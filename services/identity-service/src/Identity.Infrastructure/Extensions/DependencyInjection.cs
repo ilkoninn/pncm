@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IVendorRepository, VendorRepository>();
 
         // Services
+        services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IOtpService, OtpService>();
 
