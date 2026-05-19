@@ -34,4 +34,29 @@ public class UserRepository(
         context.Users.Remove(user);
         await context.SaveChangesAsync();
     }
+
+    // For refresh token management
+    public async Task SaveRefreshTokenAsync(RefreshToken refreshToken)
+    {
+        await context.RefreshTokens.AddAsync(refreshToken);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+    {
+        return await context.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.Token == token);
+    }
+
+    public async Task RevokeRefreshTokenAsync(string token)
+    {
+        var refreshToken = await context.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.Token == token);
+        
+        if (refreshToken is null) return;
+        
+        refreshToken.IsRevoked = true;
+        await context.SaveChangesAsync();
+    }
 }

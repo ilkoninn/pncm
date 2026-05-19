@@ -19,10 +19,17 @@ public sealed class LoginCommandHandler(
         var accessToken = tokenService.GenerateAccessToken(user);
         var refreshToken = tokenService.GenerateRefreshToken();
 
+        await userRepository.SaveRefreshTokenAsync(new RefreshToken
+        {
+            Token = refreshToken,
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        });
+
         return new LoginResponseDto(
-            accessToken, 
-            refreshToken, 
-            DateTime.UtcNow.AddMinutes(15), 
+            accessToken,
+            refreshToken,
+            DateTime.UtcNow.AddMinutes(15),
             "Login successful."
         );
     }

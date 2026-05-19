@@ -5,4 +5,9 @@ public interface IUserRepository
     Task CreateAsync(AppUser user);
     Task UpdateAsync(AppUser user);
     Task DeleteAsync(Guid id);
+
+    // For refresh token management
+    Task SaveRefreshTokenAsync(RefreshToken refreshToken);
+    Task<RefreshToken?> GetRefreshTokenAsync(string token);
+    Task RevokeRefreshTokenAsync(string token);
 }
