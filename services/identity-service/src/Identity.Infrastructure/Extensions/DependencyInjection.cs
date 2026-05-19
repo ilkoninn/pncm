@@ -25,6 +25,16 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IOtpService, OtpService>();
 
+        var applicationAssembly = typeof(RegisterCommand).Assembly;
+
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(applicationAssembly);
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        });
+
+        services.AddValidatorsFromAssembly(applicationAssembly);
+        
         return services;
     }
 }

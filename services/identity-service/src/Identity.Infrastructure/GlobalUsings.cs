@@ -10,3 +10,5 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using StackExchange.Redis;
 global using Microsoft.Extensions.DependencyInjection;
+global using MediatR;
+global using FluentValidation;
