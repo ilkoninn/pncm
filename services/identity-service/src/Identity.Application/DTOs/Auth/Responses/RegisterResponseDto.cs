@@ -1,0 +1,1 @@
+public sealed record RegisterResponseDto(string message);

@@ -1,0 +1,37 @@
+public class UserRepository(
+    AppDbContext context
+) : IUserRepository
+{
+    public async Task<AppUser?> GetByEmailAsync(string email)
+    {
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<AppUser?> GetByIdAsync(Guid id)
+    {
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
+
+    public async Task CreateAsync(AppUser user)
+    {
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(AppUser user)
+    {
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var user = await GetByIdAsync(id);
+        if (user is null) return;
+    
+        context.Users.Remove(user);
+        await context.SaveChangesAsync();
+    }
+}
