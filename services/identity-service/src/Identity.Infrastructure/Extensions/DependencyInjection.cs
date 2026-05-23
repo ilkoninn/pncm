@@ -6,7 +6,8 @@ public static class DependencyInjection
     {
         // DbContext
         services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+                .UseSnakeCaseNamingConvention());
 
         // Redis
         services.AddSingleton<IConnectionMultiplexer>(_ =>
