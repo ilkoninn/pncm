@@ -1,1 +1,0 @@
-public record VerifyOtpResponseDto(bool IsVerified);

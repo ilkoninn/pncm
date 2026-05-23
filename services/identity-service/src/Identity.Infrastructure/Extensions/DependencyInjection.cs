@@ -20,8 +20,9 @@ public static class DependencyInjection
         services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<IMagicLinkService, MagicLinkService>();
 
-        var applicationAssembly = typeof(RegisterCommand).Assembly;
+        var applicationAssembly = typeof(RequestAccessCommand).Assembly;
 
         services.AddMediatR(cfg =>
         {

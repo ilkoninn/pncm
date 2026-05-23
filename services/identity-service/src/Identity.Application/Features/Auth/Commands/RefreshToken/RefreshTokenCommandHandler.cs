@@ -1,24 +1,24 @@
 public sealed class RefreshTokenCommandHandler(
     IUserRepository userRepository,
     ITokenService tokenService
-) : IRequestHandler<RefreshTokenCommand, LoginResponseDto>
+) : IRequestHandler<RefreshTokenCommand, TokenResponseDto>
 {
-    public async Task<LoginResponseDto> Handle(
+    public async Task<TokenResponseDto> Handle(
         RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var principal = tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
-        
+
         var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
-            return new LoginResponseDto(null, null, null, "Token etibarsızdır.");
+            return new TokenResponseDto(null, null, null, "Token etibarsızdır.");
 
         var storedToken = await userRepository.GetRefreshTokenAsync(request.RefreshToken);
 
         if (storedToken is null || storedToken.IsRevoked || storedToken.ExpiresAt < DateTime.UtcNow)
-            return new LoginResponseDto(null, null, null, "Refresh token etibarsızdır.");
+            return new TokenResponseDto(null, null, null, "Refresh token etibarsızdır.");
 
         if (storedToken.UserId != Guid.Parse(userId))
-            return new LoginResponseDto(null, null, null, "Token etibarsızdır.");
+            return new TokenResponseDto(null, null, null, "Token etibarsızdır.");
 
         await userRepository.RevokeRefreshTokenAsync(request.RefreshToken);
 
@@ -32,7 +32,7 @@ public sealed class RefreshTokenCommandHandler(
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         });
 
-        return new LoginResponseDto(newAccessToken, newRefreshToken, 
+        return new TokenResponseDto(newAccessToken, newRefreshToken,
             DateTime.UtcNow.AddMinutes(15), "Token yeniləndi.");
     }
 }
