@@ -1,4 +1,4 @@
-public class ExceptionHandlingMiddleware(RequestDelegate next)
+public sealed class ExceptionHandlingMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {

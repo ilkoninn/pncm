@@ -1,4 +1,4 @@
-public class GetCurrentUserEndpoint(IMediator mediator)
+public sealed class GetCurrentUserEndpoint(IMediator mediator)
     : EndpointWithoutRequest<UserResponseDto>
 {
     public override void Configure()

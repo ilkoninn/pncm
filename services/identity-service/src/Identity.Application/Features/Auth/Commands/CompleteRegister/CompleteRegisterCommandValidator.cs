@@ -1,4 +1,4 @@
-public class CompleteRegisterCommandValidator : AbstractValidator<CompleteRegisterCommand>
+public sealed class CompleteRegisterCommandValidator : AbstractValidator<CompleteRegisterCommand>
 {
     public CompleteRegisterCommandValidator()
     {

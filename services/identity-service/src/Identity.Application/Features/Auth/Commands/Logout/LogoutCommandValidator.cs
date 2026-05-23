@@ -1,4 +1,4 @@
-public class LogoutCommandValidator : AbstractValidator<LogoutCommand>
+public sealed class LogoutCommandValidator : AbstractValidator<LogoutCommand>
 {
     public LogoutCommandValidator()
     {

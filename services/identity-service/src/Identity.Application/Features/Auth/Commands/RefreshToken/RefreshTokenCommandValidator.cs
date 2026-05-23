@@ -1,4 +1,4 @@
-public class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
+public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
 {
     public RefreshTokenCommandValidator()
     {

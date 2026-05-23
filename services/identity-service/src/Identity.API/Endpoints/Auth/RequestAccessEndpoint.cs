@@ -1,4 +1,4 @@
-public class RequestAccessEndpoint(IMediator mediator)
+public sealed class RequestAccessEndpoint(IMediator mediator)
     : Endpoint<RequestAccessEndpoint.Request, RequestAccessResponseDto>
 {
     public record Request(string Email, EClient Client);

@@ -1,4 +1,4 @@
-public class OtpCodeConfiguration : IEntityTypeConfiguration<OtpCode>
+public sealed class OtpCodeConfiguration : IEntityTypeConfiguration<OtpCode>
 {
     public void Configure(EntityTypeBuilder<OtpCode> builder)
     {

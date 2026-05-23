@@ -1,11 +1,16 @@
-public class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkService
+public sealed class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkService
 {
+    private static readonly TimeSpan MagicTokenTtl = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan MagicCodeTtl = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan RegistrationTokenTtl = TimeSpan.FromMinutes(15);
+
     private readonly IDatabase _db = redis.GetDatabase();
 
     public async Task<string> GenerateMagicLinkTokenAsync(string email)
     {
         var token = Guid.NewGuid().ToString("N");
-        await _db.StringSetAsync($"magic:{token}", email, TimeSpan.FromMinutes(10));
+        await _db.StringSetAsync($"magic:{token}", email, MagicTokenTtl);
         return token;
     }
 
@@ -21,7 +26,7 @@ public class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkService
     public async Task<string> GenerateMagicCodeAsync(string email)
     {
         var code = Random.Shared.Next(100000, 1000000).ToString();
-        await _db.StringSetAsync($"magic-code:{email}", code, TimeSpan.FromMinutes(5));
+        await _db.StringSetAsync($"magic-code:{email}", code, MagicCodeTtl);
         return code;
     }
 
@@ -37,7 +42,7 @@ public class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkService
     public async Task<string> GenerateOtpAsync(string email)
     {
         var code = Random.Shared.Next(100000, 1000000).ToString();
-        await _db.StringSetAsync($"otp:{email}:access", code, TimeSpan.FromMinutes(10));
+        await _db.StringSetAsync($"otp:{email}:access", code, OtpTtl);
         return code;
     }
 
@@ -53,7 +58,7 @@ public class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkService
     public async Task<string> StoreRegistrationTokenAsync(string email)
     {
         var token = Guid.NewGuid().ToString("N");
-        await _db.StringSetAsync($"reg:{token}", email, TimeSpan.FromMinutes(15));
+        await _db.StringSetAsync($"reg:{token}", email, RegistrationTokenTtl);
         return token;
     }
 

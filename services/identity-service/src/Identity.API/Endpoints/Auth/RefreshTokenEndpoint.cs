@@ -1,4 +1,4 @@
-public class RefreshTokenEndpoint(IMediator mediator)
+public sealed class RefreshTokenEndpoint(IMediator mediator)
     : Endpoint<RefreshTokenRequestDto, TokenResponseDto>
 {
     public override void Configure()

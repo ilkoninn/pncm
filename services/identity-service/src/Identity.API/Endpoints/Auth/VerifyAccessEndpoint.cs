@@ -1,4 +1,4 @@
-public class VerifyAccessEndpoint(IMediator mediator)
+public sealed class VerifyAccessEndpoint(IMediator mediator)
     : Endpoint<VerifyAccessEndpoint.Request, VerifyAccessResponseDto>
 {
     public record Request(string Email, string Code, EClient Client);

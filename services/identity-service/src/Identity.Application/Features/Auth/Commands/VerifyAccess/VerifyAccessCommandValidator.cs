@@ -1,4 +1,4 @@
-public class VerifyAccessCommandValidator : AbstractValidator<VerifyAccessCommand>
+public sealed class VerifyAccessCommandValidator : AbstractValidator<VerifyAccessCommand>
 {
     public VerifyAccessCommandValidator()
     {

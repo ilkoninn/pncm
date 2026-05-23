@@ -1,4 +1,4 @@
-public class CompleteRegisterEndpoint(IMediator mediator)
+public sealed class CompleteRegisterEndpoint(IMediator mediator)
     : Endpoint<CompleteRegisterEndpoint.Request, CompleteRegisterResponseDto>
 {
     public record Request(string RegistrationToken, string FirstName, string LastName, string? PhoneNumber);

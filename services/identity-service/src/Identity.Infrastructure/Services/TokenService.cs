@@ -1,4 +1,4 @@
-public class TokenService(IConfiguration configuration) : ITokenService
+public sealed class TokenService(IConfiguration configuration) : ITokenService
 {
     public string GenerateAccessToken(AppUser user)
     {

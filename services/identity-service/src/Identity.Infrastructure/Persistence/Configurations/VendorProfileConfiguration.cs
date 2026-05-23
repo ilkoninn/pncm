@@ -1,4 +1,4 @@
-public class VendorProfileConfiguration : IEntityTypeConfiguration<VendorProfile>
+public sealed class VendorProfileConfiguration : IEntityTypeConfiguration<VendorProfile>
 {
     public void Configure(EntityTypeBuilder<VendorProfile> builder)
     {
