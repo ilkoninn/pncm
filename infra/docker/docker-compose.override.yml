@@ -29,3 +29,14 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres
     depends_on:
       - postgres
+
+  gateway:
+    build:
+      context: ../../gateway/yarp
+      dockerfile: Dockerfile
+    container_name: pncm_gateway
+    ports:
+      - "5000:8080"
+    depends_on:
+      - identity-service
+      - store-service
