@@ -1,0 +1,1 @@
+public sealed record GetStoreByIdQuery(Guid Id) : IRequest<StoreResponseDto>;

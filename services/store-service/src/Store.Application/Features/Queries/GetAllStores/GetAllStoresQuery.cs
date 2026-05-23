@@ -1,0 +1,1 @@
+public sealed record GetAllStoresQuery() : IRequest<IEnumerable<StoreResponseDto>>;
