@@ -2,6 +2,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddFastEndpoints();
+builder.Services.SwaggerDocument(o =>
+{
+    o.DocumentSettings = s =>
+    {
+        s.Title = "Pəncəm Identity API";
+        s.Version = "v1";
+        s.Description = "Pəncəm platforması üçün Identity Service API";
+    };
+});
+
 
 var app = builder.Build();
 
@@ -9,6 +19,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<BlacklistMiddleware>();
+app.UseSwaggerGen();
 
 app.UseFastEndpoints(c =>
 {
