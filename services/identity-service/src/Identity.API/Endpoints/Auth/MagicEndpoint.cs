@@ -1,4 +1,4 @@
-public class MagicEndpoint(IMediator mediator) : EndpointWithoutRequest
+public sealed class MagicEndpoint(IMediator mediator) : EndpointWithoutRequest
 {
     public override void Configure()
     {

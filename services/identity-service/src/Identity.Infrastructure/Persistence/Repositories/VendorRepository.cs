@@ -1,4 +1,4 @@
-public class VendorRepository(
+public sealed class VendorRepository(
     AppDbContext context
 ) : IVendorRepository
 {

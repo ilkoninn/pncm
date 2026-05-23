@@ -1,4 +1,4 @@
-public class LogoutEndpoint(IMediator mediator)
+public sealed class LogoutEndpoint(IMediator mediator)
     : Endpoint<LogoutRequestDto>
 {
     public override void Configure()

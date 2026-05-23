@@ -1,4 +1,4 @@
-public class UserRepository(
+public sealed class UserRepository(
     AppDbContext context
 ) : IUserRepository
 {

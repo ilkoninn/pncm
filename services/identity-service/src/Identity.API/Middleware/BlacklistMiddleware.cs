@@ -1,4 +1,4 @@
-public class BlacklistMiddleware(RequestDelegate next)
+public sealed class BlacklistMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, ITokenBlacklistService blacklistService)
     {

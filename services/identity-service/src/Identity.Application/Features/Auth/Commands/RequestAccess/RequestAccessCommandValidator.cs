@@ -1,4 +1,4 @@
-public class RequestAccessCommandValidator : AbstractValidator<RequestAccessCommand>
+public sealed class RequestAccessCommandValidator : AbstractValidator<RequestAccessCommand>
 {
     public RequestAccessCommandValidator()
     {
