@@ -9,6 +9,4 @@ public class AppUser : IdentityUser<Guid>, IAuditable
     public bool IsDeleted { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-
-    public VendorProfile? VendorProfile { get; set; }
 }

@@ -15,7 +15,6 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IVendorRepository, VendorRepository>();
 
         // Services
         services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
