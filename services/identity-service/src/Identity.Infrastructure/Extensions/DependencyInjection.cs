@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IMagicLinkService, MagicLinkService>();
+        services.AddScoped<IUserService, UserService>();
 
         var applicationAssembly = typeof(RequestAccessCommand).Assembly;
 

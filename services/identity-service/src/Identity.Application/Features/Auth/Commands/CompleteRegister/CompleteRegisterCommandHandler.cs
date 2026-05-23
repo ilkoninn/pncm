@@ -1,6 +1,6 @@
 public sealed class CompleteRegisterCommandHandler(
     IMagicLinkService magicLinkService,
-    UserManager<AppUser> userManager,
+    IUserService userManager,
     IUserRepository userRepository,
     ITokenService tokenService
 ) : IRequestHandler<CompleteRegisterCommand, CompleteRegisterResponseDto>
