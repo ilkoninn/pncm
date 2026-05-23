@@ -1,5 +1,5 @@
 public class RefreshTokenEndpoint(IMediator mediator)
-    : Endpoint<RefreshTokenRequestDto, LoginResponseDto>
+    : Endpoint<RefreshTokenRequestDto, TokenResponseDto>
 {
     public override void Configure()
     {
