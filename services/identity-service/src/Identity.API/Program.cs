@@ -13,6 +13,7 @@ app.UseMiddleware<BlacklistMiddleware>();
 app.UseFastEndpoints(c =>
 {
     c.Errors.UseProblemDetails();
+    c.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
     c.Errors.ResponseBuilder = (failures, ctx, statusCode) =>
     {
         return new
