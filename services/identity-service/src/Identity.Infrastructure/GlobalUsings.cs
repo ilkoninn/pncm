@@ -12,3 +12,4 @@ global using StackExchange.Redis;
 global using Microsoft.Extensions.DependencyInjection;
 global using MediatR;
 global using FluentValidation;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
