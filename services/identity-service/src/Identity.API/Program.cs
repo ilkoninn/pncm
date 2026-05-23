@@ -42,3 +42,5 @@ app.UseFastEndpoints(c =>
 });
 
 app.Run();
+
+public partial class Program { }
