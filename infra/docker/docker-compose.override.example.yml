@@ -8,7 +8,7 @@ services:
       - "5174:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_identity;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_identity;Username=your_user;Password=your_password
       - ConnectionStrings__Redis=redis:6379
       - Jwt__SecretKey=your-secret-key-here-min-32-chars!!
       - Jwt__Issuer=pncm-identity
@@ -26,6 +26,6 @@ services:
       - "5175:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_store;Username=your_user;Password=your_password
     depends_on:
       - postgres
