@@ -1,0 +1,18 @@
+services:
+  identity-service:
+    build:
+      context: ../../services/identity-service
+      dockerfile: Dockerfile
+    container_name: pncm_identity
+    ports:
+      - "5174:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_identity;Username=postgres;Password=postgres
+      - ConnectionStrings__Redis=redis:6379
+      - Jwt__SecretKey=your-secret-key-here-min-32-chars!!
+      - Jwt__Issuer=pncm-identity
+      - Jwt__Audience=pncm-api
+    depends_on:
+      - postgres
+      - redis
