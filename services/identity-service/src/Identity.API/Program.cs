@@ -5,6 +5,11 @@ builder.Services.AddFastEndpoints();
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<BlacklistMiddleware>();
+
 app.UseFastEndpoints(c =>
 {
     c.Errors.UseProblemDetails();
@@ -23,7 +28,5 @@ app.UseFastEndpoints(c =>
         };
     };
 });
-
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.Run();

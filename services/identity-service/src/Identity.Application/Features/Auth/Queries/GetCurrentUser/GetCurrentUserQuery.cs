@@ -1,0 +1,1 @@
+public record GetCurrentUserQuery(Guid UserId) : IRequest<UserResponseDto>;
