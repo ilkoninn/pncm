@@ -1,0 +1,11 @@
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Configuration;
+global using Testcontainers.PostgreSql;
+global using Testcontainers.Redis;
+global using Microsoft.EntityFrameworkCore;
+global using System.Net.Http.Json;
+global using System.Net;
+global using FluentAssertions;
+global using StackExchange.Redis;
