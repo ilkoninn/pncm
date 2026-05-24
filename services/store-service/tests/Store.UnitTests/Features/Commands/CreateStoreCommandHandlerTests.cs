@@ -1,6 +1,7 @@
 public sealed class CreateStoreCommandHandlerTests
 {
     private readonly Mock<IStoreRepository> _repositoryMock = new();
+    private readonly Mock<IUserGrpcClient> _userGrpcClientMock = new();
 
     [Fact]
     public async Task Handle_ValidCommand_ReturnsStoreResponseDto()
@@ -36,8 +37,12 @@ public sealed class CreateStoreCommandHandlerTests
         _repositoryMock
             .Setup(r => r.CreateAsync(It.IsAny<PetStore>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(store);
+            
+        _userGrpcClientMock
+            .Setup(x => x.UserExistsAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(true);
 
-        var handler = new CreateStoreCommandHandler(_repositoryMock.Object);
+        var handler = new CreateStoreCommandHandler(_repositoryMock.Object, _userGrpcClientMock.Object);
         var result = await handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -78,7 +83,11 @@ public sealed class CreateStoreCommandHandlerTests
             .Setup(r => r.CreateAsync(It.IsAny<PetStore>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(store);
 
-        var handler = new CreateStoreCommandHandler(_repositoryMock.Object);
+        _userGrpcClientMock
+            .Setup(x => x.UserExistsAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(true);
+
+        var handler = new CreateStoreCommandHandler(_repositoryMock.Object, _userGrpcClientMock.Object);
         await handler.Handle(command, CancellationToken.None);
 
         _repositoryMock.Verify(

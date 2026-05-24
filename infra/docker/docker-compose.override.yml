@@ -6,6 +6,7 @@ services:
     container_name: pncm_identity
     ports:
       - "5174:8080"
+      - "5176:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_identity;Username=postgres;Password=postgres

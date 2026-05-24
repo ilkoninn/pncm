@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "Identity.API.Protos";
+
+package user;
+
+service UserGrpcService {
+  rpc UserExists (UserExistsRequest) returns (UserExistsResponse);
+}
+
+message UserExistsRequest {
+  string user_id = 1;
+}
+
+message UserExistsResponse {
+  bool exists = 1;
+}

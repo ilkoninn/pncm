@@ -1,10 +1,16 @@
 public sealed class CreateStoreCommandHandler(
-    IStoreRepository storeRepository
+    IStoreRepository storeRepository,
+    IUserGrpcClient userGrpcClient
 ) : IRequestHandler<CreateStoreCommand, StoreResponseDto>
 {
     public async Task<StoreResponseDto> Handle(
         CreateStoreCommand request, CancellationToken cancellationToken)
     {
+        var userExists = await userGrpcClient.UserExistsAsync(request.OwnerId);
+
+        if (!userExists)
+            throw new KeyNotFoundException("İstifadəçi tapılmadı.");
+
         var store = new PetStore
         {
             Name = request.Name,
