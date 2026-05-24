@@ -18,8 +18,20 @@ public class StoreApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
         });
 
-        builder.ConfigureServices(services =>
+       builder.ConfigureServices(services =>
         {
+            var grpcClient = services.SingleOrDefault(
+                d => d.ServiceType == typeof(IUserGrpcClient));
+            if (grpcClient != null)
+                services.Remove(grpcClient);
+
+            var mockGrpcClient = new Mock<IUserGrpcClient>();
+            mockGrpcClient
+                .Setup(x => x.UserExistsAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+
+            services.AddScoped<IUserGrpcClient>(_ => mockGrpcClient.Object);
+
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<StoreDbContext>();

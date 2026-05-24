@@ -10,6 +10,8 @@ public static class DependencyInjection
 
         services.AddScoped<IStoreRepository, StoreRepository>();
 
+        services.AddScoped<IUserGrpcClient, UserGrpcClient>();
+
         var applicationAssembly = typeof(CreateStoreCommand).Assembly;
 
         services.AddMediatR(cfg =>
