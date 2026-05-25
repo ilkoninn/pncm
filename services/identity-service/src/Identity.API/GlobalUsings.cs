@@ -6,3 +6,4 @@ global using System.Text.Json.Serialization;
 global using FastEndpoints.Swagger;
 global using Grpc.Core;
 global using Identity.API.Protos;
+global using Microsoft.EntityFrameworkCore;

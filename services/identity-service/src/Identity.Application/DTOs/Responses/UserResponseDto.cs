@@ -3,5 +3,6 @@ public record UserResponseDto(
     string FirstName,
     string LastName,
     string Email,
-    string? PhoneNumber
+    string? PhoneNumber,
+    Guid? AvatarMediaId
 );

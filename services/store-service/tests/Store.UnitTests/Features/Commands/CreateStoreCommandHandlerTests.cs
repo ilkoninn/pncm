@@ -27,7 +27,7 @@ public sealed class CreateStoreCommandHandlerTests
             Latitude = command.Latitude,
             Longitude = command.Longitude,
             Description = command.Description,
-            LogoUrl = command.LogoUrl,
+            LogoMediaId = command.LogoMediaId,
             PhoneNumber = command.PhoneNumber,
             OwnerId = command.OwnerId,
             IsActive = true,

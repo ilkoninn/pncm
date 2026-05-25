@@ -19,7 +19,7 @@ public sealed class CreateStoreCommandHandler(
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             Description = request.Description,
-            LogoUrl = request.LogoUrl,
+            LogoMediaId = request.LogoMediaId,
             PhoneNumber = request.PhoneNumber,
             OwnerId = request.OwnerId
         };
@@ -34,7 +34,7 @@ public sealed class CreateStoreCommandHandler(
             created.Latitude,
             created.Longitude,
             created.Description,
-            created.LogoUrl,
+            created.LogoMediaId,
             created.PhoneNumber,
             created.IsActive,
             created.CreatedAt

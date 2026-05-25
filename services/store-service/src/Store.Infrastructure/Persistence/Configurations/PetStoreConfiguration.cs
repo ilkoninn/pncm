@@ -25,6 +25,8 @@ public sealed class PetStoreConfiguration : IEntityTypeConfiguration<PetStore>
 
         builder.Property(x => x.PhoneNumber)
             .HasMaxLength(20);
+            
+        builder.Property(u => u.LogoMediaId);
 
         builder.HasIndex(x => x.City);
         builder.HasIndex(x => x.OwnerId);

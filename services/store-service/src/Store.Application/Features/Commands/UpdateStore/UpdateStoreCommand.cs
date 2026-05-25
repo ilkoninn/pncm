@@ -6,7 +6,7 @@ public sealed record UpdateStoreCommand(
     decimal Latitude,
     decimal Longitude,
     string? Description,
-    string? LogoUrl,
     string? PhoneNumber,
+    Guid? LogoMediaId,
     bool IsActive
 ) : IRequest<StoreResponseDto>;

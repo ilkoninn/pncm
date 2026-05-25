@@ -16,6 +16,12 @@ if (app.Environment.IsDevelopment())
 app.MapCarter();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<StoreDbContext>();
+    db.Database.Migrate();
+}
+
 app.Run();
 
 public partial class Program { }

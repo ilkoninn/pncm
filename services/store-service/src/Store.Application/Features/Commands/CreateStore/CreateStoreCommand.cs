@@ -5,7 +5,7 @@ public sealed record CreateStoreCommand(
     decimal Latitude,
     decimal Longitude,
     string? Description,
-    string? LogoUrl,
+    Guid? LogoMediaId,
     string? PhoneNumber,
     Guid OwnerId
 ) : IRequest<StoreResponseDto>;

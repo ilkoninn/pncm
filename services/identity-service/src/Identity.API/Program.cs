@@ -43,6 +43,12 @@ app.UseFastEndpoints(c =>
     };
 });
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+    db.Database.Migrate();
+}
+
 app.Run();
 
 public partial class Program { }

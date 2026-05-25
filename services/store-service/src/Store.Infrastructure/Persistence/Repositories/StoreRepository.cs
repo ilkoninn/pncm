@@ -20,8 +20,6 @@ public sealed class StoreRepository(StoreDbContext context) : IStoreRepository
 
     public async Task<PetStore> CreateAsync(PetStore store, CancellationToken cancellationToken = default)
     {
-        store.Id = Guid.NewGuid();
-        store.CreatedAt = DateTime.UtcNow;
         context.Stores.Add(store);
         await context.SaveChangesAsync(cancellationToken);
         return store;
@@ -29,7 +27,6 @@ public sealed class StoreRepository(StoreDbContext context) : IStoreRepository
 
     public async Task<PetStore> UpdateAsync(PetStore store, CancellationToken cancellationToken = default)
     {
-        store.UpdatedAt = DateTime.UtcNow;
         context.Stores.Update(store);
         await context.SaveChangesAsync(cancellationToken);
         return store;

@@ -15,7 +15,7 @@ public sealed class GetAllStoresQueryHandler(
             s.Latitude,
             s.Longitude,
             s.Description,
-            s.LogoUrl,
+            s.LogoMediaId,
             s.PhoneNumber,
             s.IsActive,
             s.CreatedAt

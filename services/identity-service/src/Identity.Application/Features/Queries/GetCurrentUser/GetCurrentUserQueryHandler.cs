@@ -15,7 +15,8 @@ public sealed class GetCurrentUserQueryHandler(
             user.FirstName,
             user.LastName,
             user.Email!,
-            user.PhoneNumber
+            user.PhoneNumber,
+            user.AvatarMediaId
         );
     }
 }

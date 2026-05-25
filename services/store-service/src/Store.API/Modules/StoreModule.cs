@@ -8,6 +8,7 @@ public class StoreModule : ICarterModule
         app.MapPost("/stores", Create);
         app.MapPut("/stores/{id:guid}", Update);
         app.MapDelete("/stores/{id:guid}", Delete);
+        app.MapPatch("/stores/{id:guid}/logo", UpdateLogo);
     }
 
     private static async Task<IResult> GetById(Guid id, IMediator mediator)
@@ -46,6 +47,13 @@ public class StoreModule : ICarterModule
     private static async Task<IResult> Delete(Guid id, IMediator mediator)
     {
         await mediator.Send(new DeleteStoreCommand(id));
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> UpdateLogo(
+        Guid id, UpdateStoreLogoCommand command, IMediator mediator)
+    {
+        await mediator.Send(command with { Id = id });
         return Results.NoContent();
     }
 }

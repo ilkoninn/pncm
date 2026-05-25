@@ -16,7 +16,7 @@ public sealed class UpdateStoreCommandHandler(
         store.Latitude = request.Latitude;
         store.Longitude = request.Longitude;
         store.Description = request.Description;
-        store.LogoUrl = request.LogoUrl;
+        store.LogoMediaId = request.LogoMediaId;
         store.PhoneNumber = request.PhoneNumber;
         store.IsActive = request.IsActive;
 
@@ -30,7 +30,7 @@ public sealed class UpdateStoreCommandHandler(
             updated.Latitude,
             updated.Longitude,
             updated.Description,
-            updated.LogoUrl,
+            updated.LogoMediaId,
             updated.PhoneNumber,
             updated.IsActive,
             updated.CreatedAt

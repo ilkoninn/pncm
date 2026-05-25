@@ -6,7 +6,7 @@ public sealed record StoreResponseDto(
     decimal Latitude,
     decimal Longitude,
     string? Description,
-    string? LogoUrl,
+    Guid? LogoMediaId,
     string? PhoneNumber,
     bool IsActive,
     DateTime CreatedAt

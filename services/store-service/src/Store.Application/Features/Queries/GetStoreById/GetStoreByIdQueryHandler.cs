@@ -18,7 +18,7 @@ public sealed class GetStoreByIdQueryHandler(
             store.Latitude,
             store.Longitude,
             store.Description,
-            store.LogoUrl,
+            store.LogoMediaId,
             store.PhoneNumber,
             store.IsActive,
             store.CreatedAt

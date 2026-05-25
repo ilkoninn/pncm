@@ -1,0 +1,1 @@
+public sealed record UpdateStoreLogoCommand(Guid Id, Guid MediaId) : IRequest;
