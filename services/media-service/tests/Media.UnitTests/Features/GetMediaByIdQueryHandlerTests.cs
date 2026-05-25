@@ -15,7 +15,6 @@ public class GetMediaByIdQueryHandlerTests
         var id = Guid.NewGuid();
         var mediaFile = new MediaFile
         {
-            Id = id,
             FileName = "user/test.png",
             OriginalFileName = "test.png",
             ContentType = "image/png",
@@ -24,8 +23,7 @@ public class GetMediaByIdQueryHandlerTests
             BucketName = "pncm-media",
             ObjectKey = "user/test.png",
             OwnerId = Guid.NewGuid(),
-            OwnerType = EOwnerType.User,
-            CreatedAt = DateTime.UtcNow
+            OwnerType = EOwnerType.User
         };
 
         _repositoryMock

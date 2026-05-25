@@ -24,7 +24,6 @@ public class UploadMediaCommandHandlerTests
 
         var mediaFile = new MediaFile
         {
-            Id = Guid.NewGuid(),
             FileName = "user/test.png",
             OriginalFileName = "test.png",
             ContentType = "image/png",
@@ -53,7 +52,7 @@ public class UploadMediaCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ValidCommand_ObjectKeyContainsLowercaseOwnerType()
+    public async Task Handle_ValidCommand_ObjectKeyStartsWithLowercaseOwnerType()
     {
         var command = new UploadMediaCommand(
             new MemoryStream([1, 2, 3]),
@@ -64,34 +63,27 @@ public class UploadMediaCommandHandlerTests
             EOwnerType.User
         );
 
-        var mediaFile = new MediaFile
-        {
-            Id = Guid.NewGuid(),
-            FileName = "user/test.png",
-            OriginalFileName = "test.png",
-            ContentType = "image/png",
-            Size = 3,
-            Url = string.Empty,
-            BucketName = "pncm-media",
-            ObjectKey = "user/test.png",
-            OwnerId = Guid.NewGuid(),
-            OwnerType = EOwnerType.User,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _storageMock
-            .Setup(s => s.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("user/test.png");
-
-        _repositoryMock
-            .Setup(r => r.CreateAsync(It.IsAny<MediaFile>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mediaFile);
-
         string? capturedObjectKey = null;
+
         _storageMock
             .Setup(s => s.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Callback<Stream, string, string, string, CancellationToken>((_, key, _, _, _) => capturedObjectKey = key)
             .ReturnsAsync("user/test.png");
+
+        _repositoryMock
+            .Setup(r => r.CreateAsync(It.IsAny<MediaFile>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MediaFile
+            {
+                FileName = "user/test.png",
+                OriginalFileName = "test.png",
+                ContentType = "image/png",
+                Size = 3,
+                Url = string.Empty,
+                BucketName = "pncm-media",
+                ObjectKey = "user/test.png",
+                OwnerId = Guid.NewGuid(),
+                OwnerType = EOwnerType.User
+            });
 
         await _handler.Handle(command, CancellationToken.None);
 

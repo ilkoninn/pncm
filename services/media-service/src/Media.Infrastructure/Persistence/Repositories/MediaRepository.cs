@@ -11,8 +11,6 @@ public sealed class MediaRepository(MediaDbContext context) : IMediaRepository
 
     public async Task<MediaFile> CreateAsync(MediaFile mediaFile, CancellationToken cancellationToken = default)
     {
-        mediaFile.Id = Guid.NewGuid();
-        mediaFile.CreatedAt = DateTime.UtcNow;
         context.MediaFiles.Add(mediaFile);
         await context.SaveChangesAsync(cancellationToken);
         return mediaFile;
