@@ -1,0 +1,1 @@
+public sealed record DeleteMediaCommand(Guid Id) : IRequest<Unit>;
