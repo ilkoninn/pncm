@@ -19,6 +19,12 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwaggerGen();
 app.UseFastEndpoints();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+    db.Database.Migrate();
+}
+
 app.Run();
 
 public partial class Program { }
