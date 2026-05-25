@@ -1,0 +1,1 @@
+public sealed record GetMediaByIdQuery(Guid Id) : IRequest<MediaFileResponseDto>;

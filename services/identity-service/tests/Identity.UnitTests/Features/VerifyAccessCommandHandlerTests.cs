@@ -64,7 +64,6 @@ public sealed class VerifyAccessCommandHandlerTests
         // Arrange
         var existingUser = new AppUser
         {
-            Id = Guid.NewGuid(),
             Email = "existing@pncm.az",
             FirstName = "Test",
             LastName = "User"

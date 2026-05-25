@@ -17,7 +17,7 @@ services:
     depends_on:
       - postgres
       - redis
-
+    networks: [pncm_network]
   store-service:
     build:
       context: ../../services/store-service
@@ -30,7 +30,25 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres
     depends_on:
       - postgres
-
+    networks: [pncm_network]
+  media-service:
+    build:
+      context: ../../services/media-service
+      dockerfile: Dockerfile
+    container_name: pncm_media
+    ports:
+      - "5178:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_media;Username=postgres;Password=postgres
+      - MinIO__Endpoint=minio:9000
+      - MinIO__PublicEndpoint=localhost:9000
+      - MinIO__AccessKey=minioadmin
+      - MinIO__SecretKey=minioadmin
+    depends_on:
+      - postgres
+      - minio
+    networks: [pncm_network]
   gateway:
     build:
       context: ../../gateway/yarp
@@ -41,3 +59,8 @@ services:
     depends_on:
       - identity-service
       - store-service
+    networks: [pncm_network]
+
+networks:
+  pncm_network:
+    external: true
