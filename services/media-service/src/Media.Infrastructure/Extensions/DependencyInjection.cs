@@ -4,9 +4,12 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<MediaDbContext>(options =>
+        services.AddSingleton<AuditableEntityInterceptor>();
+
+        services.AddDbContext<MediaDbContext>((sp, options) =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                   .UseSnakeCaseNamingConvention());
+                .UseSnakeCaseNamingConvention()
+                .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddKeyedSingleton<IMinioClient>("internal", (_, _) => new MinioClient()
             .WithEndpoint(configuration["MinIO:Endpoint"]!)

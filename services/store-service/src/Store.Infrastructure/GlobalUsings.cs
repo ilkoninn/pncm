@@ -6,3 +6,4 @@ global using MediatR;
 global using FluentValidation;
 global using Grpc.Net.Client;
 global using Identity.API.Protos;
+global using Microsoft.EntityFrameworkCore.Diagnostics;

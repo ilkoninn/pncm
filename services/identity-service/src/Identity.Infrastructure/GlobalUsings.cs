@@ -13,4 +13,4 @@ global using Microsoft.Extensions.DependencyInjection;
 global using MediatR;
 global using FluentValidation;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
-global using EFCore.NamingConventions;
+global using Microsoft.EntityFrameworkCore.Diagnostics;

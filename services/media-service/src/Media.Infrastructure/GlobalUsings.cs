@@ -5,3 +5,4 @@ global using Minio.DataModel.Args;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using FluentValidation;
+global using Microsoft.EntityFrameworkCore.Diagnostics;

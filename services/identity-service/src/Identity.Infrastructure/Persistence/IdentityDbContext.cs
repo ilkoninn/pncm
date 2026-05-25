@@ -1,6 +1,6 @@
-public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
+public class IdentityDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options) { }
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
@@ -16,6 +16,6 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
         builder.Entity<IdentityRoleClaim<Guid>>().ToTable("role_claims");
         builder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
 
-        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);
     }
 }
