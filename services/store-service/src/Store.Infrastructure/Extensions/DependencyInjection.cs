@@ -4,9 +4,12 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<StoreDbContext>(options =>
+        services.AddSingleton<AuditableEntityInterceptor>();
+
+        services.AddDbContext<StoreDbContext>((sp, options) =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                   .UseSnakeCaseNamingConvention());
+                .UseSnakeCaseNamingConvention()
+                .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddScoped<IStoreRepository, StoreRepository>();
 

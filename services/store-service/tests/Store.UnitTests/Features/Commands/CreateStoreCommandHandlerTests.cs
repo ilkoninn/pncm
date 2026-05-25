@@ -20,7 +20,6 @@ public sealed class CreateStoreCommandHandlerTests
 
         var store = new PetStore
         {
-            Id = Guid.NewGuid(),
             Name = command.Name,
             Address = command.Address,
             City = command.City,
@@ -68,7 +67,6 @@ public sealed class CreateStoreCommandHandlerTests
 
         var store = new PetStore
         {
-            Id = Guid.NewGuid(),
             Name = command.Name,
             Address = command.Address,
             City = command.City,

@@ -5,9 +5,12 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // DbContext
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddSingleton<AuditableEntityInterceptor>();
+
+        services.AddDbContext<IdentityDbContext>((sp, options) =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                .UseSnakeCaseNamingConvention());
+                .UseSnakeCaseNamingConvention()
+                .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>())); 
 
         // Redis
         services.AddSingleton<IConnectionMultiplexer>(_ =>
@@ -35,7 +38,7 @@ public static class DependencyInjection
         
         services.AddIdentityCore<AppUser>()
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<AppDbContext>()
+            .AddEntityFrameworkStores<IdentityDbContext>()
             .AddDefaultTokenProviders();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
