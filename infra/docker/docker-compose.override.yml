@@ -75,6 +75,21 @@ services:
     depends_on:
       - postgres
     networks: [pncm_network]
+  community-service:
+    build:
+      context: ../../services/community-service
+      dockerfile: Dockerfile
+    container_name: pncm_community
+    ports:
+      - "5180:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_community;Username=postgres;Password=postgres;Encoding=UTF8
+      - ConnectionStrings__Redis=redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks: [pncm_network]
   gateway:
     build:
       context: ../../gateway/yarp
@@ -88,6 +103,7 @@ services:
       - media-service
       - pet-service
       - adoption-service
+      - community-service
     networks: [pncm_network]
 
 networks:

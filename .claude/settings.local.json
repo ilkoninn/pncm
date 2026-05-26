@@ -9,7 +9,10 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(dotnet new *)",
       "Bash(dotnet add *)",
-      "Bash(dotnet sln *)"
+      "Bash(dotnet sln *)",
+      "Bash(dotnet ef *)",
+      "Bash(xargs grep -l \"IDesignTimeDbContextFactory\")",
+      "Bash(dotnet test *)"
     ]
   }
 }
