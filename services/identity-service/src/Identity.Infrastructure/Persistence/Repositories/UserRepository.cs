@@ -1,5 +1,5 @@
 public sealed class UserRepository(
-    AppDbContext context
+    IdentityDbContext context
 ) : IUserRepository
 {
     public async Task<AppUser?> GetByEmailAsync(string email)

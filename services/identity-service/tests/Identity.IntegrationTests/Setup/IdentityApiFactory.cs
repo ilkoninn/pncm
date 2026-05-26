@@ -34,7 +34,7 @@ public class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             // EF Core migration avtomatik tətbiq et
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
             db.Database.Migrate();
         });
     }
