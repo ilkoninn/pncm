@@ -1,0 +1,12 @@
+public interface IPetRepository
+{
+    Task<Pet?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Pet>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Pet>> GetByOwnerAsync(Guid ownerId, EOwnerType ownerType, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Pet>> GetNearbyAsync(decimal latitude, decimal longitude, double radiusKm, CancellationToken cancellationToken = default);
+    Task<Pet> CreateAsync(Pet pet, CancellationToken cancellationToken = default);
+    Task<Pet> UpdateAsync(Pet pet, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task AddPhotoAsync(PetPhoto photo, CancellationToken cancellationToken = default);
+    Task DeletePhotoAsync(Guid photoId, CancellationToken cancellationToken = default);
+}

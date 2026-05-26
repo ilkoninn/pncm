@@ -1,0 +1,1 @@
+public sealed record AddPetPhotoCommand(Guid PetId, Guid MediaId, bool IsPrimary) : IRequest<PetPhotoResponseDto>;

@@ -1,0 +1,1 @@
+public sealed record UpdatePetStatusCommand(Guid Id, EPetStatus Status) : IRequest<PetResponseDto>;

@@ -1,0 +1,1 @@
+public sealed record DeletePetCommand(Guid Id) : IRequest;

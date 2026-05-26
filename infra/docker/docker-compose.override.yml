@@ -9,7 +9,7 @@ services:
       - "5176:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_identity;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_identity;Username=postgres;Password=postgres;Encoding=UTF8
       - ConnectionStrings__Redis=redis:6379
       - Jwt__SecretKey=your-secret-key-here-min-32-chars!!
       - Jwt__Issuer=pncm-identity
@@ -27,7 +27,7 @@ services:
       - "5175:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres;Encoding=UTF8
     depends_on:
       - postgres
     networks: [pncm_network]
@@ -40,7 +40,7 @@ services:
       - "5178:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_media;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_media;Username=postgres;Password=postgres;Encoding=UTF8
       - MinIO__Endpoint=minio:9000
       - MinIO__PublicEndpoint=localhost:9000
       - MinIO__AccessKey=minioadmin
@@ -48,6 +48,19 @@ services:
     depends_on:
       - postgres
       - minio
+    networks: [pncm_network]
+  pet-service:
+    build:
+      context: ../../services/pet-service
+      dockerfile: Dockerfile
+    container_name: pncm_pet
+    ports:
+      - "5177:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_pet;Username=postgres;Password=postgres;Encoding=UTF8
+    depends_on:
+      - postgres
     networks: [pncm_network]
   gateway:
     build:
@@ -59,6 +72,8 @@ services:
     depends_on:
       - identity-service
       - store-service
+      - media-service
+      - pet-service
     networks: [pncm_network]
 
 networks:
