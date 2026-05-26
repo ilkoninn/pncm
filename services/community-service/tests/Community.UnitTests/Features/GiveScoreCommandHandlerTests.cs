@@ -1,6 +1,7 @@
 public sealed class GiveScoreCommandHandlerTests
 {
     private readonly Mock<IContestEntryRepository> _repositoryMock = new();
+    private readonly Mock<ITopicProducer<ScoreGivenEvent>> _producerMock = new();
 
     public GiveScoreCommandHandlerTests()
     {
@@ -20,7 +21,11 @@ public sealed class GiveScoreCommandHandlerTests
             .Setup(r => r.AddScoreAsync(entryId, givenByUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(entryDto);
 
-        var handler = new GiveScoreCommandHandler(_repositoryMock.Object);
+        _producerMock
+            .Setup(p => p.Produce(It.IsAny<ScoreGivenEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var handler = new GiveScoreCommandHandler(_repositoryMock.Object, _producerMock.Object);
         var result = await handler.Handle(new GiveScoreCommand(entryId, givenByUserId), CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -33,7 +38,7 @@ public sealed class GiveScoreCommandHandlerTests
             .Setup(r => r.AddScoreAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException("Yarışma iştirakçısı tapılmadı."));
 
-        var handler = new GiveScoreCommandHandler(_repositoryMock.Object);
+        var handler = new GiveScoreCommandHandler(_repositoryMock.Object, _producerMock.Object);
         var act = async () => await handler.Handle(
             new GiveScoreCommand(Guid.NewGuid(), Guid.NewGuid()), CancellationToken.None);
 

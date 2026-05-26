@@ -1,4 +1,4 @@
-public class ExceptionHandlingMiddleware(RequestDelegate next)
+public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -8,6 +8,8 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+
             var (statusCode, title) = ex switch
             {
                 KeyNotFoundException => (404, ex.Message),

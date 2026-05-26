@@ -33,6 +33,19 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(applicationAssembly);
 
+        services.AddMassTransit(x =>
+        {
+            x.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+            x.AddRider(rider =>
+            {
+                rider.AddProducer<ScoreGivenEvent>("score-given");
+                rider.UsingKafka((ctx, k) =>
+                {
+                    k.Host(configuration["Kafka:BootstrapServers"]);
+                });
+            });
+        });
+
         var mapsterConfig = TypeAdapterConfig.GlobalSettings;
         MappingConfig.Register(mapsterConfig);
         services.AddSingleton(mapsterConfig);
