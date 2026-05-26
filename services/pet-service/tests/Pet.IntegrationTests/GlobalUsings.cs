@@ -1,0 +1,11 @@
+global using Xunit;
+global using FluentAssertions;
+global using System.Net;
+global using System.Net.Http.Headers;
+global using System.Net.Http.Json;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.EntityFrameworkCore;
+global using Testcontainers.PostgreSql;

@@ -32,6 +32,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
 
         var (statusCode, title) = ex switch
         {
+            BadHttpRequestException => (400, ex.Message),
             KeyNotFoundException => (404, ex.Message),
             UnauthorizedAccessException => (401, ex.Message),
             _ => (500, "Xəta baş verdi.")
