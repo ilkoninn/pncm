@@ -1,3 +1,5 @@
+namespace Community.Domain.Events;
+
 public class ScoreGivenEvent : BaseEvent
 {
     public Guid ContestEntryId { get; set; }

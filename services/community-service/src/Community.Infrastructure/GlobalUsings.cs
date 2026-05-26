@@ -1,3 +1,4 @@
+global using MassTransit;
 global using Microsoft.EntityFrameworkCore.Design;
 global using FluentValidation;
 global using Mapster;
@@ -8,3 +9,4 @@ global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using StackExchange.Redis;
+global using Community.Domain.Events;

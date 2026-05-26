@@ -1,18 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\big-projects\\\\pncm\" -Depth 2)",
+      "Bash(Get-ChildItem -Path * -Recurse -Include *.csproj,*.sln)",
       "Bash(Select-Object FullName, PSIsContainer)",
       "Bash(Format-Table -AutoSize)",
       "Bash(dotnet build *)",
-      "Bash(Get-ChildItem \"D:\\\\projects\\\\big-projects\\\\pncm\\\\services\\\\pet-service\\\\src\\\\Pet.Infrastructure\\\\Migrations\" -Recurse -Filter \"*.cs\")",
+      "Bash(Get-ChildItem * -Recurse -Include *.csproj,*.sln | Select-Object -ExpandProperty FullName)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(dotnet new *)",
       "Bash(dotnet add *)",
       "Bash(dotnet sln *)",
-      "Bash(dotnet ef *)",
-      "Bash(xargs grep -l \"IDesignTimeDbContextFactory\")",
-      "Bash(dotnet test *)"
+      "Bash(xargs grep -l \"IDesignTimeDbContextFactory\")"
     ]
   }
 }
