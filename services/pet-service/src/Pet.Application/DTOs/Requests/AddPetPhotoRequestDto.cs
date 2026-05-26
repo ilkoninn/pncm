@@ -1,0 +1,1 @@
+public sealed record AddPetPhotoRequestDto(Guid MediaId, bool IsPrimary);
