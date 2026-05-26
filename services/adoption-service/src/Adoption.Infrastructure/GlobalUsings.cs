@@ -1,4 +1,6 @@
+global using MassTransit;
 global using FluentValidation;
+global using Adoption.Domain.Events;
 global using Mapster;
 global using MediatR;
 global using Microsoft.EntityFrameworkCore;

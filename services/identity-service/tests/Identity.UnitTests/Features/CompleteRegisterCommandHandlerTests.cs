@@ -1,20 +1,26 @@
 public sealed class CompleteRegisterCommandHandlerTests
 {
     private readonly Mock<IMagicLinkService> _magicLinkServiceMock = new();
-    private readonly Mock<IUserService > _userManagerMock;
+    private readonly Mock<IUserService> _userManagerMock;
     private readonly Mock<IUserRepository> _userRepositoryMock = new();
     private readonly Mock<ITokenService> _tokenServiceMock = new();
+    private readonly Mock<ITopicProducer<UserRegisteredEvent>> _producerMock = new();
     private readonly CompleteRegisterCommandHandler _handler;
 
     public CompleteRegisterCommandHandlerTests()
     {
         _userManagerMock = new Mock<IUserService>();
 
+        _producerMock
+            .Setup(p => p.Produce(It.IsAny<UserRegisteredEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         _handler = new CompleteRegisterCommandHandler(
             _magicLinkServiceMock.Object,
             _userManagerMock.Object,
             _userRepositoryMock.Object,
-            _tokenServiceMock.Object
+            _tokenServiceMock.Object,
+            _producerMock.Object
         );
     }
 

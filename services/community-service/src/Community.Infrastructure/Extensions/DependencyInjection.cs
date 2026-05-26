@@ -39,6 +39,7 @@ public static class DependencyInjection
             x.AddRider(rider =>
             {
                 rider.AddProducer<ScoreGivenEvent>("score-given");
+                rider.AddProducer<ContestEndedEvent>("contest-ended");
                 rider.UsingKafka((ctx, k) =>
                 {
                     k.Host(configuration["Kafka:BootstrapServers"]);

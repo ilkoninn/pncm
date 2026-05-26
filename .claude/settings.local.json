@@ -10,7 +10,9 @@
       "Bash(dotnet new *)",
       "Bash(dotnet add *)",
       "Bash(dotnet sln *)",
-      "Bash(xargs grep -l \"IDesignTimeDbContextFactory\")"
+      "Bash(xargs grep -l \"IDesignTimeDbContextFactory\")",
+      "Bash(xargs grep -l \"SendOkAsync\\\\|SendNoContent\")",
+      "Bash(xargs grep -l \"SendOkAsync\\\\|SendNoContent\\\\|void HandleAsync\")"
     ]
   }
 }

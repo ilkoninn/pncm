@@ -2,7 +2,8 @@ public sealed class CompleteRegisterCommandHandler(
     IMagicLinkService magicLinkService,
     IUserService userManager,
     IUserRepository userRepository,
-    ITokenService tokenService
+    ITokenService tokenService,
+    ITopicProducer<UserRegisteredEvent> producer
 ) : IRequestHandler<CompleteRegisterCommand, CompleteRegisterResponseDto>
 {
     public async Task<CompleteRegisterResponseDto> Handle(
@@ -40,6 +41,12 @@ public sealed class CompleteRegisterCommandHandler(
             UserId = user.Id,
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         });
+
+        await producer.Produce(new UserRegisteredEvent
+        {
+            UserId = user.Id,
+            Email = user.Email!
+        }, cancellationToken);
 
         return new CompleteRegisterResponseDto(accessToken, refreshToken, DateTime.UtcNow.AddMinutes(15));
     }

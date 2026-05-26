@@ -1,6 +1,7 @@
 public sealed class CreateAdoptionCommandHandlerTests
 {
     private readonly Mock<IAdoptionRepository> _repositoryMock = new();
+    private readonly Mock<ITopicProducer<AdoptionRequestedEvent>> _producerMock = new();
 
     public CreateAdoptionCommandHandlerTests()
     {
@@ -25,7 +26,10 @@ public sealed class CreateAdoptionCommandHandlerTests
             .Setup(r => r.CreateAsync(It.IsAny<AdoptionRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(adoptionEntity);
 
-        var handler = new CreateAdoptionCommandHandler(_repositoryMock.Object);
+        _producerMock
+            .Setup(p => p.Produce(It.IsAny<AdoptionRequestedEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var handler = new CreateAdoptionCommandHandler(_repositoryMock.Object, _producerMock.Object);
         var result = await handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -50,7 +54,10 @@ public sealed class CreateAdoptionCommandHandlerTests
             .Setup(r => r.CreateAsync(It.IsAny<AdoptionRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(adoptionEntity);
 
-        var handler = new CreateAdoptionCommandHandler(_repositoryMock.Object);
+        _producerMock
+            .Setup(p => p.Produce(It.IsAny<AdoptionRequestedEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var handler = new CreateAdoptionCommandHandler(_repositoryMock.Object, _producerMock.Object);
         var result = await handler.Handle(command, CancellationToken.None);
 
         result.Status.Should().Be(EAdoptionStatus.Pending);
