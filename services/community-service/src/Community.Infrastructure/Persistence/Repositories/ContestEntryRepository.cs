@@ -13,7 +13,7 @@ public sealed class ContestEntryRepository(CommunityDbContext context) : IContes
     public async Task<ContestEntryResponseDto> AddScoreAsync(Guid entryId, Guid givenByUserId, CancellationToken ct = default)
     {
         var entry = await context.ContestEntries.FirstOrDefaultAsync(e => e.Id == entryId, ct)
-            ?? throw new KeyNotFoundException("Yarışma girişi tapılmadı.");
+            ?? throw new KeyNotFoundException("Yarışma iştirakçısı tapılmadı.");
 
         var alreadyScored = await context.ScoreEvents
             .AnyAsync(s => s.ContestEntryId == entryId && s.GivenByUserId == givenByUserId, ct);

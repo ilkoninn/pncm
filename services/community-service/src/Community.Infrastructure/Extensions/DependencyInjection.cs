@@ -11,8 +11,12 @@ public static class DependencyInjection
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
-        services.AddSingleton<IConnectionMultiplexer>(
-            ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
+        var redisConnectionString = configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrEmpty(redisConnectionString))
+        {
+            services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect(redisConnectionString));
+        }
 
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IContestRepository, ContestRepository>();
