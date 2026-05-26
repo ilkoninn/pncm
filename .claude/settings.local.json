@@ -6,7 +6,10 @@
       "Bash(Format-Table -AutoSize)",
       "Bash(dotnet build *)",
       "Bash(Get-ChildItem \"D:\\\\projects\\\\big-projects\\\\pncm\\\\services\\\\pet-service\\\\src\\\\Pet.Infrastructure\\\\Migrations\" -Recurse -Filter \"*.cs\")",
-      "Bash(Select-Object -ExpandProperty FullName)"
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(dotnet new *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet sln *)"
     ]
   }
 }
