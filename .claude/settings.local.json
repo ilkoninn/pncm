@@ -12,7 +12,9 @@
       "Bash(dotnet sln *)",
       "Bash(xargs grep -l \"IDesignTimeDbContextFactory\")",
       "Bash(xargs grep -l \"SendOkAsync\\\\|SendNoContent\")",
-      "Bash(xargs grep -l \"SendOkAsync\\\\|SendNoContent\\\\|void HandleAsync\")"
+      "Bash(xargs grep -l \"SendOkAsync\\\\|SendNoContent\\\\|void HandleAsync\")",
+      "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\big-projects\\\\pncm\" -Directory)",
+      "Bash(Select-Object Name)"
     ]
   }
 }
