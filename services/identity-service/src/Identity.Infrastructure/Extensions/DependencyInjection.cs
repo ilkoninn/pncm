@@ -59,6 +59,19 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
+        services.AddMassTransit(x =>
+        {
+            x.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+            x.AddRider(rider =>
+            {
+                rider.AddProducer<UserRegisteredEvent>("user-registered");
+                rider.UsingKafka((ctx, k) =>
+                {
+                    k.Host(configuration["Kafka:BootstrapServers"]);
+                });
+            });
+        });
+
         return services;
     }
 }

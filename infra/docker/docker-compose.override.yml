@@ -14,9 +14,11 @@ services:
       - Jwt__SecretKey=your-secret-key-here-min-32-chars!!
       - Jwt__Issuer=pncm-identity
       - Jwt__Audience=pncm-api
+      - Kafka__BootstrapServers=kafka:29092
     depends_on:
       - postgres
       - redis
+      - kafka
     networks: [pncm_network]
   store-service:
     build:
@@ -72,8 +74,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_adoption;Username=postgres;Password=postgres;Encoding=UTF8
+      - Kafka__BootstrapServers=kafka:29092
     depends_on:
       - postgres
+      - kafka
     networks: [pncm_network]
   community-service:
     build:
@@ -92,6 +96,21 @@ services:
       - redis
       - kafka
     networks: [pncm_network]
+  notification-service:
+    build:
+      context: ../../services/notification-service
+      dockerfile: Dockerfile
+    container_name: pncm_notification
+    ports:
+      - "5181:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pncm_notification;Username=postgres;Password=postgres;Encoding=UTF8
+      - Kafka__BootstrapServers=kafka:29092
+    depends_on:
+      - postgres
+      - kafka
+    networks: [pncm_network]
   gateway:
     build:
       context: ../../gateway/yarp
@@ -106,6 +125,7 @@ services:
       - pet-service
       - adoption-service
       - community-service
+      - notification-service
     networks: [pncm_network]
 
 networks:

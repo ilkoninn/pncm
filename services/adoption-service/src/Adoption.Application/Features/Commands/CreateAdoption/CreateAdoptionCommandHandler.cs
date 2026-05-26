@@ -1,4 +1,6 @@
-public sealed class CreateAdoptionCommandHandler(IAdoptionRepository repository)
+public sealed class CreateAdoptionCommandHandler(
+    IAdoptionRepository repository,
+    ITopicProducer<AdoptionRequestedEvent> producer)
     : IRequestHandler<CreateAdoptionCommand, AdoptionResponseDto>
 {
     public async Task<AdoptionResponseDto> Handle(CreateAdoptionCommand request, CancellationToken cancellationToken)
@@ -12,6 +14,14 @@ public sealed class CreateAdoptionCommandHandler(IAdoptionRepository repository)
         };
 
         await repository.CreateAsync(adoption, cancellationToken);
+
+        await producer.Produce(new AdoptionRequestedEvent
+        {
+            AdoptionId = adoption.Id,
+            PetId = adoption.PetId,
+            AdopterId = adoption.AdopterId,
+            OwnerId = Guid.Empty
+        }, cancellationToken);
 
         return adoption.Adapt<AdoptionResponseDto>();
     }

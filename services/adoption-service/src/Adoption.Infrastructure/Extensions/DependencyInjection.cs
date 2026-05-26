@@ -27,6 +27,21 @@ public static class DependencyInjection
         MappingConfig.Register(mapsterConfig);
         services.AddSingleton(mapsterConfig);
 
+        services.AddMassTransit(x =>
+        {
+            x.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+            x.AddRider(rider =>
+            {
+                rider.AddProducer<AdoptionRequestedEvent>("adoption-requested");
+                rider.AddProducer<AdoptionApprovedEvent>("adoption-approved");
+                rider.AddProducer<AdoptionRejectedEvent>("adoption-rejected");
+                rider.UsingKafka((ctx, k) =>
+                {
+                    k.Host(configuration["Kafka:BootstrapServers"]);
+                });
+            });
+        });
+
         return services;
     }
 }

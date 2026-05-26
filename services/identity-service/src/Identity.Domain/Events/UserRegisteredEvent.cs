@@ -1,11 +1,7 @@
+namespace Identity.Domain.Events;
+
 public class UserRegisteredEvent : BaseEvent
 {
-    public Guid UserId { get; }
-    public string Email { get; }
-
-    public UserRegisteredEvent(Guid userId, string email)
-    {
-        UserId = userId;
-        Email = email;
-    }
+    public Guid UserId { get; set; }
+    public string Email { get; set; } = string.Empty;
 }

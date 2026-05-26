@@ -1,6 +1,8 @@
 public sealed class UpdateAdoptionStatusCommandHandlerTests
 {
     private readonly Mock<IAdoptionRepository> _repositoryMock = new();
+    private readonly Mock<ITopicProducer<AdoptionApprovedEvent>> _approvedProducerMock = new();
+    private readonly Mock<ITopicProducer<AdoptionRejectedEvent>> _rejectedProducerMock = new();
 
     public UpdateAdoptionStatusCommandHandlerTests()
     {
@@ -29,7 +31,13 @@ public sealed class UpdateAdoptionStatusCommandHandlerTests
             .Setup(r => r.UpdateAsync(It.IsAny<AdoptionRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(adoptionEntity);
 
-        var handler = new UpdateAdoptionStatusCommandHandler(_repositoryMock.Object);
+        _approvedProducerMock
+            .Setup(p => p.Produce(It.IsAny<AdoptionApprovedEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _rejectedProducerMock
+            .Setup(p => p.Produce(It.IsAny<AdoptionRejectedEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var handler = new UpdateAdoptionStatusCommandHandler(_repositoryMock.Object, _approvedProducerMock.Object, _rejectedProducerMock.Object);
         var result = await handler.Handle(new UpdateAdoptionStatusCommand(adoptionId, EAdoptionStatus.Approved), CancellationToken.None);
 
         result.Status.Should().Be(EAdoptionStatus.Approved);
@@ -42,7 +50,13 @@ public sealed class UpdateAdoptionStatusCommandHandlerTests
             .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((AdoptionRequest?)null);
 
-        var handler = new UpdateAdoptionStatusCommandHandler(_repositoryMock.Object);
+        _approvedProducerMock
+            .Setup(p => p.Produce(It.IsAny<AdoptionApprovedEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _rejectedProducerMock
+            .Setup(p => p.Produce(It.IsAny<AdoptionRejectedEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var handler = new UpdateAdoptionStatusCommandHandler(_repositoryMock.Object, _approvedProducerMock.Object, _rejectedProducerMock.Object);
         var act = async () => await handler.Handle(
             new UpdateAdoptionStatusCommand(Guid.NewGuid(), EAdoptionStatus.Approved), CancellationToken.None);
 
