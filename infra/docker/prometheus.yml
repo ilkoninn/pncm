@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: identity-service
+    static_configs:
+      - targets: ['pncm_identity:8080']
+
+  - job_name: store-service
+    static_configs:
+      - targets: ['pncm_store:8080']
+
+  - job_name: media-service
+    static_configs:
+      - targets: ['pncm_media:8080']
+
+  - job_name: pet-service
+    static_configs:
+      - targets: ['pncm_pet:8080']
+
+  - job_name: adoption-service
+    static_configs:
+      - targets: ['pncm_adoption:8080']
+
+  - job_name: community-service
+    static_configs:
+      - targets: ['pncm_community:8080']
+
+  - job_name: notification-service
+    static_configs:
+      - targets: ['pncm_notification:8080']

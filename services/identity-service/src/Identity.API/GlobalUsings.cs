@@ -7,3 +7,6 @@ global using FastEndpoints.Swagger;
 global using Grpc.Core;
 global using Identity.API.Protos;
 global using Microsoft.EntityFrameworkCore;
+global using OpenTelemetry.Resources;
+global using OpenTelemetry.Trace;
+global using Prometheus;

@@ -1,11 +1,13 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddOpenTelemetry(builder.Configuration, "adoption-service");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseHttpMetrics();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -49,6 +51,8 @@ app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatus
     var result = await mediator.Send(new UpdateAdoptionStatusCommand(id, dto.Status));
     return Results.Ok(result);
 });
+
+app.MapMetrics();
 
 app.Run();
 
