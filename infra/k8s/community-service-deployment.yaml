@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: community-service
+  namespace: pncm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: community-service
+  template:
+    metadata:
+      labels:
+        app: community-service
+    spec:
+      containers:
+        - name: community-service
+          image: ilkoninn/pncm-community:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: pncm-config
+            - secretRef:
+                name: pncm-secrets
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=pncm-postgres;Port=5432;Database=pncm_community;Username=postgres;Password=postgres;Encoding=UTF8"
+            - name: ConnectionStrings__Redis
+              value: "pncm-redis:6379"
+            - name: Kafka__BootstrapServers
+              value: "pncm-kafka:29092"
+            - name: Otlp__Endpoint
+              value: "http://pncm-jaeger:4317"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pncm-community
+  namespace: pncm
+spec:
+  selector:
+    app: community-service
+  ports:
+    - port: 80
+      targetPort: 8080

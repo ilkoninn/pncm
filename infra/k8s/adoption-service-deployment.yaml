@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adoption-service
+  namespace: pncm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adoption-service
+  template:
+    metadata:
+      labels:
+        app: adoption-service
+    spec:
+      containers:
+        - name: adoption-service
+          image: ilkoninn/pncm-adoption:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: pncm-config
+            - secretRef:
+                name: pncm-secrets
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=pncm-postgres;Port=5432;Database=pncm_adoption;Username=postgres;Password=postgres;Encoding=UTF8"
+            - name: Kafka__BootstrapServers
+              value: "pncm-kafka:29092"
+            - name: Otlp__Endpoint
+              value: "http://pncm-jaeger:4317"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pncm-adoption
+  namespace: pncm
+spec:
+  selector:
+    app: adoption-service
+  ports:
+    - port: 80
+      targetPort: 8080
