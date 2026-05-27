@@ -18,6 +18,13 @@ spec:
           image: ilkoninn/pncm-gateway:latest
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
           envFrom:
             - configMapRef:
                 name: pncm-config

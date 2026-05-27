@@ -4,6 +4,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddOpenTelemetry(builder.Configuration, "adoption-service");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -53,6 +54,7 @@ app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatus
 });
 
 app.MapMetrics();
+app.MapHealthChecks("/health");
 
 app.Run();
 

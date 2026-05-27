@@ -5,6 +5,7 @@ builder.Services.AddOpenTelemetry(builder.Configuration, "store-service");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCarter();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -18,6 +19,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapCarter();
 app.MapMetrics();
+app.MapHealthChecks("/health");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 using (var scope = app.Services.CreateScope())

@@ -4,6 +4,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddOpenTelemetry(builder.Configuration, "notification-service");
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 var app = builder.Build();
 
@@ -12,6 +14,10 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwaggerGen();
 app.UseFastEndpoints();
 app.MapMetrics();
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = check => check.Name == "self"
+});
 
 using (var scope = app.Services.CreateScope())
 {

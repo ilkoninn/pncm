@@ -17,7 +17,7 @@ builder.Services.SwaggerDocument(o =>
         s.Description = "Pəncəm platforması üçün Identity Service API";
     };
 });
-
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -29,6 +29,7 @@ app.UseMiddleware<BlacklistMiddleware>();
 app.UseSwaggerGen();
 app.MapGrpcService<UserGrpcService>();
 app.MapMetrics();
+app.MapHealthChecks("/health");
 
 app.UseFastEndpoints(c =>
 {
