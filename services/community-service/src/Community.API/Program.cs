@@ -5,6 +5,7 @@ builder.Services.AddOpenTelemetry(builder.Configuration, "community-service");
 builder.Services.AddCarter();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -14,6 +15,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.MapCarter();
 app.MapMetrics();
+app.MapHealthChecks("/health");
 
 using (var scope = app.Services.CreateScope())
 {

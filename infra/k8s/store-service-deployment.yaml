@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-service
+  namespace: pncm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-service
+  template:
+    metadata:
+      labels:
+        app: store-service
+    spec:
+      containers:
+        - name: store-service
+          image: ilkoninn/pncm-store:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          envFrom:
+            - configMapRef:
+                name: pncm-config
+            - secretRef:
+                name: pncm-secrets
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=pncm-postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres;Encoding=UTF8"
+            - name: Otlp__Endpoint
+              value: "http://pncm-jaeger:4317"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pncm-store
+  namespace: pncm
+spec:
+  selector:
+    app: store-service
+  ports:
+    - port: 80
+      targetPort: 8080

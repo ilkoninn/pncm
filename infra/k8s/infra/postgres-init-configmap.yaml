@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-sql
+  namespace: pncm
+data:
+  init.sql: |
+    CREATE DATABASE pncm_identity;
+    CREATE DATABASE pncm_store;
+    CREATE DATABASE pncm_media;
+    CREATE DATABASE pncm_pet;
+    CREATE DATABASE pncm_adoption;
+    CREATE DATABASE pncm_community;
+    CREATE DATABASE pncm_notification;

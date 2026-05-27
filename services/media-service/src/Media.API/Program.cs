@@ -13,6 +13,7 @@ builder.Services.SwaggerDocument(o =>
         s.Description = "Pəncəm platforması üçün Media Service API";
     };
 });
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -21,6 +22,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwaggerGen();
 app.UseFastEndpoints();
 app.MapMetrics();
+app.MapHealthChecks("/health");
 
 using (var scope = app.Services.CreateScope())
 {

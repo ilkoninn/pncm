@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pncm-config
+  namespace: pncm
+data:
+  ASPNETCORE_ENVIRONMENT: Development
+  POSTGRES_HOST: pncm-postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: postgres
+  REDIS_HOST: pncm-redis
+  KAFKA_BOOTSTRAP: pncm-kafka:29092
+  MINIO_ENDPOINT: pncm-minio:9000
+  MINIO_PUBLIC_ENDPOINT: localhost:9000
+  OTLP_ENDPOINT: http://pncm-jaeger:4317
