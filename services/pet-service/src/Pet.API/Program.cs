@@ -1,11 +1,14 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddOpenTelemetry(builder.Configuration, "pet-service");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCarter();
 
 var app = builder.Build();
+
+app.UseHttpMetrics();
 
 if (app.Environment.IsDevelopment())
 {
@@ -14,6 +17,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapCarter();
+app.MapMetrics();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 using (var scope = app.Services.CreateScope())

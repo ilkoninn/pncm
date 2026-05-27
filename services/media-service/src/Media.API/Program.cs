@@ -1,6 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddOpenTelemetry(builder.Configuration, "media-service");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument(o =>
@@ -15,9 +16,11 @@ builder.Services.SwaggerDocument(o =>
 
 var app = builder.Build();
 
+app.UseHttpMetrics();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwaggerGen();
 app.UseFastEndpoints();
+app.MapMetrics();
 
 using (var scope = app.Services.CreateScope())
 {

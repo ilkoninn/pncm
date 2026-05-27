@@ -3,6 +3,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddGrpc();
 builder.Services.AddFastEndpoints();
+
+builder.Services.AddOpenTelemetry(
+    builder.Configuration,
+    "identity-service");
+
 builder.Services.SwaggerDocument(o =>
 {
     o.DocumentSettings = s =>
@@ -16,12 +21,14 @@ builder.Services.SwaggerDocument(o =>
 
 var app = builder.Build();
 
+app.UseHttpMetrics();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<BlacklistMiddleware>();
 app.UseSwaggerGen();
 app.MapGrpcService<UserGrpcService>();
+app.MapMetrics();
 
 app.UseFastEndpoints(c =>
 {
