@@ -42,6 +42,8 @@ spec:
                 name: pncm-config
             - secretRef:
                 name: pncm-secrets
+            - secretRef:
+                name: pncm-email-secrets
           env:
             - name: ConnectionStrings__DefaultConnection
               value: "Host=pncm-postgres;Port=5432;Database=pncm_identity;Username=postgres;Password=postgres;Encoding=UTF8"
