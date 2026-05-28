@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: pet-service
-          image: ilkoninn/pncm-pet:sha-cb604dfae1c4de1ffde9989caf54f39d77c9326f
+          image: ilkoninn/pncm-pet:sha-6e56a16b3e44602fd7be1209e238945eebfdf6b8
           ports:
             - containerPort: 8080
           resources:
@@ -62,4 +62,4 @@ spec:
   template:
     spec:
       containers:
-        - image: ilkoninn/pncm-pet:sha-cb604dfae1c4de1ffde9989caf54f39d77c9326f
+        - image: ilkoninn/pncm-pet:sha-6e56a16b3e44602fd7be1209e238945eebfdf6b8
