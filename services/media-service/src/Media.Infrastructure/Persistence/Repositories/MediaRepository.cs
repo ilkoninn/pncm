@@ -9,6 +9,12 @@ public sealed class MediaRepository(MediaDbContext context) : IMediaRepository
             .Where(x => x.OwnerId == ownerId && x.OwnerType == ownerType)
             .ToListAsync(cancellationToken);
 
+    public async Task<IEnumerable<MediaFile>> GetByOwnersAsync(
+        IEnumerable<Guid> ownerIds, EOwnerType ownerType, CancellationToken cancellationToken = default)
+        => await context.MediaFiles
+            .Where(x => ownerIds.Contains(x.OwnerId) && x.OwnerType == ownerType)
+            .ToListAsync(cancellationToken);
+
     public async Task<MediaFile> CreateAsync(MediaFile mediaFile, CancellationToken cancellationToken = default)
     {
         context.MediaFiles.Add(mediaFile);
