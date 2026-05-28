@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getSession } from "next-auth/react";
+import { getAccessToken } from "./token-store";
 
 const apiClient = axios.create({
   baseURL: "http://pncm.local",
@@ -8,10 +8,10 @@ const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use(async (config) => {
-  const session = await getSession();
-  if (session?.accessToken) {
-    config.headers.Authorization = `Bearer ${session.accessToken}`;
+apiClient.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });

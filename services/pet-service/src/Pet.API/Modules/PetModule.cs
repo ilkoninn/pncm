@@ -31,9 +31,12 @@ public class PetModule : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetByOwner(Guid ownerId, EOwnerType ownerType, IMediator mediator)
+    private static async Task<IResult> GetByOwner(ClaimsPrincipal user, IMediator mediator)
     {
-        var result = await mediator.Send(new GetPetsByOwnerQuery(ownerId, ownerType));
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+        var result = await mediator.Send(new GetPetsByOwnerQuery(userId, EOwnerType.User));
         return Results.Ok(result);
     }
 

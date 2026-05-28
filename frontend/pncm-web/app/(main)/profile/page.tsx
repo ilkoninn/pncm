@@ -1,27 +1,63 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
+import { uploadMedia, deleteMedia, getMediaByOwnersBatch } from "@/lib/api/media";
+import { EOwnerType } from "@/types/media";
 import { PetCard } from "@/components/shared/pets/PetCard";
 import type { Pet } from "@/types/pets";
 import {
   Pencil, X, Trophy, LogOut, Copy, Check,
-  UserRound, Link as LinkIcon,
+  UserRound, Link as LinkIcon, Camera,
 } from "lucide-react";
 
-function Avatar({ name, size = "lg" }: { name: string; size?: "lg" | "sm" }) {
+function Avatar({
+  name,
+  photoUrl,
+  size = "lg",
+  onClick,
+  uploading,
+}: {
+  name: string;
+  photoUrl?: string;
+  size?: "lg" | "sm";
+  onClick?: () => void;
+  uploading?: boolean;
+}) {
   const sz = size === "lg" ? "w-16 h-16 text-2xl" : "w-10 h-10 text-base";
   return (
-    <div className={`${sz} rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white flex-shrink-0`}>
-      {name?.[0]?.toUpperCase() ?? "?"}
+    <div
+      className={`${sz} rounded-full flex-shrink-0 relative ${onClick ? "cursor-pointer" : ""}`}
+      onClick={onClick}
+    >
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={name}
+          className="w-full h-full rounded-full object-cover"
+        />
+      ) : (
+        <div className={`w-full h-full rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white`}>
+          {uploading ? (
+            <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          ) : (
+            name?.[0]?.toUpperCase() ?? "?"
+          )}
+        </div>
+      )}
+      {onClick && !uploading && (
+        <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Camera className="w-4 h-4 text-white" />
+        </div>
+      )}
     </div>
   );
 }
 
-function SettingsDrawer({ open, onClose, name, email }: {
-  open: boolean; onClose: () => void; name: string; email: string;
+function SettingsDrawer({ open, onClose, name, email, photoUrl }: {
+  open: boolean; onClose: () => void; name: string; email: string; photoUrl?: string;
 }) {
   return (
     <>
@@ -41,7 +77,7 @@ function SettingsDrawer({ open, onClose, name, email }: {
 
         <div className="p-5 space-y-6 overflow-y-auto h-full pb-24">
           <div className="flex items-center gap-3">
-            <Avatar name={name} size="sm" />
+            <Avatar name={name} photoUrl={photoUrl} size="sm" />
             <div>
               <p className="font-semibold text-slate-900 text-sm">{name}</p>
               <p className="text-xs text-slate-400">{email}</p>
@@ -197,19 +233,62 @@ function MyPetsSection() {
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const name = session?.username || session?.user?.email?.split("@")[0] || "İstifadəçi";
   const email = session?.user?.email ?? "";
+  const userId = session?.userId;
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const { data: photoMap } = useQuery({
+    queryKey: ["profile-photo", userId],
+    queryFn: () => getMediaByOwnersBatch([userId!], EOwnerType.User),
+    enabled: !!userId,
+  });
+
+  const profilePhotoUrl = userId ? photoMap?.[userId]?.[0]?.url : undefined;
+
+  const { mutate: uploadPhoto, isPending: uploading } = useMutation({
+    mutationFn: async (file: File) => {
+      const existing = userId ? photoMap?.[userId] : undefined;
+      if (existing?.length) {
+        await Promise.all(existing.map((p) => deleteMedia(p.id)));
+      }
+      return uploadMedia(file, EOwnerType.User);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile-photo", userId] });
+    },
+  });
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadPhoto(file);
+    e.target.value = "";
+  }
 
   return (
     <div className="bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-28">
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
 
-        {/* Profile header card */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Avatar name={name} size="lg" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <Avatar
+                name={name}
+                photoUrl={profilePhotoUrl}
+                size="lg"
+                uploading={uploading}
+                onClick={() => fileInputRef.current?.click()}
+              />
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="font-bold text-slate-900 text-lg leading-tight">{name}</h1>
@@ -231,13 +310,9 @@ export default function ProfilePage() {
               Düzəliş et
             </button>
           </div>
-
         </div>
 
-        {/* Invite section */}
         <InviteSection />
-
-        {/* My pets */}
         <MyPetsSection />
 
       </div>
@@ -247,6 +322,7 @@ export default function ProfilePage() {
         onClose={() => setSettingsOpen(false)}
         name={name}
         email={email}
+        photoUrl={profilePhotoUrl}
       />
     </div>
   );

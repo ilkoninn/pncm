@@ -1,7 +1,11 @@
 global using Carter;
 global using FluentValidation;
 global using MediatR;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.IdentityModel.Tokens;
 global using OpenTelemetry.Resources;
 global using OpenTelemetry.Trace;
 global using Prometheus;
+global using System.Security.Claims;
+global using System.Text;

@@ -46,6 +46,15 @@ spec:
           env:
             - name: ConnectionStrings__DefaultConnection
               value: "Host=pncm-postgres;Port=5432;Database=pncm_adoption;Username=postgres;Password=postgres;Encoding=UTF8"
+            - name: Jwt__Issuer
+              value: "pncm-identity"
+            - name: Jwt__Audience
+              value: "pncm-api"
+            - name: Jwt__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: pncm-secrets
+                  key: JWT_SECRET
             - name: Kafka__BootstrapServers
               value: "pncm-kafka:29092"
             - name: Otlp__Endpoint
