@@ -96,7 +96,7 @@ export default function LoginPage() {
             <div className="mb-5">
               <button
                 type="button"
-                className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 rounded-full px-4 h-12 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 rounded-xl px-4 h-13 py-3.5 text-base font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
                 <GoogleIcon />
                 Google ilə davam et
