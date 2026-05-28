@@ -1,39 +1,45 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+function parseJwt(token: string) {
+  const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  return JSON.parse(Buffer.from(base64, "base64").toString());
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        accessToken: { type: "text" },
+        refreshToken: { type: "text" },
+        expiresAt: { type: "text" },
       },
       async authorize(credentials) {
-        const res = await fetch(
-          "http://localhost:5000/api/identity/auth/login",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          }
-        );
+        if (!credentials.accessToken) return null;
 
-        if (!res.ok) return null;
+        const payload = parseJwt(credentials.accessToken as string);
 
-        const data = await res.json();
+        const nameId =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+          ] ?? payload.sub;
+        const email =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] ?? payload.email;
+        const firstName =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+          ] ?? "";
 
         return {
-          id: data.userId,
-          email: data.email,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          expiresIn: data.expiresIn,
-          username: data.username,
-          roles: data.roles,
+          id: nameId,
+          email,
+          username: firstName,
+          accessToken: credentials.accessToken as string,
+          refreshToken: credentials.refreshToken as string,
+          expiresAt: credentials.expiresAt as string,
         };
       },
     }),
@@ -45,8 +51,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.refreshToken = user.refreshToken;
         token.userId = user.id as string;
         token.username = user.username;
-        token.roles = user.roles;
-        token.accessTokenExpires = Date.now() + (user.expiresIn as number) * 1000;
+        token.roles = [];
+        token.accessTokenExpires = new Date(
+          user.expiresAt as string
+        ).getTime();
       }
       return token;
     },
