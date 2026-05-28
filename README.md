@@ -1,49 +1,49 @@
-# PNCM — Pet & Community Management Platform
+# PNCM — Ev Heyvanları və İcma İdarəetmə Platforması
 
-A microservices-based backend platform for managing pets, adoptions, community contests, media, and notifications. Built with .NET 9, event-driven communication via Apache Kafka, and an API Gateway using YARP.
+Ev heyvanlarının idarəsi, övladlığa götürülməsi, icma müsabiqələri, media və bildiriş sistemini əhatə edən microservices backend platforması. .NET 9, Apache Kafka (event-driven), YARP API Gateway üzərində qurulub.
 
 ---
 
-## Documentation
+## Sənədlər
 
-| File | Contents |
+| Fayl | Məzmun |
 |---|---|
-| [architecture.md](docs/architecture.md) | Architecture diagram, tech stack, design decisions |
-| [services.md](docs/services.md) | Each service — entities, endpoints, Kafka events |
-| [event-flows.md](docs/event-flows.md) | Kafka flows step-by-step, payloads, contract pattern |
+| [architecture.md](docs/architecture.md) | Arxitektura diaqramı, tech stack, dizayn qərarları |
+| [services.md](docs/services.md) | Hər servis — entity-lər, endpoint-lər, Kafka event-lər |
+| [event-flows.md](docs/event-flows.md) | Kafka axışları step-by-step, payload-lar, contract pattern |
 | [csharp-patterns.md](docs/csharp-patterns.md) | Clean Architecture, CQRS, MediatR, EF Core, JWT, gRPC |
 | [infrastructure.md](docs/infrastructure.md) | Docker Compose, Kubernetes, Terraform, GitHub Actions |
 
 ---
 
-## Getting Started
+## Başlamaq
 
-### Prerequisites
+### Tələblər
 - Docker Desktop
 - Docker Compose
 
-### 1. Create the Docker network
+### 1. Docker network yarat
 
 ```bash
 docker network create pncm_network
 ```
 
-### 2. Start infrastructure services
+### 2. İnfrastruktur servisləri başlat
 
 ```bash
 cd infra/docker
 docker compose -f docker-compose.yml up -d
 ```
 
-### 3. Start application services
+### 3. Tətbiq servisləri başlat
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 ```
 
-### 4. Access
+### 4. Giriş nöqtələri
 
-| Service | URL |
+| Servis | URL |
 |---|---|
 | API Gateway | http://localhost:5000 |
 | Identity | http://localhost:5174/swagger |
