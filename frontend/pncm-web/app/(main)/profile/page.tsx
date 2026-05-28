@@ -10,7 +10,7 @@ export default function ProfilePage() {
   const initial = name[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="md:bg-slate-100 min-h-full">
+    <div className="md:bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-24 md:pb-28">
       <div className="max-w-2xl mx-auto px-4 py-6 md:py-8 space-y-4">
 
         {/* Account info section */}

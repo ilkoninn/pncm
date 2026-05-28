@@ -62,7 +62,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col overflow-x-hidden w-screen">
+    <div className="min-h-screen bg-white flex flex-col overflow-x-hidden w-screen">
       <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-100 bg-white">
         <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
           {/* Logo */}
@@ -91,12 +91,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </header>
 
-      <main className="flex-1 pt-14 pb-20 md:pb-28 min-h-full">
+      <main className="flex-1 pt-14 min-h-full">
         {children}
       </main>
 
       {/* Mobile bottom nav — full width */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[1001] bg-white border-t border-slate-100">
         <div className="flex items-stretch h-16">
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
@@ -120,7 +120,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </nav>
 
       {/* Desktop floating center nav */}
-      <nav className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+      <nav className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-[1001]">
         <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl px-2 py-2">
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");

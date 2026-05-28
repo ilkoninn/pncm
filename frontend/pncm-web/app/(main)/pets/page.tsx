@@ -41,7 +41,7 @@ export default function PetsPage() {
   });
 
   return (
-    <div className="md:bg-slate-100 min-h-full">
+    <div className="md:bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-24 md:pb-28">
       <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-6">
         <div className="flex gap-4">
 
