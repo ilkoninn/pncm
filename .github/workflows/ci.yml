@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build-identity:
     runs-on: ubuntu-latest
@@ -24,7 +27,9 @@ jobs:
           context: services/identity-service
           file: services/identity-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-identity:latest
+          tags: |
+            ilkoninn/pncm-identity:latest
+            ilkoninn/pncm-identity:sha-${{ github.sha }}
 
   build-store:
     runs-on: ubuntu-latest
@@ -44,7 +49,9 @@ jobs:
           context: services/store-service
           file: services/store-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-store:latest
+          tags: |
+            ilkoninn/pncm-store:latest
+            ilkoninn/pncm-store:sha-${{ github.sha }}
 
   build-media:
     runs-on: ubuntu-latest
@@ -64,7 +71,9 @@ jobs:
           context: services/media-service
           file: services/media-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-media:latest
+          tags: |
+            ilkoninn/pncm-media:latest
+            ilkoninn/pncm-media:sha-${{ github.sha }}
 
   build-pet:
     runs-on: ubuntu-latest
@@ -84,7 +93,9 @@ jobs:
           context: services/pet-service
           file: services/pet-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-pet:latest
+          tags: |
+            ilkoninn/pncm-pet:latest
+            ilkoninn/pncm-pet:sha-${{ github.sha }}
 
   build-adoption:
     runs-on: ubuntu-latest
@@ -104,7 +115,9 @@ jobs:
           context: services/adoption-service
           file: services/adoption-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-adoption:latest
+          tags: |
+            ilkoninn/pncm-adoption:latest
+            ilkoninn/pncm-adoption:sha-${{ github.sha }}
 
   build-community:
     runs-on: ubuntu-latest
@@ -124,7 +137,9 @@ jobs:
           context: services/community-service
           file: services/community-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-community:latest
+          tags: |
+            ilkoninn/pncm-community:latest
+            ilkoninn/pncm-community:sha-${{ github.sha }}
 
   build-notification:
     runs-on: ubuntu-latest
@@ -144,7 +159,9 @@ jobs:
           context: services/notification-service
           file: services/notification-service/Dockerfile
           push: true
-          tags: ilkoninn/pncm-notification:latest
+          tags: |
+            ilkoninn/pncm-notification:latest
+            ilkoninn/pncm-notification:sha-${{ github.sha }}
 
   build-gateway:
     runs-on: ubuntu-latest
@@ -164,4 +181,49 @@ jobs:
           context: gateway/yarp
           file: gateway/yarp/Dockerfile
           push: true
-          tags: ilkoninn/pncm-gateway:latest
+          tags: |
+            ilkoninn/pncm-gateway:latest
+            ilkoninn/pncm-gateway:sha-${{ github.sha }}
+
+  patch-k8s-images:
+    runs-on: ubuntu-latest
+    needs:
+      - build-identity
+      - build-store
+      - build-media
+      - build-pet
+      - build-adoption
+      - build-community
+      - build-notification
+      - build-gateway
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+
+      - name: Patch image tags in deployment YAMLs
+        run: |
+          SHA="sha-${{ github.sha }}"
+
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-identity:${SHA}\"" infra/k8s/identity-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-store:${SHA}\"" infra/k8s/store-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-media:${SHA}\"" infra/k8s/media-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-pet:${SHA}\"" infra/k8s/pet-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-adoption:${SHA}\"" infra/k8s/adoption-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-community:${SHA}\"" infra/k8s/community-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-notification:${SHA}\"" infra/k8s/notification-service-deployment.yaml
+          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-gateway:${SHA}\"" infra/k8s/gateway-deployment.yaml
+
+      - name: Commit and push updated manifests
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add infra/k8s/
+          git commit -m "ci: update image tags to sha-${{ github.sha }}"
+          git push
