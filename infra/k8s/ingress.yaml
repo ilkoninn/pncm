@@ -16,3 +16,13 @@ spec:
                 name: pncm-gateway
                 port:
                   number: 80
+    - host: minio.pncm.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pncm-minio
+                port:
+                  number: 9000

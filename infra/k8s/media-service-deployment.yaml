@@ -48,7 +48,7 @@ spec:
             - name: MinIO__Endpoint
               value: "pncm-minio:9000"
             - name: MinIO__PublicEndpoint
-              value: "localhost:9000"
+              value: "minio.pncm.local"
             - name: MinIO__AccessKey
               valueFrom:
                 secretKeyRef:
