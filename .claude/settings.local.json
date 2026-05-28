@@ -22,7 +22,18 @@
       "PowerShell(Set-Location \"D:/projects/big-projects/pncm/frontend/pncm-web\"; Get-ChildItem -Recurse -Directory | Where-Object { $_.FullName -notmatch \"node_modules|\\\\.next\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
       "Bash(npx shadcn@latest add card input label form --yes)",
       "Bash(npx shadcn@latest add form --yes)",
-      "Bash(dotnet clean *)"
+      "Bash(dotnet clean *)",
+      "Bash(cp -r \"D:/projects/big-projects/pncm/agent-skills/skills/web-design-guidelines\" \"C:/Users/receb/.claude/skills/\")",
+      "Bash(cp -r \"D:/projects/big-projects/pncm/agent-skills/skills/react-best-practices\" \"C:/Users/receb/.claude/skills/\")",
+      "Bash(cp -r \"D:/projects/big-projects/pncm/agent-skills/skills/composition-patterns\" \"C:/Users/receb/.claude/skills/\")",
+      "Bash(grep -v \"^agent-skills$\")",
+      "Bash(cp *)",
+      "Bash(cp -r \"D:/projects/big-projects/pncm/bencium-claude-code-design-skill/bencium-innovative-ux-designer\" \"C:/Users/receb/.claude/skills/\")",
+      "Bash(cp -r \"D:/projects/big-projects/pncm/bencium-claude-code-design-skill/bencium-controlled-ux-designer\" \"C:/Users/receb/.claude/skills/\")",
+      "Bash(cp -r \"C:/Users/receb/.claude/skills/bencium-innovative-ux-designer/skills/bencium-innovative-ux-designer\" \"C:/Users/receb/.claude/skills/bencium-innovative\")",
+      "Bash(cp -r \"C:/Users/receb/.claude/skills/bencium-controlled-ux-designer/skills/bencium-controlled-ux-designer\" \"C:/Users/receb/.claude/skills/bencium-controlled\")",
+      "Bash(rm -rf \"C:/Users/receb/.claude/skills/bencium-innovative-ux-designer\" \"C:/Users/receb/.claude/skills/bencium-controlled-ux-designer\")",
+      "Bash(python3 *)"
     ]
   }
 }
