@@ -3,7 +3,6 @@ public sealed class UploadMediaEndpoint(IMediator mediator) : Endpoint<UploadMed
     public override void Configure()
     {
         Post("/media/upload");
-        AllowAnonymous();
         AllowFileUploads();
     }
 
@@ -18,12 +17,21 @@ public sealed class UploadMediaEndpoint(IMediator mediator) : Endpoint<UploadMed
             return;
         }
 
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            AddError("auth", "İstifadəçi məlumatı tapılmadı.");
+            await Send.ErrorsAsync(401, ct);
+            return;
+        }
+
         var result = await mediator.Send(new UploadMediaCommand(
             file.OpenReadStream(),
             file.FileName,
             file.ContentType,
             file.Length,
-            req.OwnerId,
+            userId,
             req.OwnerType
         ), ct);
 
