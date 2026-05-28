@@ -32,10 +32,13 @@ public sealed class UploadMediaCommandHandler(
 
         var created = await mediaRepository.CreateAsync(mediaFile, cancellationToken);
 
+        var presignedUrl = await storageService.GetPresignedUrlAsync(
+            created.ObjectKey, created.BucketName, cancellationToken: cancellationToken);
+
         return new MediaFileResponseDto(
             created.Id,
             created.OriginalFileName,
-            created.Url,
+            presignedUrl,
             created.ContentType,
             created.Size,
             created.OwnerType,
