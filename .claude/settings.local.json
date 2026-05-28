@@ -17,7 +17,12 @@
       "Bash(Select-Object Name)",
       "PowerShell(Get-ChildItem -Path \"D:\\\\projects\\\\big-projects\\\\pncm\" -Directory | ForEach-Object { Write-Output $_.Name })",
       "PowerShell(Get-ChildItem -Path \"D:\\\\projects\\\\big-projects\\\\pncm\\\\services\" -Directory | ForEach-Object { Write-Output $_.Name })",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "PowerShell(New-Item *)",
+      "PowerShell(Set-Location \"D:/projects/big-projects/pncm/frontend/pncm-web\"; Get-ChildItem -Recurse -Directory | Where-Object { $_.FullName -notmatch \"node_modules|\\\\.next\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "Bash(npx shadcn@latest add card input label form --yes)",
+      "Bash(npx shadcn@latest add form --yes)",
+      "Bash(dotnet clean *)"
     ]
   }
 }

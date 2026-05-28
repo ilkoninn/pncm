@@ -1,4 +1,7 @@
-public sealed class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkService
+public sealed class MagicLinkService(
+    IConnectionMultiplexer redis,
+    IEmailService emailService,
+    IConfiguration configuration) : IMagicLinkService
 {
     private static readonly TimeSpan MagicTokenTtl = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan MagicCodeTtl = TimeSpan.FromMinutes(5);
@@ -7,10 +10,15 @@ public sealed class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkS
 
     private readonly IDatabase _db = redis.GetDatabase();
 
-    public async Task<string> GenerateMagicLinkTokenAsync(string email)
+    public async Task<string> GenerateMagicLinkTokenAsync(string email, CancellationToken ct = default)
     {
         var token = Guid.NewGuid().ToString("N");
         await _db.StringSetAsync($"magic:{token}", email, MagicTokenTtl);
+
+        var frontendUrl = configuration["App:FrontendUrl"]!;
+        var magicLink = $"{frontendUrl}/auth/magic?token={token}";
+        await emailService.SendMagicLinkAsync(email, magicLink, ct);
+
         return token;
     }
 
@@ -39,10 +47,11 @@ public sealed class MagicLinkService(IConnectionMultiplexer redis) : IMagicLinkS
         return true;
     }
 
-    public async Task<string> GenerateOtpAsync(string email)
+    public async Task<string> GenerateOtpAsync(string email, CancellationToken ct = default)
     {
         var code = Random.Shared.Next(100000, 1000000).ToString();
         await _db.StringSetAsync($"otp:{email}:access", code, OtpTtl);
+        await emailService.SendOtpAsync(email, code, ct);
         return code;
     }
 

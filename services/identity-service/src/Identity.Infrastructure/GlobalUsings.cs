@@ -16,3 +16,6 @@ global using Identity.Domain.Events;
 global using FluentValidation;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
+global using MailKit.Net.Smtp;
+global using MailKit.Security;
+global using MimeKit;

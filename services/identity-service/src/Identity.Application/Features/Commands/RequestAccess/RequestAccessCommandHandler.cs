@@ -10,15 +10,9 @@ public sealed class RequestAccessCommandHandler(
         var isNewUser = user is null;
 
         if (request.Client == EClient.Web)
-        {
-            var token = await magicLinkService.GenerateMagicLinkTokenAsync(request.Email);
-            Console.WriteLine($"[Magic Link] https://pncm.az/auth/magic?token={token}");
-        }
+            await magicLinkService.GenerateMagicLinkTokenAsync(request.Email, cancellationToken);
         else
-        {
-            var otp = await magicLinkService.GenerateOtpAsync(request.Email);
-            Console.WriteLine($"[OTP] {request.Email} → {otp}");
-        }
+            await magicLinkService.GenerateOtpAsync(request.Email, cancellationToken);
 
         return new RequestAccessResponseDto(isNewUser);
     }
