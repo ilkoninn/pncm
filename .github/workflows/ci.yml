@@ -211,14 +211,14 @@ jobs:
         run: |
           SHA="sha-${{ github.sha }}"
 
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-identity:${SHA}\"" infra/k8s/identity-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-store:${SHA}\"" infra/k8s/store-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-media:${SHA}\"" infra/k8s/media-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-pet:${SHA}\"" infra/k8s/pet-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-adoption:${SHA}\"" infra/k8s/adoption-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-community:${SHA}\"" infra/k8s/community-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-notification:${SHA}\"" infra/k8s/notification-service-deployment.yaml
-          yq -i ".spec.template.spec.containers[0].image = \"ilkoninn/pncm-gateway:${SHA}\"" infra/k8s/gateway-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-identity:${SHA}\"" infra/k8s/identity-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-store:${SHA}\"" infra/k8s/store-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-media:${SHA}\"" infra/k8s/media-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-pet:${SHA}\"" infra/k8s/pet-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-adoption:${SHA}\"" infra/k8s/adoption-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-community:${SHA}\"" infra/k8s/community-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-notification:${SHA}\"" infra/k8s/notification-service-deployment.yaml
+          yq -i "(select(.kind == \"Deployment\") | .spec.template.spec.containers[0].image) = \"ilkoninn/pncm-gateway:${SHA}\"" infra/k8s/gateway-deployment.yaml
 
       - name: Commit and push updated manifests
         run: |

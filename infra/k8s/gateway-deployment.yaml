@@ -43,7 +43,3 @@ spec:
   ports:
     - port: 80
       targetPort: 8080
-  template:
-    spec:
-      containers:
-        - image: ilkoninn/pncm-gateway:sha-3c56e83b9857ee6b20097804bae8476c50e0e51b
