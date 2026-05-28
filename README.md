@@ -4,6 +4,20 @@ A microservices-based backend platform for managing pets, adoptions, community c
 
 ---
 
+## Documentation
+
+Detailed technical documentation lives in the [`docs/`](docs/) folder:
+
+| File | Contents |
+|---|---|
+| [architecture.md](docs/architecture.md) | Architecture diagram, tech stack, design decisions |
+| [services.md](docs/services.md) | Each service — entities, endpoints, Kafka events |
+| [event-flows.md](docs/event-flows.md) | Kafka flows step-by-step, payloads, contract pattern |
+| [csharp-patterns.md](docs/csharp-patterns.md) | Clean Architecture, CQRS, MediatR, EF Core, JWT, gRPC |
+| [infrastructure.md](docs/infrastructure.md) | Docker Compose, Kubernetes, Terraform, GitHub Actions |
+
+---
+
 ## Table of Contents
 
 - [Architecture Overview](#architecture-overview)
