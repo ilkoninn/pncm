@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: identity-service
-          image: ilkoninn/pncm-identity:sha-d9abc7feaf086972794a5aad6ec1828023f36a74
+          image: ilkoninn/pncm-identity:sha-3c56e83b9857ee6b20097804bae8476c50e0e51b
           ports:
             - containerPort: 8080
           resources:
@@ -77,4 +77,4 @@ spec:
   template:
     spec:
       containers:
-        - image: ilkoninn/pncm-identity:sha-d9abc7feaf086972794a5aad6ec1828023f36a74
+        - image: ilkoninn/pncm-identity:sha-3c56e83b9857ee6b20097804bae8476c50e0e51b
