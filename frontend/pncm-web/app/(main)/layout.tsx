@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Store, Users } from "lucide-react";
-import { LogoutButton } from "@/components/shared/auth/LogoutButton";
+import { signOut } from "next-auth/react";
+import { Bell, Store, Users, UserCircle2, LogOut } from "lucide-react";
 
 function PawPrint({ className }: { className?: string }) {
   return (
@@ -29,10 +29,12 @@ function PawIcon({ className }: { className?: string }) {
   );
 }
 
+
 const NAV_ITEMS = [
-  { href: "/pets",      label: "Heyvanlar", Icon: PawIcon  },
-  { href: "/stores",    label: "Mağazalar", Icon: Store    },
-  { href: "/community", label: "İcma",      Icon: Users    },
+  { href: "/pets",      label: "Heyvanlar", Icon: PawIcon    },
+  { href: "/stores",    label: "Mağazalar", Icon: Store      },
+  { href: "/community", label: "İcma",      Icon: Users      },
+  { href: "/profile",   label: "Profil",    Icon: UserCircle2 },
 ];
 
 function NavItem({ href, label, Icon, active }: {
@@ -60,15 +62,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-100 flex flex-col overflow-x-hidden w-screen">
       <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-100 bg-white">
-        <div className="h-full px-4 md:px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <PawPrint className="w-6 h-6 text-emerald-700" />
             <span className="font-bold text-slate-800 tracking-tight">Pəncəm</span>
           </div>
 
-          <div className="flex items-center gap-1">
+          {/* Right actions */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               className="relative w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
               aria-label="Bildirişlər"
@@ -76,42 +80,23 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
             </button>
-            <LogoutButton />
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden md:inline">Çıxış</span>
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="flex flex-1 pt-14">
-        <aside className="hidden md:flex flex-col fixed top-14 left-0 bottom-0 w-56 border-r border-slate-100 bg-white z-30">
-          <nav className="flex-1 p-3 space-y-1">
-            {NAV_ITEMS.map(({ href, label, Icon }) => (
-              <NavItem
-                key={href}
-                href={href}
-                label={label}
-                Icon={Icon}
-                active={pathname === href || pathname.startsWith(href + "/")}
-              />
-            ))}
-          </nav>
+      <main className="flex-1 pt-14 pb-20 md:pb-28 min-h-full">
+        {children}
+      </main>
 
-          <div className="p-3 border-t border-slate-100">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0" />
-              <div className="space-y-1 flex-1 min-w-0">
-                <div className="h-2.5 w-20 rounded bg-slate-200" />
-                <div className="h-2 w-28 rounded bg-slate-100" />
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <main className="flex-1 md:ml-56 pb-20 md:pb-6 min-h-full">
-          {children}
-        </main>
-      </div>
-
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 safe-area-inset-bottom">
+      {/* Mobile bottom nav — full width */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100">
         <div className="flex items-stretch h-16">
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
@@ -119,15 +104,38 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <Link
                 key={href}
                 href={href}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors duration-200 ${
+                className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors duration-200 relative ${
                   active ? "text-emerald-700" : "text-slate-400"
                 }`}
               >
+                {active && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-emerald-500 rounded-full" />}
                 <Icon className={`w-5 h-5 transition-transform duration-200 ${active ? "scale-110" : ""}`} />
                 <span className={`text-[10px] font-medium transition-all duration-200 ${active ? "opacity-100" : "opacity-0"}`}>
                   {label}
                 </span>
-                {active && <div className="absolute top-0 w-12 h-0.5 bg-emerald-500 rounded-full" />}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Desktop floating center nav */}
+      <nav className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl px-2 py-2">
+          {NAV_ITEMS.map(({ href, label, Icon }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  active
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                }`}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                {label}
               </Link>
             );
           })}
