@@ -41,6 +41,8 @@ spec:
               value: minioadmin
             - name: MINIO_ROOT_PASSWORD
               value: minioadmin
+            - name: MINIO_SERVER_URL
+              value: http://minio.pncm.local
           volumeMounts:
             - name: minio-data
               mountPath: /data

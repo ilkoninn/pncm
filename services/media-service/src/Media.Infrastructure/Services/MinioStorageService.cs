@@ -32,11 +32,15 @@ public sealed class MinioStorageService(
     }
 
     public async Task<string> GetPresignedUrlAsync(
-        string objectKey, string bucketName, int expirySeconds = 3600, CancellationToken cancellationToken = default)
+        string objectKey, string bucketName, int expirySeconds = 604800, CancellationToken cancellationToken = default)
     {
         return await publicClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
             .WithBucket(bucketName)
             .WithObject(objectKey)
-            .WithExpiry(expirySeconds));
+            .WithExpiry(expirySeconds)
+            .WithHeaders(new Dictionary<string, string>
+            {
+                ["response-cache-control"] = "public, max-age=31536000, immutable"
+            }));
     }
 }

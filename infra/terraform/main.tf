@@ -37,7 +37,7 @@ resource "kubernetes_config_map" "pncm_config" {
     REDIS_HOST             = "pncm-redis"
     KAFKA_BOOTSTRAP        = "pncm-kafka:29092"
     MINIO_ENDPOINT         = "pncm-minio:9000"
-    MINIO_PUBLIC_ENDPOINT  = "localhost:9000"
+    MINIO_PUBLIC_ENDPOINT  = "minio.pncm.local"
     OTLP_ENDPOINT          = "http://pncm-jaeger:4317"
   }
 }
