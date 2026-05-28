@@ -90,7 +90,7 @@ function EmailStep({
         )}
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full h-12 text-base font-semibold rounded-xl" disabled={isSubmitting}>
         {isSubmitting ? "Göndərilir..." : "Kod göndər"}
       </Button>
     </form>
@@ -165,7 +165,7 @@ function OtpStep({
         )}
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full h-12 text-base font-semibold rounded-xl" disabled={isSubmitting}>
         {isSubmitting ? "Yoxlanılır..." : "Təsdiqlə"}
       </Button>
     </form>
@@ -229,7 +229,7 @@ function ProfileStep({ registrationToken }: { registrationToken: string }) {
         )}
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full h-12 text-base font-semibold rounded-xl" disabled={isSubmitting}>
         {isSubmitting ? "Yaradılır..." : "Hesab yarat"}
       </Button>
     </form>

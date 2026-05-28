@@ -1,7 +1,138 @@
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Bell, Store, Users } from "lucide-react";
+import { LogoutButton } from "@/components/shared/auth/LogoutButton";
+
+function PawPrint({ className }: { className?: string }) {
   return (
-    <div className="min-h-screen bg-white">
-      {children}
+    <svg viewBox="0 0 80 80" fill="currentColor" className={className} aria-hidden="true">
+      <ellipse cx="27" cy="18" rx="8" ry="10" />
+      <ellipse cx="53" cy="18" rx="8" ry="10" />
+      <ellipse cx="13" cy="36" rx="7" ry="9" />
+      <ellipse cx="67" cy="36" rx="7" ry="9" />
+      <ellipse cx="40" cy="56" rx="18" ry="16" />
+    </svg>
+  );
+}
+
+function PawIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <ellipse cx="8.5" cy="5.5" rx="2.5" ry="3" />
+      <ellipse cx="15.5" cy="5.5" rx="2.5" ry="3" />
+      <ellipse cx="4.5" cy="11" rx="2" ry="2.8" />
+      <ellipse cx="19.5" cy="11" rx="2" ry="2.8" />
+      <ellipse cx="12" cy="16.5" rx="5.5" ry="5" />
+    </svg>
+  );
+}
+
+const NAV_ITEMS = [
+  { href: "/pets",      label: "Heyvanlar", Icon: PawIcon  },
+  { href: "/stores",    label: "Mağazalar", Icon: Store    },
+  { href: "/community", label: "İcma",      Icon: Users    },
+];
+
+function NavItem({ href, label, Icon, active }: {
+  href: string; label: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+        active
+          ? "bg-emerald-50 text-emerald-700"
+          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+      }`}
+    >
+      <Icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${active ? "" : "group-hover:scale-110"}`} />
+      <span className={`text-sm font-medium ${active ? "font-semibold" : ""}`}>{label}</span>
+      {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+    </Link>
+  );
+}
+
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-100 bg-white">
+        <div className="h-full px-4 md:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <PawPrint className="w-6 h-6 text-emerald-700" />
+            <span className="font-bold text-slate-800 tracking-tight">Pəncəm</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              className="relative w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              aria-label="Bildirişlər"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+            </button>
+            <LogoutButton />
+          </div>
+        </div>
+      </header>
+
+      <div className="flex flex-1 pt-14">
+        <aside className="hidden md:flex flex-col fixed top-14 left-0 bottom-0 w-56 border-r border-slate-100 bg-white z-30">
+          <nav className="flex-1 p-3 space-y-1">
+            {NAV_ITEMS.map(({ href, label, Icon }) => (
+              <NavItem
+                key={href}
+                href={href}
+                label={label}
+                Icon={Icon}
+                active={pathname === href || pathname.startsWith(href + "/")}
+              />
+            ))}
+          </nav>
+
+          <div className="p-3 border-t border-slate-100">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+              <div className="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0" />
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="h-2.5 w-20 rounded bg-slate-200" />
+                <div className="h-2 w-28 rounded bg-slate-100" />
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 md:ml-56 pb-20 md:pb-6 min-h-full">
+          {children}
+        </main>
+      </div>
+
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 safe-area-inset-bottom">
+        <div className="flex items-stretch h-16">
+          {NAV_ITEMS.map(({ href, label, Icon }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors duration-200 ${
+                  active ? "text-emerald-700" : "text-slate-400"
+                }`}
+              >
+                <Icon className={`w-5 h-5 transition-transform duration-200 ${active ? "scale-110" : ""}`} />
+                <span className={`text-[10px] font-medium transition-all duration-200 ${active ? "opacity-100" : "opacity-0"}`}>
+                  {label}
+                </span>
+                {active && <div className="absolute top-0 w-12 h-0.5 bg-emerald-500 rounded-full" />}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
