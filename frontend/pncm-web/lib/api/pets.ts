@@ -10,3 +10,8 @@ export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   const { data } = await apiClient.get<Pet[]>("/pets", { params });
   return data;
 };
+
+export const getMyPets = async (): Promise<Pet[]> => {
+  const { data } = await apiClient.get<Pet[]>("/pets/owner");
+  return data;
+};
