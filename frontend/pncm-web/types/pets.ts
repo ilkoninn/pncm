@@ -58,3 +58,19 @@ export interface PetFilters {
   city?: string;
   status?: number;
 }
+
+export interface CreatePetDto {
+  name: string;
+  species: number;
+  breed?: string;
+  ageMonths?: number;
+  gender: number;
+  size: number;
+  color?: string;
+  description?: string;
+  isVaccinated: boolean;
+  isNeutered: boolean;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+}

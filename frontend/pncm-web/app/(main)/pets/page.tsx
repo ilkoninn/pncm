@@ -5,7 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getPets } from "@/lib/api/pets";
 import { PetCard } from "@/components/shared/pets/PetCard";
 import { PetFiltersBar } from "@/components/shared/pets/PetFilters";
+import { CreatePetModal } from "@/components/shared/pets/CreatePetModal";
 import type { PetFilters } from "@/types/pets";
+import { Plus } from "lucide-react";
 
 function SkeletonCard() {
   return (
@@ -34,6 +36,7 @@ function AdBanner({ label }: { label: string }) {
 
 export default function PetsPage() {
   const [filters, setFilters] = useState<PetFilters>({});
+  const [createOpen, setCreateOpen] = useState(false);
 
   const { data: pets, isLoading, isError } = useQuery({
     queryKey: ["pets", filters],
@@ -53,7 +56,18 @@ export default function PetsPage() {
 
           {/* Main content */}
           <div className="flex-1 min-w-0 space-y-4">
-            <PetFiltersBar filters={filters} onChange={setFilters} />
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <PetFiltersBar filters={filters} onChange={setFilters} />
+              </div>
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="flex items-center gap-1.5 h-10 px-4 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Paylaş
+              </button>
+            </div>
 
             {isError && (
               <div className="flex items-center justify-center py-16">
@@ -104,6 +118,8 @@ export default function PetsPage() {
 
         </div>
       </div>
+
+      {createOpen && <CreatePetModal onClose={() => setCreateOpen(false)} />}
     </div>
   );
 }

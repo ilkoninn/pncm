@@ -9,8 +9,6 @@ public sealed record CreatePetRequestDto(
     string? Description,
     bool IsVaccinated,
     bool IsNeutered,
-    Guid OwnerId,
-    EOwnerType OwnerType,
     string City,
     decimal? Latitude,
     decimal? Longitude

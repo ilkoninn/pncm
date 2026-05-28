@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import type { Pet, PetFilters } from "@/types/pets";
+import type { Pet, PetFilters, CreatePetDto } from "@/types/pets";
 
 export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   const params: Record<string, string> = {};
@@ -13,5 +13,10 @@ export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
 
 export const getMyPets = async (): Promise<Pet[]> => {
   const { data } = await apiClient.get<Pet[]>("/pets/owner");
+  return data;
+};
+
+export const createPet = async (dto: CreatePetDto): Promise<Pet> => {
+  const { data } = await apiClient.post<Pet>("/pets", dto);
   return data;
 };

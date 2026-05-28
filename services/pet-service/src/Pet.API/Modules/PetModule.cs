@@ -40,13 +40,16 @@ public class PetModule : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> Create(CreatePetRequestDto dto, IMediator mediator)
+    private static async Task<IResult> Create(ClaimsPrincipal user, CreatePetRequestDto dto, IMediator mediator)
     {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
         var result = await mediator.Send(new CreatePetCommand(
             dto.Name, dto.Species, dto.Breed, dto.AgeMonths,
             dto.Gender, dto.Size, dto.Color, dto.Description,
-            dto.IsVaccinated, dto.IsNeutered, dto.OwnerId,
-            dto.OwnerType, dto.City, dto.Latitude, dto.Longitude));
+            dto.IsVaccinated, dto.IsNeutered, userId,
+            EOwnerType.User, dto.City, dto.Latitude, dto.Longitude));
         return Results.Created($"/pets/{result.Id}", result);
     }
 
