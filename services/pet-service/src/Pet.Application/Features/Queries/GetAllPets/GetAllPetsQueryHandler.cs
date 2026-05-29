@@ -6,7 +6,7 @@ public sealed class GetAllPetsQueryHandler(IPetRepository petRepository, IMediaG
         var pets = await petRepository.GetAllAsync(
             request.City, request.Species, request.Gender,
             request.Size, request.IsVaccinated, request.IsNeutered,
-            request.ExcludeOwnerId, cancellationToken);
+            request.ExcludeOwnerId, request.OwnerId, cancellationToken);
 
         var petList = pets.ToList();
         if (petList.Count == 0)

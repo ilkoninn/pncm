@@ -49,8 +49,16 @@ RefreshToken
 | POST | `/auth/refresh-token` | — | Access token yenilə |
 | POST | `/auth/logout` | Bearer | Blacklist-ə əlavə et |
 | GET | `/auth/magic?token=` | — | Magic link doğrula (HTML) |
-| GET | `/auth/me` | Bearer | Cari istifadəçi məlumatları |
+| GET | `/auth/me` | Bearer | Cari istifadəçi — `UserResponseDto` (email, phone, bio, city, avatarUrl) |
+| PATCH | `/users/me` | Bearer | Ad, soyad, telefon, bio, şəhər yenilə |
 | PATCH | `/users/me/avatar` | Bearer | Avatar MediaId yenilə |
+| GET | `/users/{id}` | — | Public profil — `UserPublicResponseDto` (email/phone yoxdur) |
+
+### DTO-lar
+```
+UserResponseDto       → Id, FirstName, LastName, Email, PhoneNumber, AvatarMediaId, AvatarUrl, Bio, City
+UserPublicResponseDto → Id, FirstName, LastName, AvatarUrl, Bio, City
+```
 
 ### RefreshToken — Atomic Get+Revoke
 `GetAndRevokeRefreshTokenAsync` — tək `ExecuteUpdateAsync` ilə WHERE filter, race condition yoxdur.
@@ -92,20 +100,27 @@ PetPhoto
 | Method | Path | Auth | İzah |
 |---|---|---|---|
 | POST | `/pets` | Bearer | Yeni elan — `OwnerId` JWT-dən, `OwnerType=User` hardcode |
-| GET | `/pets` | — | Bütün heyvanlar (filtrasiya ilə) |
+| GET | `/pets` | — | Bütün heyvanlar — filterlər: city, species, gender, size, isVaccinated, isNeutered, ownerId |
 | GET | `/pets/{id}` | — | ID-yə görə heyvan |
+| GET | `/pets/slug/{slug}` | — | Slug-a görə heyvan |
 | GET | `/pets/nearby?lat=&lng=&radius=` | — | Yaxınlıqdakı heyvanlar |
-| GET | `/pets/owner` | Bearer | Cari istifadəçinin heyvanları (JWT-dən userId) |
-| PUT | `/pets/{id}` | — | Məlumatları yenilə |
-| DELETE | `/pets/{id}` | — | Soft delete |
-| PATCH | `/pets/{id}/status` | — | Status dəyiş |
-| POST | `/pets/{id}/photos` | — | Şəkil əlavə et (MediaId qəbul edir) |
+| GET | `/pets/owner?type=` | Bearer | Cari istifadəçinin heyvanları — `type=adoption` (status≠5) / `type=personal` (status=5) |
+| PUT | `/pets/{id}` | Bearer | Məlumatları yenilə — ownership check |
+| DELETE | `/pets/{id}` | Bearer | Soft delete — ownership check |
+| PATCH | `/pets/{id}/status` | Bearer | Status dəyiş — ownership check |
+| POST | `/pets/{id}/photos` | Bearer | Şəkil əlavə et (MediaId qəbul edir) |
+| DELETE | `/pets/{id}/photos/{photoId}` | Bearer | Şəkil sil — ownership check |
 
 **Şəkil əlavə etmə axışı:**
 ```
 1. POST /media/upload → MediaId al
 2. POST /pets/{id}/photos → { mediaId: "..." }
 ```
+
+**Ownership check:** `RequesterId` JWT-dən, `pet.OwnerId != requesterId` → `UnauthorizedAccessException`
+
+**GET /pets query params:** `?city=&species=&gender=&size=&isVaccinated=&isNeutered=&excludeOwnerId=&ownerId=`
+- `ownerId` verilsə `excludeOwnerId` ignore edilir (public profil üçün)
 
 ---
 
@@ -181,17 +196,20 @@ AdoptionRequest
 ├── PetId, AdopterId
 ├── Status (EAdoptionStatus: Pending / Approved / Rejected)
 ├── Message (müraciət məktubu)
-└── ContactPhone
+├── ContactPhone
+├── PetName, PetSlug         ← denormalization (frontend-dən yaradılarkən)
+└── PetPrimaryPhotoUrl?      ← denormalization (frontend-dən yaradılarkən)
 ```
 
 ### Endpoints
 
 | Method | Path | Auth | İzah |
 |---|---|---|---|
-| POST | `/adoptions` | Bearer | Yeni müraciət — `AdopterId` JWT-dən, request body-dən silinib |
+| POST | `/adoptions` | Bearer | Yeni müraciət — `AdopterId` JWT-dən; body-də petName, petSlug, petPrimaryPhotoUrl |
 | GET | `/adoptions/{id}` | — | Müraciəti gətir |
-| GET | `/adoptions/pet/{petId}` | — | Heyvana gələn müraciətlər |
-| GET | `/adoptions/adopter/{adopterId}` | — | İstifadəçinin müraciətləri |
+| GET | `/adoptions/pet/{petId}` | — | Heyvana gələn müraciətlər (pet owner görür) |
+| GET | `/adoptions/me` | Bearer | Cari istifadəçinin müraciətləri (JWT) |
+| DELETE | `/adoptions/{id}` | Bearer | Müraciəti ləğv et — yalnız adopter, yalnız Pending |
 | PATCH | `/adoptions/{id}/status` | — | Status dəyiş (Approved/Rejected) |
 
 ### Kafka Events (Publisher)
@@ -299,10 +317,10 @@ Notification
 
 ### Endpoints
 
-| Method | Path | İzah |
-|---|---|---|
-| GET | `/notifications/user/{userId}` | İstifadəçinin bütün bildirişləri |
-| PATCH | `/notifications/{id}/read` | Oxunmuş kimi işarələ |
+| Method | Path | Auth | İzah |
+|---|---|---|---|
+| GET | `/notifications/me` | Bearer | Cari istifadəçinin bildirişləri (JWT) |
+| PATCH | `/notifications/{id}/read` | — | Oxunmuş kimi işarələ |
 
 ### Kafka Consumers
 

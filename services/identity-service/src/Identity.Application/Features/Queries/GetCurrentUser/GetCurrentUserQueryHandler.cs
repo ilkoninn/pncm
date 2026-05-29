@@ -20,7 +20,9 @@ public sealed class GetCurrentUserQueryHandler(
             user.Email!,
             user.PhoneNumber,
             user.AvatarMediaId,
-            avatarUrl
+            avatarUrl,
+            user.Bio,
+            user.City
         );
     }
 }

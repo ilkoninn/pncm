@@ -56,6 +56,23 @@ Hər servis media-service-dən şəkil URL-lərini gRPC ilə alır:
 ### Client-side filter etmə
 Filtrasiya, axtarış, sıralama backend-də SQL-də olmalıdır. Frontend-də yalnız display məntiqi olur.
 
+### Ownership check — write endpoint-lər
+PUT/DELETE/PATCH endpoint-lərində `RequesterId` JWT-dən alınır, handler-da `entity.OwnerId != requesterId` → `UnauthorizedAccessException` atılır. `RequireAuthorization()` route-a əlavə edilir.
+
+### Denormalization — cross-service məlumatlar
+Servislər arası real-time call əvəzinə, entity yaradılarkən lazımi məlumatlar saxlanır:
+- `AdoptionRequest.PetName`, `PetSlug`, `PetPrimaryPhotoUrl` — `POST /adoptions`-da pet service-ə call etmədən frontend-dən alınır
+- `AdoptionRequest.AdopterName` — JWT `GivenName+Surname` claim-lərindən saxlanır (pending)
+
+### Public vs Private profile məlumatları
+- `GET /auth/me` → `UserResponseDto` — email, phone, bio, city (authenticated, özü üçün)
+- `GET /users/{id}` → `UserPublicResponseDto` — yalnız firstName, lastName, avatarUrl, bio, city (public, email/phone yoxdur)
+
+### Modal animation pattern (Frontend)
+- Bottom sheet (aşağıdan yuxarı): `items-end`, `rounded-t-3xl`, `translate-y-full → translate-y-0`
+- Conditional render + transition problemi: `openEdit(pet)` → `setEditingPet(pet)` → `requestAnimationFrame(() => setEditOpen(true))` — mount sonra open et
+- Bağlanma: `setOpen(false)` → `setTimeout(() => clearData(), 300)` — transition tamamlansın
+
 ---
 
 ## İcazə Verilən Əmrlər
@@ -125,22 +142,30 @@ JWT: 15 dəq. RefreshToken: 7 gün (DB-də, atomic get+revoke). Blacklist Redis-
 - `EPetStatus`: Available=0, Reserved=1, Adopted=2, Lost=3, Found=4, Personal=5
 - Personal (5) — `GET /pets` list-dən exclude edilir, yalnız sahibi görə bilir
 
+### Adoption entity — denormalization fields
+- `PetName`, `PetSlug`, `PetPrimaryPhotoUrl` — yaradılarkən frontend-dən alınır
+- `AdopterName` — pending (JWT `GivenName+Surname`-dən saxlanacaq)
+
 ### Frontend feature statusu
 **Tamamlanıb:**
-- Profile page: avatar (settings-dən), SettingsDrawer (desktop), /profile/settings (mobil), InviteSection
-- Profile tabs: Paylaşdıqlarım + Saxladıqlarım + Müraciətlərim
-- Pets page: filter (backend), CreatePetModal (personal/adoption), AdoptionModal
-- Pet detail: PhotoGallery (photo.url birbaşa), info panel
+- Profile page: avatar, SettingsDrawer (desktop), /profile/settings (mobil) — bio+city daxil
+- Profile tabs: Paylaşdıqlarım (type=adoption) + Saxladıqlarım (type=personal) + Müraciətlərim
+- Pets page: filter (backend), CreatePetModal (çoxlu foto), AdoptionModal
+- Pet detail: PhotoGallery, info panel
+- Pet edit/delete: `EditPetModal` (foto idarəsi daxil), `PetCard` edit düyməsi
+- Adoption kartı: pet foto+ad+link, ləğv düyməsi
+- `/profile/[userId]` — public profil (bio, şəhər, elanlar)
 - Token refresh + auto signOut
 - gRPC media enrichment — batch call yoxdur
 
 **Pending:**
-- `GET /adoptions/me` backend + frontend
-- `GET /notifications/me` backend + frontend
-- `GET /pets/owner?type=` backend filter
-- Pet/Store edit + delete UI
-- Ownership check — PUT/DELETE endpoint-lərdə
+- Adoption müraciət siyahısı (pet owner görür) — mobil page + web modal
+- `AdopterName` adoption-da (JWT-dən saxlanacaq)
+- Community postlarda author link → `/profile/{userId}`
+- Store edit + delete UI
+- `GET /notifications/me` UI inteqrasiyası
 - Pagination
+- Social login (Google)
 
 ## Docs
 Kontekst başlayanda aşağıdakı sənədləri oxu:

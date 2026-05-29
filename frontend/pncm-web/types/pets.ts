@@ -68,6 +68,7 @@ export interface PetFilters {
   size?: number;
   isVaccinated?: boolean;
   isNeutered?: boolean;
+  ownerId?: string;
 }
 
 export interface CreatePetDto {

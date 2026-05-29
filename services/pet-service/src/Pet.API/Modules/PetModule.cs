@@ -23,12 +23,16 @@ public class PetModule : ICarterModule
         int? gender = null,
         int? size = null,
         bool? isVaccinated = null,
-        bool? isNeutered = null)
+        bool? isNeutered = null,
+        Guid? ownerId = null)
     {
         Guid? excludeOwnerId = null;
-        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (Guid.TryParse(userIdClaim, out var userId))
-            excludeOwnerId = userId;
+        if (ownerId is null)
+        {
+            var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Guid.TryParse(userIdClaim, out var userId))
+                excludeOwnerId = userId;
+        }
 
         var result = await mediator.Send(new GetAllPetsQuery(
             city,
@@ -37,7 +41,8 @@ public class PetModule : ICarterModule
             size.HasValue    ? (EPetSize)size.Value     : null,
             isVaccinated,
             isNeutered,
-            excludeOwnerId));
+            excludeOwnerId,
+            ownerId));
         return Results.Ok(result);
     }
 

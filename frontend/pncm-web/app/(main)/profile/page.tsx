@@ -59,20 +59,20 @@ function Avatar({
   );
 }
 
-function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, photoUrl, onSaved }: {
+function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio, city, photoUrl, onSaved }: {
   open: boolean; onClose: () => void;
   firstName: string; lastName: string; email: string; phone?: string;
-  photoUrl?: string; onSaved: () => void;
+  bio?: string; city?: string; photoUrl?: string; onSaved: () => void;
 }) {
-  const [form, setForm] = useState({ firstName, lastName, phone: phone ?? "" });
+  const [form, setForm] = useState({ firstName, lastName, phone: phone ?? "", bio: bio ?? "", city: city ?? "" });
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setForm({ firstName, lastName, phone: phone ?? "" });
-  }, [firstName, lastName, phone]);
+    setForm({ firstName, lastName, phone: phone ?? "", bio: bio ?? "", city: city ?? "" });
+  }, [firstName, lastName, phone, bio, city]);
 
   const { mutate: save, isPending } = useMutation({
-    mutationFn: () => updateUser(form.firstName, form.lastName, form.phone || undefined),
+    mutationFn: () => updateUser(form.firstName, form.lastName, form.phone || undefined, form.bio || undefined, form.city || undefined),
     onSuccess: () => {
       setSaved(true);
       setTimeout(() => { setSaved(false); onSaved(); onClose(); }, 1000);
@@ -135,6 +135,25 @@ function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, phot
                 onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                 placeholder="+994 XX XXX XX XX"
                 className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Şəhər</label>
+              <input
+                value={form.city}
+                onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                placeholder="məs. Bakı"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Bio</label>
+              <textarea
+                value={form.bio}
+                onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
+                placeholder="Özünüz haqqında qısa məlumat..."
+                rows={3}
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors resize-none"
               />
             </div>
             <button
@@ -484,6 +503,8 @@ export default function ProfilePage() {
         lastName={lastName}
         email={email}
         phone={userProfile?.phoneNumber}
+        bio={userProfile?.bio}
+        city={userProfile?.city}
         photoUrl={profilePhotoUrl}
         onSaved={() => refetchProfile()}
       />

@@ -5,5 +5,7 @@ public record UserResponseDto(
     string Email,
     string? PhoneNumber,
     Guid? AvatarMediaId,
-    string? AvatarUrl = null
+    string? AvatarUrl = null,
+    string? Bio = null,
+    string? City = null
 );

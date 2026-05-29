@@ -16,7 +16,7 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", phone: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", phone: "", bio: "", city: "" });
   const [saved, setSaved] = useState(false);
 
   const userId = session?.userId;
@@ -35,6 +35,8 @@ export default function SettingsPage() {
         firstName: userProfile.firstName ?? "",
         lastName: userProfile.lastName ?? "",
         phone: userProfile.phoneNumber ?? "",
+        bio: userProfile.bio ?? "",
+        city: userProfile.city ?? "",
       });
     }
   }, [userProfile]);
@@ -52,7 +54,7 @@ export default function SettingsPage() {
   });
 
   const { mutate: save, isPending } = useMutation({
-    mutationFn: () => updateUser(form.firstName, form.lastName, form.phone || undefined),
+    mutationFn: () => updateUser(form.firstName, form.lastName, form.phone || undefined, form.bio || undefined, form.city || undefined),
     onSuccess: () => {
       setSaved(true);
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
@@ -159,6 +161,27 @@ export default function SettingsPage() {
               onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
               placeholder="+994 XX XXX XX XX"
               className={inputCls}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-600">Şəhər</label>
+            <input
+              value={form.city}
+              onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+              placeholder="məs. Bakı"
+              className={inputCls}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-600">Bio</label>
+            <textarea
+              value={form.bio}
+              onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
+              placeholder="Özünüz haqqında qısa məlumat..."
+              rows={3}
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors resize-none"
             />
           </div>
 

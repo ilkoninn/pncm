@@ -5,5 +5,6 @@ public sealed record GetAllPetsQuery(
     EPetSize? Size = null,
     bool? IsVaccinated = null,
     bool? IsNeutered = null,
-    Guid? ExcludeOwnerId = null
+    Guid? ExcludeOwnerId = null,
+    Guid? OwnerId = null
 ) : IRequest<IEnumerable<PetResponseDto>>;

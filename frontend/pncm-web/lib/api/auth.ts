@@ -18,13 +18,39 @@ export const verifyAccess = (email: string, code: string) =>
     client: 1,
   });
 
-export const getCurrentUser = async () => {
-  const { data } = await apiClient.get("/auth/me");
-  return data as { id: string; firstName: string; lastName: string; email: string; phoneNumber?: string; avatarMediaId?: string; avatarUrl?: string };
+export interface UserProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  avatarMediaId?: string;
+  avatarUrl?: string;
+  bio?: string;
+  city?: string;
+}
+
+export interface UserPublicProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
+  bio?: string;
+  city?: string;
+}
+
+export const getCurrentUser = async (): Promise<UserProfile> => {
+  const { data } = await apiClient.get<UserProfile>("/auth/me");
+  return data;
 };
 
-export const updateUser = (firstName: string, lastName: string, phoneNumber?: string) =>
-  apiClient.patch("/users/me", { firstName, lastName, phoneNumber });
+export const getUserById = async (id: string): Promise<UserPublicProfile> => {
+  const { data } = await apiClient.get<UserPublicProfile>(`/users/${id}`);
+  return data;
+};
+
+export const updateUser = (firstName: string, lastName: string, phoneNumber?: string, bio?: string, city?: string) =>
+  apiClient.patch<UserProfile>("/users/me", { firstName, lastName, phoneNumber, bio, city });
 
 export const completeRegister = (
   registrationToken: string,

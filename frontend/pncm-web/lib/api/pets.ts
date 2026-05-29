@@ -9,6 +9,7 @@ export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   if (filters?.size !== undefined)           params.size        = String(filters.size);
   if (filters?.isVaccinated !== undefined)   params.isVaccinated = String(filters.isVaccinated);
   if (filters?.isNeutered !== undefined)     params.isNeutered   = String(filters.isNeutered);
+  if (filters?.ownerId)                      params.ownerId      = filters.ownerId;
 
   const { data } = await apiClient.get<Pet[]>("/pets", { params });
   return data;

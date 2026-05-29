@@ -17,38 +17,47 @@
 ```
 frontend/pncm-web/
 ├── app/
-│   ├── (auth)/              ← login, register flow
-│   ├── (main)/              ← autentifikasiya tələb edən səhifələr
-│   │   ├── pets/page.tsx
-│   │   ├── profile/page.tsx
+│   ├── (auth)/                    ← login, register flow
+│   ├── (main)/
+│   │   ├── pets/
+│   │   │   └── page.tsx           ← pet list + filter
+│   │   ├── pets/[slug]/
+│   │   │   └── page.tsx           ← pet detail (PhotoGallery, info, AdoptionModal)
+│   │   ├── profile/
+│   │   │   ├── page.tsx           ← öz profili (tabs, settings drawer)
+│   │   │   ├── settings/page.tsx  ← mobil settings
+│   │   │   └── [userId]/page.tsx  ← public profil (bio, elanlar)
 │   │   └── layout.tsx
-│   ├── providers.tsx        ← SessionProvider, QueryClientProvider, TokenSync
+│   ├── providers.tsx              ← SessionProvider, QueryClientProvider, TokenSync
 │   ├── layout.tsx
 │   └── globals.css
 ├── components/
 │   └── shared/
 │       └── pets/
-│           ├── PetCard.tsx
+│           ├── PetCard.tsx        ← onEdit? prop, kalem düyməsi overlay
 │           ├── PetFilters.tsx
-│           ├── AdoptionModal.tsx   ← "Övladlığa al" formu
-│           └── CreatePetModal.tsx  ← Yeni elan formu
+│           ├── AdoptionModal.tsx  ← petName/petSlug/petPrimaryPhotoUrl göndərir
+│           ├── CreatePetModal.tsx ← çoxlu foto, dərhal upload
+│           └── EditPetModal.tsx   ← aşağıdan yuxarı, edit|confirm-delete|done
 ├── lib/
 │   └── api/
-│       ├── client.ts        ← axios instance (token-store-dan oxuyur)
-│       ├── token-store.ts   ← module-level token cache
+│       ├── client.ts             ← axios instance (token-store-dan oxuyur)
+│       ├── token-store.ts        ← module-level token cache
 │       ├── pets.ts
 │       ├── media.ts
 │       ├── adoptions.ts
 │       ├── auth.ts
+│       ├── notifications.ts
 │       ├── stores.ts
 │       └── community.ts
 ├── types/
-│   ├── pets.ts
+│   ├── pets.ts                   ← Pet, PetPhoto, PetFilters, CreatePetDto, UpdatePetDto
 │   ├── media.ts
-│   ├── adoptions.ts
-│   ├── auth.ts
+│   ├── adoptions.ts              ← petName, petSlug, petPrimaryPhotoUrl fields
+│   ├── notifications.ts          ← NotificationDto
+│   ├── auth.ts                   ← UserProfile, UserPublicProfile
 │   └── index.ts
-└── auth.ts                  ← NextAuth v5 konfiqurasiyası
+└── auth.ts                       ← NextAuth v5 konfiqurasiyası
 ```
 
 ---
@@ -101,70 +110,113 @@ apiClient.interceptors.request.use((config) => {
 });
 ```
 
-Bütün API funksiyaları `lib/api/` altındadır, həmişə bu client-dən istifadə edir.
-
 ---
 
 ## Media
 
 ### Upload
 ```ts
-// lib/api/media.ts
 uploadMedia(file: File, ownerType: EOwnerType): Promise<MediaFileDto>
 ```
 Multipart/form-data. `OwnerId` backend-də JWT-dən oxunur.
 
-### Batch (N+1 həlli)
-```ts
-getMediaByOwnersBatch(ownerIds: string[], ownerType: EOwnerType)
-  : Promise<Record<string, MediaFileDto[]>>
-```
-`POST /media/batch` — 1 sorğu ilə çoxlu owner-in media-sını alır.
-
 ### Presigned URL
-Hər `GET /media/{id}` cavabında `url` field-i MinIO presigned URL-dir (7 gün, `Cache-Control: immutable`). Browser 1 il cache edir.
+Hər API cavabında `url` / `primaryPhotoUrl` / `avatarUrl` MinIO presigned URL-dir (7 gün). Frontend birbaşa DTO-dan oxuyur, media call etmir.
 
 ---
 
 ## Səhifələr
 
 ### `/pets` — Pets Page
-- `GET /pets` — filter ilə (species, city, status)
-- `PetCard` — `status=0 (Available)` olanlarda "Övladlığa al" düyməsi
-- `AdoptionModal` — petId + message + phone → `POST /adoptions`
-- "Paylaş" düyməsi → `CreatePetModal` → `POST /pets`
+- `GET /pets` — backend filter (city, species, gender, size, isVaccinated, isNeutered)
+- `PetCard` — `status=0` olanlarda "Övladlığa al" düyməsi
+- `AdoptionModal` — petId + message + phone + petName + petSlug + petPrimaryPhotoUrl → `POST /adoptions`
+- "Paylaş" düyməsi → `CreatePetModal` → çoxlu foto, dərhal upload
 
-### `/profile` — Profile Page
+### `/pets/[slug]` — Pet Detail Page
+- `GET /pets/slug/{slug}` — pet + photos[].url
+- PhotoGallery, info panel
+- `AdoptionModal` (status=Available olarsa)
+
+### `/profile` — Öz profil
 - Avatar: klik → file picker → `POST /media/upload` → köhnəni sil → yenisi göstər
-- **Paylaşdıqlarım** tab: `GET /pets/owner` (JWT)
-- **Müraciətlərim** tab: `GET /adoptions/adopter/{userId}`
-- SettingsDrawer: ad/soyad/telefon formu
-- InviteSection: dəvət linki
+- **Paylaşdıqlarım** tab: `GET /pets/owner?type=adoption` → ownerId+edit düyməsi olan PetCard-lar
+- **Saxladıqlarım** tab: `GET /pets/owner?type=personal`
+- **Müraciətlərim** tab: `GET /adoptions/me` — pet foto+ad+link, "Ləğv" düyməsi (Pending)
+- `EditPetModal` — `openEdit(pet)` → `setEditingPet(pet)` → `requestAnimationFrame(() => setEditOpen(true))`
+- SettingsDrawer (desktop): ad/soyad/telefon/bio/şəhər
+
+### `/profile/settings` — Mobil settings
+- Ad, soyad, telefon, şəhər, bio
+- `PATCH /users/me` → TanStack Query invalidate
+
+### `/profile/[userId]` — Public profil
+- `GET /users/{id}` → firstName, lastName, avatarUrl, bio, city
+- `GET /pets?ownerId={userId}` → həmin istifadəçinin adoption pet-ləri
+- Avatar, ad, MapPin+şəhər, bio, PetCard grid
 
 ---
 
-## TanStack Query
+## TanStack Query Patterns
 
 ```ts
-// Default options (providers.tsx):
-staleTime: 30 * 1000  // 30 saniyə
-retry: 1
+// Query keys:
+["pets"]                    // GET /pets
+["pets", slug]              // GET /pets/slug/{slug}
+["my-pets", "adoption"]     // GET /pets/owner?type=adoption
+["my-pets", "personal"]     // GET /pets/owner?type=personal
+["my-adoptions"]            // GET /adoptions/me
+["user-profile"]            // GET /auth/me
+["public-profile", userId]  // GET /users/{id}
 
-// Lazy fetch (yalnız tab açılanda):
-enabled: tab === "adoptions"
-
-// Invalidate after mutation:
-queryClient.invalidateQueries({ queryKey: ["pets"] })
+// Mutation sonrası invalidate:
 queryClient.invalidateQueries({ queryKey: ["my-pets"] })
-queryClient.invalidateQueries({ queryKey: ["profile-photo", userId] })
+queryClient.invalidateQueries({ queryKey: ["my-adoptions"] })
+queryClient.invalidateQueries({ queryKey: ["user-profile"] })
 ```
 
 ---
 
-## Bilinen Problemlər
+## Modal Animation Pattern
 
-| Problem | Səbəb | Status |
-|---|---|---|
-| `PetCard` şəkil göstərmir | `${API_URL}/media/${mediaId}` JSON qaytarır, şəkil yox | Pending |
-| `GET /pets/owner` 401 | Pet service JWT deploy gözlənilir | CI-da |
-| Token refresh real test edilməyib | Yeni yazılıb | Test lazım |
+Bottom sheet (aşağıdan yuxarı):
+```
+overlay:  fixed inset-0, flex items-end
+sheet:    rounded-t-3xl, transition translate-y-full → translate-y-0
+```
+
+Mount/open ayrılması (React 18 state batching problemi):
+```ts
+const openEdit = (pet: Pet) => {
+  setEditingPet(pet);
+  requestAnimationFrame(() => setEditOpen(true));
+};
+const closeEdit = () => {
+  setEditOpen(false);
+  setTimeout(() => setEditingPet(null), 300); // transition bitsin
+};
+```
+
+---
+
+## Feature Status
+
+### Tamamlanıb
+- Landing, auth flow (OTP, NextAuth v5), token refresh + auto signOut
+- Pets page: filter, CreatePetModal (çoxlu foto), AdoptionModal
+- Pet detail: PhotoGallery, info panel
+- Pet edit/delete: EditPetModal (foto idarəsi, delete confirm, animation)
+- PetCard: onEdit prop, overlay kalem düyməsi
+- Profile: avatar, tabs (Paylaşdıqlarım / Saxladıqlarım / Müraciətlərim)
+- Adoption kartı: pet foto+ad+link, Ləğv düyməsi
+- Settings (drawer + mobil page): bio, city daxil
+- `/profile/[userId]` public profil
+
+### Pending
+- Adoption müraciət siyahısı (pet owner görür) — mobil page + web modal
+- `adopterName` adoption-da (backend tamamlanmayıb — JWT GivenName+Surname)
+- Community postlarda author link → `/profile/{userId}`
+- Store edit + delete UI
+- `GET /notifications/me` UI inteqrasiyası (backend hazır)
+- Pagination
+- Social login (Google)

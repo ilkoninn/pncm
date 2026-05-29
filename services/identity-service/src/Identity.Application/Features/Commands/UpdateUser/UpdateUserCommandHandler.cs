@@ -10,9 +10,11 @@ public sealed class UpdateUserCommandHandler(
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
         user.PhoneNumber = request.PhoneNumber;
+        user.Bio = request.Bio;
+        user.City = request.City;
 
         await userRepository.UpdateAsync(user);
 
-        return new UserResponseDto(user.Id, user.FirstName, user.LastName, user.Email!, user.PhoneNumber, user.AvatarMediaId);
+        return new UserResponseDto(user.Id, user.FirstName, user.LastName, user.Email!, user.PhoneNumber, user.AvatarMediaId, Bio: user.Bio, City: user.City);
     }
 }
