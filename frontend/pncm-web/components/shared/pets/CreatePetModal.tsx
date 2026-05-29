@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPet, addPetPhoto } from "@/lib/api/pets";
 import { uploadMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
-import { X, Check, Camera, ImagePlus, Heart, PawPrint } from "lucide-react";
+import { X, Check, ImagePlus, Heart, PawPrint, Plus } from "lucide-react";
 import { SPECIES_MAP, GENDER_MAP, SIZE_MAP } from "@/types/pets";
 import type { Pet, PetFormType } from "@/types/pets";
 
@@ -26,8 +26,7 @@ export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () =
   const [form, setForm] = useState(INITIAL);
   const [step, setStep] = useState<"type" | "form" | "photo" | "done">("type");
   const [createdPet, setCreatedPet] = useState<Pet | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [uploadedPhotos, setUploadedPhotos] = useState<{ preview: string; uploaded: boolean }[]>([]);
 
   useEffect(() => {
     if (!open) {
@@ -36,8 +35,7 @@ export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () =
         setForm(INITIAL);
         setStep("type");
         setCreatedPet(null);
-        setPhotoPreview(null);
-        setPhotoFile(null);
+        setUploadedPhotos([]);
       }, 300);
     }
   }, [open]);
@@ -72,26 +70,23 @@ export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () =
     setForm(f => ({ ...f, [key]: value }));
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
-  }
-
-  async function handlePhotoUpload() {
-    if (!photoFile || !createdPet) return;
+    if (!file || !createdPet) return;
+    e.target.value = "";
+    const preview = URL.createObjectURL(file);
+    const idx = uploadedPhotos.length;
+    setUploadedPhotos(prev => [...prev, { preview, uploaded: false }]);
     setPhotoUploading(true);
     try {
-      const media = await uploadMedia(photoFile, EOwnerType.Pet, createdPet.id);
-      await addPetPhoto(createdPet.id, media.id, true);
+      const isPrimary = idx === 0;
+      const media = await uploadMedia(file, EOwnerType.Pet, createdPet.id);
+      await addPetPhoto(createdPet.id, media.id, isPrimary);
+      setUploadedPhotos(prev => prev.map((p, i) => i === idx ? { ...p, uploaded: true } : p));
       queryClient.invalidateQueries({ queryKey: ["pets"] });
       queryClient.invalidateQueries({ queryKey: ["my-pets"] });
-      queryClient.invalidateQueries({ queryKey: ["pets-media"] });
-      queryClient.invalidateQueries({ queryKey: ["my-pets-media"] });
     } finally {
       setPhotoUploading(false);
-      setStep("done");
     }
   }
 
@@ -265,31 +260,48 @@ export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () =
           <div className="p-5 space-y-4">
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="relative aspect-video rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden cursor-pointer hover:border-emerald-400 transition-colors flex items-center justify-center bg-slate-50"
-            >
-              {photoPreview ? (
-                <img src={photoPreview} alt="preview" className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-400">
-                  <ImagePlus className="w-8 h-8" />
-                  <p className="text-sm">Şəkil seç</p>
+            <p className="text-xs text-slate-400">İlk foto əsas foto olacaq</p>
+
+            <div className="flex flex-wrap gap-2">
+              {uploadedPhotos.map((p, i) => (
+                <div key={i} className="relative w-[72px] h-[72px] rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                  <img src={p.preview} alt="" className="w-full h-full object-cover" />
+                  {!p.uploaded && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    </div>
+                  )}
+                  {i === 0 && p.uploaded && (
+                    <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">
+                      Əsas
+                    </span>
+                  )}
                 </div>
-              )}
-              {photoPreview && (
-                <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Camera className="w-6 h-6 text-white" />
-                </div>
-              )}
+              ))}
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={photoUploading}
+                className="w-[72px] h-[72px] rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors cursor-pointer flex-shrink-0"
+              >
+                {uploadedPhotos.length === 0 ? (
+                  <>
+                    <ImagePlus className="w-5 h-5 text-slate-400" />
+                    <span className="text-[10px] text-slate-400">Şəkil</span>
+                  </>
+                ) : (
+                  <Plus className="w-5 h-5 text-slate-400" />
+                )}
+              </button>
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setStep("done")} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer">
-                Sonra əlavə et
-              </button>
-              <button onClick={handlePhotoUpload} disabled={!photoFile || photoUploading} className="flex-1 h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors cursor-pointer">
-                {photoUploading ? "Yüklənir..." : "Yüklə"}
+              <button
+                onClick={() => setStep("done")}
+                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                {uploadedPhotos.length > 0 ? "Tamamla" : "Sonra əlavə et"}
               </button>
             </div>
           </div>

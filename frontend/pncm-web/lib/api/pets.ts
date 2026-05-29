@@ -41,3 +41,7 @@ export const updatePet = async (id: string, dto: UpdatePetDto): Promise<Pet> => 
 export const deletePet = async (id: string): Promise<void> => {
   await apiClient.delete(`/pets/${id}`);
 };
+
+export const deletePetPhoto = async (petId: string, photoId: string): Promise<void> => {
+  await apiClient.delete(`/pets/${petId}/photos/${photoId}`);
+};

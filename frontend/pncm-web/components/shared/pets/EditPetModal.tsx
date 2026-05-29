@@ -1,15 +1,100 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updatePet, deletePet } from "@/lib/api/pets";
-import { X, Trash2, AlertTriangle, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { updatePet, deletePet, addPetPhoto, deletePetPhoto, getPetBySlug } from "@/lib/api/pets";
+import { uploadMedia } from "@/lib/api/media";
+import { EOwnerType } from "@/types/media";
+import { X, Trash2, AlertTriangle, Check, Plus, ImagePlus } from "lucide-react";
 import type { Pet, UpdatePetDto } from "@/types/pets";
 
 const inputCls = "w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors";
 const labelCls = "text-xs font-medium text-slate-600";
 
 type Step = "edit" | "confirm-delete" | "done";
+
+function PhotoGrid({ petId, petSlug }: { petId: string; petSlug: string }) {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const { data: fullPet } = useQuery({
+    queryKey: ["pet", petSlug],
+    queryFn: () => getPetBySlug(petSlug),
+    staleTime: 0,
+  });
+
+  const { mutate: removePhoto, variables: removingId } = useMutation({
+    mutationFn: (photoId: string) => deletePetPhoto(petId, photoId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pet", petSlug] }),
+  });
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setUploading(true);
+    try {
+      const photos = fullPet?.photos ?? [];
+      const isPrimary = photos.length === 0;
+      const media = await uploadMedia(file, EOwnerType.Pet, petId);
+      await addPetPhoto(petId, media.id, isPrimary);
+      queryClient.invalidateQueries({ queryKey: ["pet", petSlug] });
+      queryClient.invalidateQueries({ queryKey: ["my-pets"] });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const photos = fullPet?.photos ?? [];
+
+  return (
+    <div className="space-y-2">
+      <label className={labelCls}>Fotolar</label>
+      <div className="flex flex-wrap gap-2">
+        {photos.map(photo => (
+          <div key={photo.id} className="relative w-[72px] h-[72px] rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+            {photo.url ? (
+              <img src={photo.url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                <ImagePlus className="w-5 h-5" />
+              </div>
+            )}
+            {photo.isPrimary && (
+              <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">
+                Əsas
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => removePhoto(photo.id)}
+              disabled={removingId === photo.id}
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-red-500 transition-colors cursor-pointer"
+            >
+              <X className="w-3 h-3 text-white" />
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="w-[72px] h-[72px] rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors cursor-pointer flex-shrink-0"
+        >
+          {uploading ? (
+            <div className="w-4 h-4 border-2 border-slate-300 border-t-emerald-500 rounded-full animate-spin" />
+          ) : (
+            <Plus className="w-5 h-5 text-slate-400" />
+          )}
+        </button>
+
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+      </div>
+    </div>
+  );
+}
 
 export function EditPetModal({ pet, open, onClose }: { pet: Pet; open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
@@ -73,6 +158,8 @@ export function EditPetModal({ pet, open, onClose }: { pet: Pet; open: boolean; 
 
         {step === "edit" && (
           <form onSubmit={e => { e.preventDefault(); save(); }} className="overflow-y-auto p-5 space-y-4">
+            {open && <PhotoGrid petId={pet.id} petSlug={pet.slug} />}
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5 col-span-2">
                 <label className={labelCls}>Ad *</label>

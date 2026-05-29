@@ -12,6 +12,7 @@ public class PetModule : ICarterModule
         app.MapDelete("/pets/{id:guid}", Delete).RequireAuthorization();
         app.MapPatch("/pets/{id:guid}/status", UpdateStatus).RequireAuthorization();
         app.MapPost("/pets/{id:guid}/photos", AddPhoto);
+        app.MapDelete("/pets/{id:guid}/photos/{photoId:guid}", DeletePhoto).RequireAuthorization();
     }
 
     private static async Task<IResult> GetAll(
@@ -110,6 +111,15 @@ public class PetModule : ICarterModule
             return Results.Unauthorized();
         var result = await mediator.Send(new UpdatePetStatusCommand(id, requesterId, dto.Status));
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> DeletePhoto(Guid id, Guid photoId, ClaimsPrincipal user, IMediator mediator)
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var requesterId))
+            return Results.Unauthorized();
+        await mediator.Send(new DeletePetPhotoCommand(id, photoId, requesterId));
+        return Results.NoContent();
     }
 
     private static async Task<IResult> AddPhoto(Guid id, ClaimsPrincipal user, AddPetPhotoRequestDto dto, IMediator mediator)
