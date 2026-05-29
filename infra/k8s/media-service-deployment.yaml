@@ -19,6 +19,7 @@ spec:
           image: ilkoninn/pncm-media:sha-6b3ba2618b7d24728a07ade834a245b5264f36c1
           ports:
             - containerPort: 8080
+            - containerPort: 8081
           resources:
             requests:
               memory: "128Mi"
@@ -81,5 +82,9 @@ spec:
   selector:
     app: media-service
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8080
+    - name: grpc
+      port: 8081
+      targetPort: 8081

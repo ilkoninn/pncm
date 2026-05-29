@@ -51,7 +51,7 @@ spec:
             - name: GrpcServices__IdentityService
               value: "http://pncm-identity:80"
             - name: GrpcServices__MediaService
-              value: "http://pncm-media:80"
+              value: "http://pncm-media:8081"
 ---
 apiVersion: v1
 kind: Service

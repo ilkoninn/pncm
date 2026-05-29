@@ -53,7 +53,7 @@ spec:
             - name: Otlp__Endpoint
               value: "http://pncm-jaeger:4317"
             - name: GrpcServices__MediaService
-              value: "http://pncm-media:80"
+              value: "http://pncm-media:8081"
 ---
 apiVersion: v1
 kind: Service

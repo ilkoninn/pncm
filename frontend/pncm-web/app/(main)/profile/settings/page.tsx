@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { getCurrentUser, updateUser } from "@/lib/api/auth";
-import { uploadMedia, deleteMedia, getMediaByOwnersBatch } from "@/lib/api/media";
+import { uploadMedia, deleteMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
 import { ChevronLeft, Camera } from "lucide-react";
 
@@ -27,13 +27,7 @@ export default function SettingsPage() {
     enabled: !!userId,
   });
 
-  const { data: photoMap } = useQuery({
-    queryKey: ["profile-photo", userId],
-    queryFn: () => getMediaByOwnersBatch([userId!], EOwnerType.User),
-    enabled: !!userId,
-  });
-
-  const photoUrl = userId ? photoMap?.[userId]?.[0]?.url : undefined;
+  const photoUrl = userProfile?.avatarUrl ?? undefined;
 
   useEffect(() => {
     if (userProfile) {
@@ -47,14 +41,13 @@ export default function SettingsPage() {
 
   const { mutate: uploadPhoto, isPending: uploading } = useMutation({
     mutationFn: async (file: File) => {
-      const existing = userId ? photoMap?.[userId] : undefined;
-      if (existing?.length) {
-        await Promise.all(existing.map(p => deleteMedia(p.id)));
+      if (userProfile?.avatarMediaId) {
+        await deleteMedia(userProfile.avatarMediaId.toString());
       }
       return uploadMedia(file, EOwnerType.User);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile-photo", userId] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
     },
   });
 

@@ -375,13 +375,7 @@ export default function ProfilePage() {
   const lastName  = userProfile?.lastName ?? "";
   const name = [firstName, lastName].filter(Boolean).join(" ") || email.split("@")[0] || "İstifadəçi";
 
-  const { data: photoMap } = useQuery({
-    queryKey: ["profile-photo", userId],
-    queryFn: () => getMediaByOwnersBatch([userId!], EOwnerType.User),
-    enabled: !!userId,
-  });
-
-  const profilePhotoUrl = userId ? photoMap?.[userId]?.[0]?.url : undefined;
+  const profilePhotoUrl = userProfile?.avatarUrl ?? undefined;
 
   return (
     <div className="bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-28">
