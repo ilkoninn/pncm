@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { getMyNotifications, markNotificationRead } from "@/lib/api/notifications";
-import { Bell, Check, Heart, Info, Star, Trophy, UserPlus, X } from "lucide-react";
+import { ArrowLeft, Bell, Check, Heart, Info, Star, Trophy, UserPlus, X } from "lucide-react";
 import type { NotificationDto } from "@/types/notifications";
 import { timeAgo } from "@/lib/utils/timeAgo";
 
@@ -44,6 +45,7 @@ function NotificationItem({ n, onRead }: { n: NotificationDto; onRead: (id: stri
 }
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: notifications = [], isLoading } = useQuery({
@@ -60,7 +62,13 @@ export default function NotificationsPage() {
 
   return (
     <div className="bg-slate-50 min-h-[calc(100vh-3.5rem)] pb-24">
-      <div className="bg-white border-b border-slate-100 px-4 py-4 flex items-center gap-2">
+      <div className="bg-white border-b border-slate-100 px-4 py-4 flex items-center gap-3">
+        <button
+          onClick={() => router.back()}
+          className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer transition-colors flex-shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
         <h1 className="font-bold text-slate-900 text-base">Bildirişlər</h1>
         {unreadCount > 0 && (
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">

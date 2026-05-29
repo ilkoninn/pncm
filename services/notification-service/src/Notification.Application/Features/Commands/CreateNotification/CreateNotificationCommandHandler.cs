@@ -1,4 +1,6 @@
-public sealed class CreateNotificationCommandHandler(INotificationRepository repository)
+public sealed class CreateNotificationCommandHandler(
+    INotificationRepository repository,
+    INotificationHub hub)
     : IRequestHandler<CreateNotificationCommand, NotificationResponseDto>
 {
     public async Task<NotificationResponseDto> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
@@ -13,6 +15,11 @@ public sealed class CreateNotificationCommandHandler(INotificationRepository rep
 
         await repository.CreateAsync(notification, cancellationToken);
 
-        return notification.Adapt<NotificationResponseDto>();
+        var dto = notification.Adapt<NotificationResponseDto>();
+
+        try { await hub.SendAsync(request.UserId, dto); }
+        catch { }
+
+        return dto;
     }
 }

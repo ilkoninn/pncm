@@ -14,6 +14,7 @@ public static class DependencyInjection
                 .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddSingleton<INotificationHub, NotificationHub>();
 
         var applicationAssembly = typeof(CreateNotificationCommand).Assembly;
 

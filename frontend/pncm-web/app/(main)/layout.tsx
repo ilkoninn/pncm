@@ -4,8 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import { Bell, Store, Users, UserCircle2, LogOut } from "lucide-react";
 import { NotificationsDrawer } from "@/components/shared/notifications/NotificationsDrawer";
+import { getMyNotifications } from "@/lib/api/notifications";
+import { useNotificationStream } from "@/hooks/useNotificationStream";
 
 function PawPrint({ className }: { className?: string }) {
   return (
@@ -64,6 +67,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
 
+  useNotificationStream();
+
+  const { data: notifications = [] } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: getMyNotifications,
+    staleTime: 1000 * 60 * 5,
+  });
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   return (
     <div className="min-h-screen bg-white flex flex-col w-screen">
       <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-100 bg-white">
@@ -83,7 +95,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               aria-label="Bildirişlər"
             >
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-[9px] font-bold text-white leading-none">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
             {/* Web: opens drawer */}
             <button
@@ -92,7 +108,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               aria-label="Bildirişlər"
             >
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-[9px] font-bold text-white leading-none">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </button>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}

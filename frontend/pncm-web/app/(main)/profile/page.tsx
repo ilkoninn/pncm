@@ -412,8 +412,8 @@ function MyActivitySection() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                      <span className="absolute bottom-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white bg-blue-500">
-                        Mənimdə
+                      <span className="absolute bottom-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white bg-emerald-600">
+                        Pəncəm
                       </span>
                     </div>
                     <div className="p-3">
@@ -543,8 +543,18 @@ export default function ProfilePage() {
                     0 xal
                   </span>
                 </div>
-                <p className="text-sm text-slate-400 mt-0.5">Pəncəm üzvü</p>
-                <p className="text-xs text-slate-400 mt-0.5">{email}</p>
+                <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5">
+                  <p className="text-sm text-slate-400">Pəncəm üzvü</p>
+                  {userProfile?.city && (
+                    <>
+                      <span className="text-slate-300 text-sm">·</span>
+                      <p className="text-sm text-slate-400">{userProfile.city}</p>
+                    </>
+                  )}
+                </div>
+                {userProfile?.bio && (
+                  <p className="text-sm text-slate-500 mt-2 leading-relaxed max-w-xs">{userProfile.bio}</p>
+                )}
               </div>
             </div>
 
