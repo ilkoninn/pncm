@@ -115,6 +115,16 @@ app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatus
     return Results.Ok(result);
 }).RequireAuthorization();
 
+app.MapPatch("/adoptions/{id:guid}/confirm", async (Guid id, ClaimsPrincipal user, IMediator mediator) =>
+{
+    var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!Guid.TryParse(userIdClaim, out var requesterId))
+        return Results.Unauthorized();
+
+    var result = await mediator.Send(new ConfirmAdoptionCommand(id, requesterId));
+    return Results.Ok(result);
+}).RequireAuthorization();
+
 app.MapMetrics();
 app.MapHealthChecks("/health");
 

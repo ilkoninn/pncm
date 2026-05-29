@@ -41,9 +41,13 @@ public static class DependencyInjection
             {
                 rider.AddProducer<ScoreGivenEvent>("score-given");
                 rider.AddProducer<ContestEndedEvent>("contest-ended");
+                rider.AddConsumer<AdoptionCompletedConsumer>();
                 rider.UsingKafka((ctx, k) =>
                 {
                     k.Host(configuration["Kafka:BootstrapServers"]);
+                    k.TopicEndpoint<Community.Infrastructure.Messaging.Contracts.AdoptionCompletedContract>(
+                        "adoption-completed", "community-group",
+                        e => e.ConfigureConsumer<AdoptionCompletedConsumer>(ctx));
                 });
             });
         });

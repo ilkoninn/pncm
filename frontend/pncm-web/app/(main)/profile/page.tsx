@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
-import { getMyAdoptions, cancelAdoption } from "@/lib/api/adoptions";
+import { getMyAdoptions, cancelAdoption, confirmAdoption } from "@/lib/api/adoptions";
 import { getCurrentUser, updateUser, updateAvatar } from "@/lib/api/auth";
 import { uploadMedia, deleteMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
@@ -255,6 +255,7 @@ const ADOPTION_STATUS_STYLES: Record<number, { bg: string; text: string }> = {
   0: { bg: "bg-amber-50", text: "text-amber-700" },
   1: { bg: "bg-emerald-50", text: "text-emerald-700" },
   2: { bg: "bg-red-50", text: "text-red-500" },
+  3: { bg: "bg-blue-50", text: "text-blue-700" },
 };
 
 function MyActivitySection() {
@@ -294,6 +295,14 @@ function MyActivitySection() {
   const { mutate: cancel, variables: cancellingId } = useMutation({
     mutationFn: (id: string) => cancelAdoption(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-adoptions"] }),
+  });
+
+  const { mutate: confirm, variables: confirmingId } = useMutation({
+    mutationFn: (id: string) => confirmAdoption(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-adoptions"] });
+      queryClient.invalidateQueries({ queryKey: ["my-pets"] });
+    },
   });
 
   const EmptyState = ({ text }: { text: string }) => (
@@ -431,6 +440,15 @@ function MyActivitySection() {
                             className="text-[11px] font-medium text-red-400 hover:text-red-600 transition-colors cursor-pointer disabled:opacity-50"
                           >
                             {isCancelling ? "..." : "Ləğv"}
+                          </button>
+                        )}
+                        {a.status === 1 && (
+                          <button
+                            onClick={() => confirm(a.id)}
+                            disabled={confirmingId === a.id}
+                            className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {confirmingId === a.id ? "..." : "Heyvana sahib oldum"}
                           </button>
                         )}
                       </div>

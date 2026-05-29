@@ -6,6 +6,7 @@ package pet;
 
 service PetGrpcService {
   rpc GetPetOwner (GetPetOwnerRequest) returns (GetPetOwnerResponse);
+  rpc TransferPetOwnership (TransferPetOwnershipRequest) returns (TransferPetOwnershipResponse);
 }
 
 message GetPetOwnerRequest {
@@ -14,4 +15,13 @@ message GetPetOwnerRequest {
 
 message GetPetOwnerResponse {
   string owner_id = 1;
+}
+
+message TransferPetOwnershipRequest {
+  string pet_id = 1;
+  string new_owner_id = 2;
+}
+
+message TransferPetOwnershipResponse {
+  bool success = 1;
 }

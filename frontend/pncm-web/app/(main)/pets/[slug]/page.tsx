@@ -20,10 +20,13 @@ function formatAge(months: number | null): string {
   return rem > 0 ? `${years} il ${rem} ay` : `${years} il`;
 }
 
+const AZ_MONTHS = ["yan", "fev", "mar", "apr", "may", "iyn", "iyl", "avq", "sen", "okt", "noy", "dek"];
+
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("az-AZ", {
-    day: "numeric", month: "long", year: "numeric",
-  });
+  const d = new Date(dateStr);
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getDate()} ${AZ_MONTHS[d.getMonth()]} ${d.getFullYear()}, ${h}:${m}`;
 }
 
 function AdBanner({ label }: { label: string }) {

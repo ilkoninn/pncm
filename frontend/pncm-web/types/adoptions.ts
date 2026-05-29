@@ -26,4 +26,5 @@ export const ADOPTION_STATUS_MAP: Record<number, string> = {
   0: "Gözləmədə",
   1: "Təsdiqləndi",
   2: "Rədd edildi",
+  3: "Tamamlandı",
 };

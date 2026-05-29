@@ -146,21 +146,28 @@ JWT: 15 dəq. RefreshToken: 7 gün (DB-də, atomic get+revoke). Blacklist Redis-
 - `PetName`, `PetSlug`, `PetPrimaryPhotoUrl` — yaradılarkən frontend-dən alınır
 - `AdopterName` — pending (JWT `GivenName+Surname`-dən saxlanacaq)
 
+### gRPC Servis-arası Pattern
+Security-critical cross-service ID-lər (ownership, authorization) gRPC ilə backend-dən alınır. Yalnız display data (ad, şəkil URL) denormalization ilə frontend-dən saxlanır.
+- `IPetGrpcClient` → `Adoption.Application/Interfaces/Services/`
+- `PetGrpcClient` → `Adoption.Infrastructure/Services/`
+- `GrpcServices__PetService: http://pncm-pet:8081`
+- Pet service: `8080=Http1` (REST), `8081=Http2` (gRPC) — `appsettings.json`-da Kestrel konfiqurasiyası
+- `try/catch` — gRPC down olsa servis işləməyə davam etməlidir (adoption üçün tətbiq edilməyib hələ)
+
 ### Frontend feature statusu
 **Tamamlanıb:**
-- Profile page: avatar, SettingsDrawer (desktop), /profile/settings (mobil) — bio+city daxil
-- Profile tabs: Paylaşdıqlarım (type=adoption) + Saxladıqlarım (type=personal) + Müraciətlərim
-- Pets page: filter (backend), CreatePetModal (çoxlu foto), AdoptionModal
-- Pet detail: PhotoGallery, info panel
-- Pet edit/delete: `EditPetModal` (foto idarəsi daxil), `PetCard` edit düyməsi
+- Profile page: avatar upload (PATCH /users/me/avatar), SettingsDrawer (desktop+avatar), /profile/settings (mobil)
+- Profile tabs: Paylaşdıqlarım + Saxladıqlarım + Müraciətlərim (pet foto+ad+link+ləğv)
+- Pets page: filter (backend), CreatePetModal (çoxlu foto), AdoptionModal (telefon auto-fill)
+- Pet detail: PhotoGallery (auto-slider 4s), tarix formatı (29 may 2026, 22:45), owner link → `/profile/{ownerId}`, "Müraciət edildi" badge, "Müraciətlər" düyməsi (owner)
+- Pet edit/delete: `EditPetModal`, `PetCard` edit düyməsi
 - Adoption kartı: pet foto+ad+link, ləğv düyməsi
+- `AdoptionRequestsModal` (web) + `/pets/[slug]/adoptions` (mobil) — adopter adı, telefon, mesaj, Qəbul/Rədd
 - `/profile/[userId]` — public profil (bio, şəhər, elanlar)
 - Token refresh + auto signOut
-- gRPC media enrichment — batch call yoxdur
+- gRPC media enrichment (media) + gRPC pet owner (adoption)
 
 **Pending:**
-- Adoption müraciət siyahısı (pet owner görür) — mobil page + web modal
-- `AdopterName` adoption-da (JWT-dən saxlanacaq)
 - Community postlarda author link → `/profile/{userId}`
 - Store edit + delete UI
 - `GET /notifications/me` UI inteqrasiyası

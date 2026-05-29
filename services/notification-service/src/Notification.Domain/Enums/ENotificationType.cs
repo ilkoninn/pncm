@@ -5,5 +5,6 @@ public enum ENotificationType
     AdoptionApproved,
     AdoptionRejected,
     UserRegistered,
-    ContestEnded
+    ContestEnded,
+    AdoptionCompleted
 }

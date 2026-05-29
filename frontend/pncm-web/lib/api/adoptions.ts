@@ -24,3 +24,8 @@ export const updateAdoptionStatus = async (id: string, status: number): Promise<
   const { data } = await apiClient.patch<AdoptionResponseDto>(`/adoptions/${id}/status`, { status });
   return data;
 };
+
+export const confirmAdoption = async (id: string): Promise<AdoptionResponseDto> => {
+  const { data } = await apiClient.patch<AdoptionResponseDto>(`/adoptions/${id}/confirm`);
+  return data;
+};

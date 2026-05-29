@@ -112,4 +112,14 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         context.PetPhotos.Remove(photo);
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task TransferOwnershipAsync(Guid petId, Guid newOwnerId, CancellationToken cancellationToken = default)
+    {
+        await context.Pets
+            .Where(p => p.Id == petId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.OwnerId, newOwnerId)
+                .SetProperty(p => p.Status, EPetStatus.Personal),
+            cancellationToken);
+    }
 }

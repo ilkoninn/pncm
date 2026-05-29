@@ -19,4 +19,5 @@ public interface IPetRepository
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     Task AddPhotoAsync(PetPhoto photo, CancellationToken cancellationToken = default);
     Task DeletePhotoAsync(Guid photoId, CancellationToken cancellationToken = default);
+    Task TransferOwnershipAsync(Guid petId, Guid newOwnerId, CancellationToken cancellationToken = default);
 }

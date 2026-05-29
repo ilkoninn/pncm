@@ -36,6 +36,7 @@ public static class DependencyInjection
                 rider.AddProducer<AdoptionRequestedEvent>("adoption-requested");
                 rider.AddProducer<AdoptionApprovedEvent>("adoption-approved");
                 rider.AddProducer<AdoptionRejectedEvent>("adoption-rejected");
+                rider.AddProducer<AdoptionCompletedEvent>("adoption-completed");
                 rider.UsingKafka((ctx, k) =>
                 {
                     k.Host(configuration["Kafka:BootstrapServers"]);

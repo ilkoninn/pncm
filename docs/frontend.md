@@ -34,11 +34,12 @@ frontend/pncm-web/
 ├── components/
 │   └── shared/
 │       └── pets/
-│           ├── PetCard.tsx        ← onEdit? prop, kalem düyməsi overlay
+│           ├── PetCard.tsx               ← onEdit? prop, kalem düyməsi overlay
 │           ├── PetFilters.tsx
-│           ├── AdoptionModal.tsx  ← petName/petSlug/petPrimaryPhotoUrl göndərir
-│           ├── CreatePetModal.tsx ← çoxlu foto, dərhal upload
-│           └── EditPetModal.tsx   ← aşağıdan yuxarı, edit|confirm-delete|done
+│           ├── AdoptionModal.tsx         ← telefon auto-fill, petName/petSlug göndərir
+│           ├── AdoptionRequestsModal.tsx ← owner üçün: ad, telefon, mesaj, Qəbul/Rədd
+│           ├── CreatePetModal.tsx        ← çoxlu foto, dərhal upload
+│           └── EditPetModal.tsx          ← aşağıdan yuxarı, edit|confirm-delete|done
 ├── lib/
 │   └── api/
 │       ├── client.ts             ← axios instance (token-store-dan oxuyur)
@@ -135,8 +136,12 @@ Hər API cavabında `url` / `primaryPhotoUrl` / `avatarUrl` MinIO presigned URL-
 
 ### `/pets/[slug]` — Pet Detail Page
 - `GET /pets/slug/{slug}` — pet + photos[].url
-- PhotoGallery, info panel
-- `AdoptionModal` (status=Available olarsa)
+- PhotoGallery — auto-slider (4s), thumbnail strip, dot indikatoru
+- Tarix: `29 may 2026, 22:45` formatı (manuel AZ ayları)
+- Owner adı → `<Link href="/profile/{ownerId}">` hover yaşıl
+- "Müraciət edildi ✓" badge — `getMyAdoptions()` cache-dən `petId` match
+- Owner üçün "Müraciətlər (N)" düyməsi — mobil: `/pets/[slug]/adoptions`, web: `AdoptionRequestsModal`
+- `AdoptionModal` (status=Available, owner deyilsə)
 
 ### `/profile` — Öz profil
 - Avatar: klik → file picker → `POST /media/upload` → köhnəni sil → yenisi göstər
@@ -203,18 +208,17 @@ const closeEdit = () => {
 
 ### Tamamlanıb
 - Landing, auth flow (OTP, NextAuth v5), token refresh + auto signOut
-- Pets page: filter, CreatePetModal (çoxlu foto), AdoptionModal
-- Pet detail: PhotoGallery, info panel
+- Pets page: filter, CreatePetModal (çoxlu foto), AdoptionModal (telefon auto-fill)
+- Pet detail: PhotoGallery (auto-slider 4s), tarix formatı (29 may 2026, 22:45), owner link, müraciət edildi badge, müraciətlər düyməsi
 - Pet edit/delete: EditPetModal (foto idarəsi, delete confirm, animation)
 - PetCard: onEdit prop, overlay kalem düyməsi
-- Profile: avatar, tabs (Paylaşdıqlarım / Saxladıqlarım / Müraciətlərim)
+- Profile: avatar upload (PATCH /users/me/avatar), tabs (Paylaşdıqlarım / Saxladıqlarım / Müraciətlərim)
 - Adoption kartı: pet foto+ad+link, Ləğv düyməsi
-- Settings (drawer + mobil page): bio, city daxil
+- AdoptionRequestsModal (web) + `/pets/[slug]/adoptions` (mobil) — Qəbul/Rədd
+- Settings (drawer+desktop+mobil): avatar upload, bio, city
 - `/profile/[userId]` public profil
 
 ### Pending
-- Adoption müraciət siyahısı (pet owner görür) — mobil page + web modal
-- `adopterName` adoption-da (backend tamamlanmayıb — JWT GivenName+Surname)
 - Community postlarda author link → `/profile/{userId}`
 - Store edit + delete UI
 - `GET /notifications/me` UI inteqrasiyası (backend hazır)

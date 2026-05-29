@@ -33,6 +33,7 @@ public static class DependencyInjection
                 rider.AddConsumer<AdoptionRequestedConsumer>();
                 rider.AddConsumer<AdoptionApprovedConsumer>();
                 rider.AddConsumer<AdoptionRejectedConsumer>();
+                rider.AddConsumer<AdoptionCompletedConsumer>();
                 rider.AddConsumer<UserRegisteredConsumer>();
                 rider.AddConsumer<ContestEndedConsumer>();
                 rider.UsingKafka((ctx, k) =>
@@ -42,6 +43,7 @@ public static class DependencyInjection
                     k.TopicEndpoint<AdoptionRequestedContract>("adoption-requested", "notification-group", e => e.ConfigureConsumer<AdoptionRequestedConsumer>(ctx));
                     k.TopicEndpoint<AdoptionApprovedContract>("adoption-approved", "notification-group", e => e.ConfigureConsumer<AdoptionApprovedConsumer>(ctx));
                     k.TopicEndpoint<AdoptionRejectedContract>("adoption-rejected", "notification-group", e => e.ConfigureConsumer<AdoptionRejectedConsumer>(ctx));
+                    k.TopicEndpoint<AdoptionCompletedContract>("adoption-completed", "notification-group", e => e.ConfigureConsumer<AdoptionCompletedConsumer>(ctx));
                     k.TopicEndpoint<UserRegisteredContract>("user-registered", "notification-group", e => e.ConfigureConsumer<UserRegisteredConsumer>(ctx));
                     k.TopicEndpoint<ContestEndedContract>("contest-ended", "notification-group", e => e.ConfigureConsumer<ContestEndedConsumer>(ctx));
                 });

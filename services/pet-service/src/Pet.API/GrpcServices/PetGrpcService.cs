@@ -16,4 +16,18 @@ public sealed class PetGrpcService(IPetRepository petRepository) : Protos.PetGrp
 
         return new GetPetOwnerResponse { OwnerId = pet.OwnerId.ToString() };
     }
+
+    public override async Task<TransferPetOwnershipResponse> TransferPetOwnership(
+        TransferPetOwnershipRequest request, ServerCallContext context)
+    {
+        if (!Guid.TryParse(request.PetId, out var petId))
+            throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.InvalidArgument, "Yanlış pet ID formatı."));
+
+        if (!Guid.TryParse(request.NewOwnerId, out var newOwnerId))
+            throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.InvalidArgument, "Yanlış owner ID formatı."));
+
+        await petRepository.TransferOwnershipAsync(petId, newOwnerId, context.CancellationToken);
+
+        return new TransferPetOwnershipResponse { Success = true };
+    }
 }

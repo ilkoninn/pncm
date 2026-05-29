@@ -194,23 +194,27 @@ MediaFile
 ```
 AdoptionRequest
 ├── PetId, AdopterId
+├── PetOwnerId               ← gRPC ilə pet-service-dən alınır (yaradılarkən)
 ├── Status (EAdoptionStatus: Pending / Approved / Rejected)
 ├── Message (müraciət məktubu)
 ├── ContactPhone
+├── AdopterName              ← JWT GivenName+Surname claim-lərindən
 ├── PetName, PetSlug         ← denormalization (frontend-dən yaradılarkən)
 └── PetPrimaryPhotoUrl?      ← denormalization (frontend-dən yaradılarkən)
 ```
+
+**gRPC:** `POST /adoptions` zamanı adoption service → pet service gRPC `GetPetOwner(petId)` → `PetOwnerId` saxlanır.
 
 ### Endpoints
 
 | Method | Path | Auth | İzah |
 |---|---|---|---|
-| POST | `/adoptions` | Bearer | Yeni müraciət — `AdopterId` JWT-dən; body-də petName, petSlug, petPrimaryPhotoUrl |
+| POST | `/adoptions` | Bearer | Yeni müraciət — `AdopterId`+`AdopterName` JWT-dən, `PetOwnerId` gRPC-dən, body-də petName/petSlug/petPrimaryPhotoUrl |
 | GET | `/adoptions/{id}` | — | Müraciəti gətir |
-| GET | `/adoptions/pet/{petId}` | — | Heyvana gələn müraciətlər (pet owner görür) |
+| GET | `/adoptions/pet/{petId}` | Bearer | Heyvana gələn müraciətlər — yalnız pet owner (WHERE petOwnerId = JWT userId) |
 | GET | `/adoptions/me` | Bearer | Cari istifadəçinin müraciətləri (JWT) |
 | DELETE | `/adoptions/{id}` | Bearer | Müraciəti ləğv et — yalnız adopter, yalnız Pending |
-| PATCH | `/adoptions/{id}/status` | — | Status dəyiş (Approved/Rejected) |
+| PATCH | `/adoptions/{id}/status` | Bearer | Status dəyiş — yalnız pet owner (PetOwnerId = JWT userId) |
 
 ### Kafka Events (Publisher)
 
