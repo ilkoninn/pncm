@@ -10,11 +10,8 @@ public sealed class GetCurrentUserQueryHandler(
             ?? throw new KeyNotFoundException("İstifadəçi tapılmadı.");
 
         string? avatarUrl = null;
-        if (user.AvatarMediaId.HasValue)
-        {
-            try { avatarUrl = await mediaGrpcClient.GetAvatarUrlAsync(user.Id, cancellationToken); }
-            catch { }
-        }
+        try { avatarUrl = await mediaGrpcClient.GetAvatarUrlAsync(user.Id, cancellationToken); }
+        catch { }
 
         return new UserResponseDto(
             user.Id,
