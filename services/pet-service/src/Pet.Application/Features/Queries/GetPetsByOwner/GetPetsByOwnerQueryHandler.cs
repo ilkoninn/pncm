@@ -3,7 +3,7 @@ public sealed class GetPetsByOwnerQueryHandler(IPetRepository petRepository, IMe
 {
     public async Task<IEnumerable<PetResponseDto>> Handle(GetPetsByOwnerQuery request, CancellationToken cancellationToken)
     {
-        var pets = await petRepository.GetByOwnerAsync(request.OwnerId, EOwnerType.User, cancellationToken);
+        var pets = await petRepository.GetByOwnerAsync(request.OwnerId, EOwnerType.User, request.Type, cancellationToken);
 
         var petList = pets.ToList();
         if (petList.Count == 0)

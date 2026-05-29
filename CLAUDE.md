@@ -19,15 +19,42 @@ Sən Pəncəm layihəsinin Senior Mentoru və baş arxitektisin. İlkin Rəcəbo
 - Promptlarda "run" əmrləri yazma
 - Ən yaxşı, ən performanslı, ən müasir alətlər seç
 
+## Skills (aktiv)
+Hər session-da bu skills-ləri aktiv et:
+- `C:\Users\receb\.claude\skills\ui-ux-pro-max` — UI/UX qaydaları, dizayn sistemi
+- `C:\Users\receb\.claude\skills\react-best-practices` — React/Next.js performans
+- `C:\Users\receb\.claude\skills\web-design-guidelines` — Web interface guidelines
+- `C:\Users\receb\.claude\skills\composition-patterns` — React komponent arxitekturası
+
 ## Arxitektura Qərarları
 
 ### JWT varsa, request body-dən UserId qəbul etmə
-`UserId`, `AdopterId` kimi cari istifadəçiyə aid ID-lər həmişə JWT-dən oxunur. Request body-dən qəbul etmək — istifadəçi başqasının adından əməliyyat edə bilər.
+`UserId`, `AdopterId` kimi cari istifadəçiyə aid ID-lər həmişə JWT-dən oxunur.
 
 **Düzgün:** `var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)`
 **Yanlış:** `public record CreateDto(Guid UserId, ...)` — JWT varken body-dən cari user ID-si alma
 
 **OwnerId (entity ID-ləri) fərqlidir:** Pet foto üçün `OwnerId = petId` body-dən qəbul edilə bilər — çünki user authenticated-dir. Amma authorization (ownership) domain servisində yoxlanır: `AddPetPhotoCommandHandler` → `pet.OwnerId != requesterId` → 403.
+
+### URL-də userId qəbul etmə
+`GET /adoptions/adopter/{userId}`, `GET /notifications/user/{userId}` kimi endpoint-lər yanlışdır.
+**Düzgün:** `GET /adoptions/me`, `GET /notifications/me` — JWT-dən oxu.
+
+### Media URL-lərini frontend-dən alma
+Frontend heç vaxt media batch/individual call etməməlidir. Media URL-ləri backend-dən gRPC ilə enrich edilir.
+- List view: `GetPrimaryPhotos(ownerIds, ownerType)` → `primaryPhotoUrl`
+- Detail view: `GetPhotosByOwner(ownerId, ownerType)` → `photos[].url`
+
+### gRPC Media Pattern
+Hər servis media-service-dən şəkil URL-lərini gRPC ilə alır:
+- `IMediaGrpcClient` → `Pet.Application/Interfaces/Services/`
+- `MediaGrpcClient` → `Pet.Infrastructure/Services/`
+- `GrpcServices__MediaService: http://pncm-media:8081`
+- Media service: `8080=Http1` (REST), `8081=Http2` (gRPC)
+- `try/catch` — media down olsa servis işləməyə davam edir
+
+### Client-side filter etmə
+Filtrasiya, axtarış, sıralama backend-də SQL-də olmalıdır. Frontend-də yalnız display məntiqi olur.
 
 ---
 
@@ -52,6 +79,7 @@ Sən Pəncəm layihəsinin Senior Mentoru və baş arxitektisin. İlkin Rəcəbo
 - axios client həmişə lib/api/client.ts-dən
 - Types həmişə types/ folderindən
 - API funksiyalar həmişə lib/api/-dən
+- `photo.url`, `primaryPhotoUrl`, `avatarUrl` — birbaşa DTO-dan, media call etmə
 
 ## Layihə — Pəncəm
 Azərbaycanda pet adoption + heyvansevərlər icması platforması.
@@ -63,10 +91,10 @@ Azərbaycanda pet adoption + heyvansevərlər icması platforması.
 
 ### Servislərin ünvanları
 - Gateway: `pncm-gateway:80` → pncm.local
-- Identity: `pncm-identity:80` | `/auth/**`, `/users/**`
+- Identity: `pncm-identity:80` (REST), `pncm-identity:8081` (gRPC) | `/auth/**`, `/users/**`
 - Pet: `pncm-pet:80` | `/pets/**`
 - Store: `pncm-store:80` | `/stores/**`
-- Media: `pncm-media:80` | `/media/**`
+- Media: `pncm-media:80` (REST), `pncm-media:8081` (gRPC) | `/media/**`
 - Adoption: `pncm-adoption:80` | `/adoptions/**`
 - Community: `pncm-community:80` | `/posts/**`, `/contests/**`
 - Notification: `pncm-notification:80` | `/notifications/**`
@@ -89,23 +117,33 @@ JWT: 15 dəq. RefreshToken: 7 gün (DB-də, atomic get+revoke). Blacklist Redis-
 ### Media / MinIO
 - Upload: `POST /media/upload` (multipart, JWT) → `{ id, url, ... }` qaytarır
 - Presigned URL: 7 gün, `Cache-Control: immutable`
-- Batch: `POST /media/batch` → `{ ownerIds, ownerType }` → `{ [ownerId]: MediaFileDto[] }`
+- Batch HTTP: `POST /media/batch` → `{ ownerIds, ownerType }` → `{ [ownerId]: MediaFileDto[] }` (frontend artıq istifadə etmir)
+- gRPC: `GetPrimaryPhotos` (list), `GetPhotosByOwner` (detail) — backend-lər istifadə edir
 - OwnerType: User=0, Store=1, Pet=2, Community=3
+
+### Pet Status
+- `EPetStatus`: Available=0, Reserved=1, Adopted=2, Lost=3, Found=4, Personal=5
+- Personal (5) — `GET /pets` list-dən exclude edilir, yalnız sahibi görə bilir
 
 ### Frontend feature statusu
 **Tamamlanıb:**
-- Profile page: avatar upload, SettingsDrawer, InviteSection
-- Profile tabs: Paylaşdıqlarım (pets) + Müraciətlərim (adoptions)
-- Pets page: list, filter, "Övladlığa al" button + modal, "Paylaş" button + create pet modal
+- Profile page: avatar (settings-dən), SettingsDrawer (desktop), /profile/settings (mobil), InviteSection
+- Profile tabs: Paylaşdıqlarım + Saxladıqlarım + Müraciətlərim
+- Pets page: filter (backend), CreatePetModal (personal/adoption), AdoptionModal
+- Pet detail: PhotoGallery (photo.url birbaşa), info panel
 - Token refresh + auto signOut
+- gRPC media enrichment — batch call yoxdur
 
-**Pending / Bilinen Problemlər:**
-- Pet foto URL düzgün deyil (PetCard `${API_URL}/media/${mediaId}` JSON qaytarır, şəkil yox)
-- `GET /pets/owner` 401 — pet service JWT deploy gözlənilir
-- Token refresh real test edilməyib
+**Pending:**
+- `GET /adoptions/me` backend + frontend
+- `GET /notifications/me` backend + frontend
+- `GET /pets/owner?type=` backend filter
+- Pet/Store edit + delete UI
+- Ownership check — PUT/DELETE endpoint-lərdə
+- Pagination
 
 ## Docs
-Kontekst başlayanda aşağıdakı sənədləri oxu — layihənin strukturunu anlamaq üçün:
+Kontekst başlayanda aşağıdakı sənədləri oxu:
 - `docs/architecture.md` — yüksək səviyyəli diaqram + texnologiyalar
 - `docs/services.md` — endpoint-lər, entity-lər, Kafka events
 - `docs/infrastructure.md` — K8s, ArgoCD, CI/CD

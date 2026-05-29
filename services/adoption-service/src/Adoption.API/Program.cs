@@ -63,11 +63,14 @@ app.MapGet("/adoptions/pet/{petId:guid}", async (Guid petId, IMediator mediator)
     return Results.Ok(result);
 });
 
-app.MapGet("/adoptions/adopter/{adopterId:guid}", async (Guid adopterId, IMediator mediator) =>
+app.MapGet("/adoptions/me", async (ClaimsPrincipal user, IMediator mediator) =>
 {
+    var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!Guid.TryParse(userIdClaim, out var adopterId))
+        return Results.Unauthorized();
     var result = await mediator.Send(new GetAdoptionsByAdopterQuery(adopterId));
     return Results.Ok(result);
-});
+}).RequireAuthorization();
 
 app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatusRequestDto dto, IMediator mediator) =>
 {

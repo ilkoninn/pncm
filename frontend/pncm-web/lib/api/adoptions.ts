@@ -11,7 +11,7 @@ export const getAdoptionsByPet = async (petId: string): Promise<AdoptionResponse
   return data;
 };
 
-export const getAdoptionsByAdopter = async (adopterId: string): Promise<AdoptionResponseDto[]> => {
-  const { data } = await apiClient.get<AdoptionResponseDto[]>(`/adoptions/adopter/${adopterId}`);
+export const getMyAdoptions = async (): Promise<AdoptionResponseDto[]> => {
+  const { data } = await apiClient.get<AdoptionResponseDto[]>("/adoptions/me");
   return data;
 };

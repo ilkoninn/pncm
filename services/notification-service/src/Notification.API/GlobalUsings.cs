@@ -1,10 +1,14 @@
 global using FastEndpoints;
 global using FastEndpoints.Swagger;
 global using MediatR;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
+global using Microsoft.IdentityModel.Tokens;
 global using NotificationDomain;
 global using OpenTelemetry.Resources;
 global using OpenTelemetry.Trace;
 global using Prometheus;
+global using System.Security.Claims;
+global using System.Text;
 global using Microsoft.AspNetCore.Diagnostics.HealthChecks;

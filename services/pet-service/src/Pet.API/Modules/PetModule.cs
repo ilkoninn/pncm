@@ -58,12 +58,12 @@ public class PetModule : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetByOwner(ClaimsPrincipal user, IMediator mediator)
+    private static async Task<IResult> GetByOwner(ClaimsPrincipal user, IMediator mediator, string? type = null)
     {
         var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdClaim, out var userId))
             return Results.Unauthorized();
-        var result = await mediator.Send(new GetPetsByOwnerQuery(userId));
+        var result = await mediator.Send(new GetPetsByOwnerQuery(userId, type));
         return Results.Ok(result);
     }
 

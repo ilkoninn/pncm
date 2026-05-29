@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
-import { getMediaByOwnersBatch } from "@/lib/api/media";
-import { getAdoptionsByAdopter } from "@/lib/api/adoptions";
+import { getMyAdoptions } from "@/lib/api/adoptions";
 import { getCurrentUser, updateUser } from "@/lib/api/auth";
-import { EOwnerType } from "@/types/media";
 import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
 import { PetCard } from "@/components/shared/pets/PetCard";
 import type { Pet } from "@/types/pets";
@@ -213,20 +211,23 @@ const ADOPTION_STATUS_STYLES: Record<number, { bg: string; text: string }> = {
   2: { bg: "bg-red-50", text: "text-red-500" },
 };
 
-function MyActivitySection({ userId }: { userId: string }) {
+function MyActivitySection() {
   const [tab, setTab] = useState<"pets" | "adoptions" | "saved">("pets");
 
-  const { data: pets = [], isLoading: petsLoading } = useQuery({
-    queryKey: ["my-pets"],
-    queryFn: getMyPets,
+  const { data: sharedPets = [], isLoading: sharedLoading } = useQuery({
+    queryKey: ["my-pets", "adoption"],
+    queryFn: () => getMyPets("adoption"),
   });
 
-  const sharedPets = pets.filter((p: Pet) => p.status !== 5);
-  const savedPets  = pets.filter((p: Pet) => p.status === 5);
+  const { data: savedPets = [], isLoading: savedLoading } = useQuery({
+    queryKey: ["my-pets", "personal"],
+    queryFn: () => getMyPets("personal"),
+    enabled: tab === "saved",
+  });
 
   const { data: adoptions = [], isLoading: adoptionsLoading } = useQuery({
-    queryKey: ["my-adoptions", userId],
-    queryFn: () => getAdoptionsByAdopter(userId),
+    queryKey: ["my-adoptions"],
+    queryFn: getMyAdoptions,
     enabled: tab === "adoptions",
   });
 
@@ -271,15 +272,15 @@ function MyActivitySection({ userId }: { userId: string }) {
       <div className="p-4">
         {tab === "pets" && (
           <>
-            {petsLoading && (
+            {sharedLoading && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
                 ))}
               </div>
             )}
-            {!petsLoading && sharedPets.length === 0 && <EmptyState text="Heç bir elan yoxdur" />}
-            {!petsLoading && sharedPets.length > 0 && (
+            {!sharedLoading && sharedPets.length === 0 && <EmptyState text="Heç bir elan yoxdur" />}
+            {!sharedLoading && sharedPets.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {sharedPets.map((pet: Pet) => (
                   <PetCard
@@ -296,15 +297,15 @@ function MyActivitySection({ userId }: { userId: string }) {
 
         {tab === "saved" && (
           <>
-            {petsLoading && (
+            {savedLoading && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
                 ))}
               </div>
             )}
-            {!petsLoading && savedPets.length === 0 && <EmptyState text="Şəxsi heyvan yoxdur" />}
-            {!petsLoading && savedPets.length > 0 && (
+            {!savedLoading && savedPets.length === 0 && <EmptyState text="Şəxsi heyvan yoxdur" />}
+            {!savedLoading && savedPets.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {savedPets.map((pet: Pet) => (
                   <PetCard
@@ -421,7 +422,7 @@ export default function ProfilePage() {
         </div>
 
         <InviteSection />
-        {userId && <MyActivitySection userId={userId} />}
+        {userId && <MyActivitySection />}
 
       </div>
 

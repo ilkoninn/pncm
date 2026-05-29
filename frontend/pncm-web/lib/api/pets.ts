@@ -14,8 +14,8 @@ export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   return data;
 };
 
-export const getMyPets = async (): Promise<Pet[]> => {
-  const { data } = await apiClient.get<Pet[]>("/pets/owner");
+export const getMyPets = async (type?: "adoption" | "personal"): Promise<Pet[]> => {
+  const { data } = await apiClient.get<Pet[]>("/pets/owner", { params: type ? { type } : undefined });
   return data;
 };
 

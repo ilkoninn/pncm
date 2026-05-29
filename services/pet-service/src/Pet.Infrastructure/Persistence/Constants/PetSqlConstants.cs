@@ -24,7 +24,7 @@ public static class PetSqlConstants
 
     public const string GetAllBaseSql = $"SELECT {PetColumns} FROM pets WHERE is_active = true AND is_deleted = false AND status != 5";
 
-    public const string GetByOwnerSql = $"SELECT {PetColumns} FROM pets WHERE owner_id = @OwnerId AND owner_type = @OwnerType AND is_active = true AND is_deleted = false";
+    public const string GetByOwnerBaseSql = $"SELECT {PetColumns} FROM pets WHERE owner_id = @OwnerId AND owner_type = @OwnerType AND is_active = true AND is_deleted = false";
 
     public const string GetNearbySql = $"""
         SELECT {PetColumns} FROM pets

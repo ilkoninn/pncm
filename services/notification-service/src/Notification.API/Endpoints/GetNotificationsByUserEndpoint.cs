@@ -3,13 +3,17 @@ public class GetNotificationsByUserEndpoint(ISender sender)
 {
     public override void Configure()
     {
-        Get("/notifications/user/{userId:guid}");
-        AllowAnonymous();
+        Get("/notifications/me");
     }
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var userId = Route<Guid>("userId");
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            await Send.UnauthorizedAsync(ct);
+            return;
+        }
         var result = await sender.Send(new GetNotificationsByUserQuery(userId), ct);
         await Send.OkAsync(result, ct);
     }

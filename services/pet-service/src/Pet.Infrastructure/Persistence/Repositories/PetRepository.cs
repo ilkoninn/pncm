@@ -52,10 +52,22 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
     }
 
     public async Task<IEnumerable<Pet>> GetByOwnerAsync(
-        Guid ownerId, EOwnerType ownerType, CancellationToken cancellationToken = default)
-        => await connection.QueryAsync<Pet>(
-            PetSqlConstants.GetByOwnerSql,
-            new { OwnerId = ownerId, OwnerType = (int)ownerType });
+        Guid ownerId, EOwnerType ownerType, string? type = null, CancellationToken cancellationToken = default)
+    {
+        var sql = new StringBuilder(PetSqlConstants.GetByOwnerBaseSql);
+        var p = new DynamicParameters();
+        p.Add("OwnerId", ownerId);
+        p.Add("OwnerType", (int)ownerType);
+
+        if (type == "personal")
+            sql.Append(" AND status = 5");
+        else if (type == "adoption")
+            sql.Append(" AND status != 5");
+
+        sql.Append(" ORDER BY created_at DESC");
+
+        return await connection.QueryAsync<Pet>(sql.ToString(), p);
+    }
 
     public async Task<IEnumerable<Pet>> GetNearbyAsync(
         decimal latitude, decimal longitude, double radiusKm, CancellationToken cancellationToken = default)

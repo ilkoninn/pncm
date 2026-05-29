@@ -11,7 +11,7 @@ public interface IPetRepository
         bool? isNeutered = null,
         Guid? excludeOwnerId = null,
         CancellationToken cancellationToken = default);
-    Task<IEnumerable<Pet>> GetByOwnerAsync(Guid ownerId, EOwnerType ownerType, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Pet>> GetByOwnerAsync(Guid ownerId, EOwnerType ownerType, string? type = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<Pet>> GetNearbyAsync(decimal latitude, decimal longitude, double radiusKm, CancellationToken cancellationToken = default);
     Task<Pet> CreateAsync(Pet pet, CancellationToken cancellationToken = default);
     Task<Pet> UpdateAsync(Pet pet, CancellationToken cancellationToken = default);
