@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createAdoption } from "@/lib/api/adoptions";
+import { getCurrentUser } from "@/lib/api/auth";
 import { X, Heart, Check } from "lucide-react";
 import type { Pet } from "@/types/pets";
 import { SPECIES_MAP } from "@/types/pets";
@@ -11,6 +12,17 @@ export function AdoptionModal({ pet, onClose }: { pet: Pet; onClose: () => void 
   const [message, setMessage] = useState("");
   const [phone, setPhone] = useState("");
   const [done, setDone] = useState(false);
+
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: getCurrentUser,
+  });
+
+  useEffect(() => {
+    if (userProfile?.phoneNumber) {
+      setPhone(userProfile.phoneNumber);
+    }
+  }, [userProfile?.phoneNumber]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: () => createAdoption({

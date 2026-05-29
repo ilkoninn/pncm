@@ -28,6 +28,7 @@ export interface Pet {
   longitude: number | null;
   photos: PetPhoto[];
   createdAt: string;
+  updatedAt?: string | null;
   primaryPhotoUrl?: string | null;
 }
 

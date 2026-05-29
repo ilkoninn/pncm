@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { getCurrentUser, updateUser } from "@/lib/api/auth";
+import { getCurrentUser, updateUser, updateAvatar } from "@/lib/api/auth";
 import { uploadMedia, deleteMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
 import { ChevronLeft, Camera } from "lucide-react";
@@ -46,7 +46,9 @@ export default function SettingsPage() {
       if (userProfile?.avatarMediaId) {
         await deleteMedia(userProfile.avatarMediaId.toString());
       }
-      return uploadMedia(file, EOwnerType.User);
+      const media = await uploadMedia(file, EOwnerType.User);
+      await updateAvatar(media.id);
+      return media;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
@@ -104,19 +106,16 @@ export default function SettingsPage() {
                   : (name?.[0]?.toUpperCase() ?? "?")}
               </div>
             )}
-            <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Camera className="w-5 h-5 text-white" />
+            </div>
+            <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
+              <Camera className="w-2.5 h-2.5 text-white" />
             </div>
           </button>
           <div>
             <p className="font-semibold text-slate-900 text-sm">{name}</p>
             <p className="text-xs text-slate-400">{email}</p>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="text-xs text-emerald-600 font-medium mt-1 cursor-pointer hover:underline"
-            >
-              Şəkli dəyiş
-            </button>
           </div>
         </div>
 

@@ -21,5 +21,6 @@ public sealed record PetResponseDto(
     decimal? Longitude,
     IEnumerable<PetPhotoResponseDto> Photos,
     DateTime CreatedAt,
+    DateTime? UpdatedAt = null,
     string? PrimaryPhotoUrl = null
 );

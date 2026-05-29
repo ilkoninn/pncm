@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
 import { getMyAdoptions, cancelAdoption } from "@/lib/api/adoptions";
-import { getCurrentUser, updateUser } from "@/lib/api/auth";
+import { getCurrentUser, updateUser, updateAvatar } from "@/lib/api/auth";
+import { uploadMedia, deleteMedia } from "@/lib/api/media";
+import { EOwnerType } from "@/types/media";
 import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
 import { PetCard } from "@/components/shared/pets/PetCard";
 import { EditPetModal } from "@/components/shared/pets/EditPetModal";
 import type { Pet } from "@/types/pets";
 import {
-  Pencil, X, Trophy, LogOut, Copy, Check,
+  Pencil, X, Trophy, Copy, Check,
   UserRound, Link as LinkIcon, Camera, Heart, ExternalLink,
 } from "lucide-react";
 
@@ -59,17 +61,29 @@ function Avatar({
   );
 }
 
-function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio, city, photoUrl, onSaved }: {
+function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio, city, photoUrl, avatarMediaId, onSaved }: {
   open: boolean; onClose: () => void;
   firstName: string; lastName: string; email: string; phone?: string;
-  bio?: string; city?: string; photoUrl?: string; onSaved: () => void;
+  bio?: string; city?: string; photoUrl?: string; avatarMediaId?: string; onSaved: () => void;
 }) {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ firstName, lastName, phone: phone ?? "", bio: bio ?? "", city: city ?? "" });
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     setForm({ firstName, lastName, phone: phone ?? "", bio: bio ?? "", city: city ?? "" });
   }, [firstName, lastName, phone, bio, city]);
+
+  const { mutate: uploadPhoto, isPending: uploading } = useMutation({
+    mutationFn: async (file: File) => {
+      if (avatarMediaId) await deleteMedia(avatarMediaId);
+      const media = await uploadMedia(file, EOwnerType.User);
+      await updateAvatar(media.id);
+      return media;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+  });
 
   const { mutate: save, isPending } = useMutation({
     mutationFn: () => updateUser(form.firstName, form.lastName, form.phone || undefined, form.bio || undefined, form.city || undefined),
@@ -93,8 +107,29 @@ function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio,
         </div>
 
         <div className="p-5 space-y-6 overflow-y-auto h-full pb-24">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) uploadPhoto(file);
+              e.target.value = "";
+            }}
+          />
           <div className="flex items-center gap-3">
-            <Avatar name={name} photoUrl={photoUrl} size="sm" />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="relative flex-shrink-0 cursor-pointer group"
+            >
+              <Avatar name={name} photoUrl={photoUrl} size="sm" uploading={uploading} />
+              {!uploading && (
+                <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
+                  <Camera className="w-2 h-2 text-white" />
+                </div>
+              )}
+            </button>
             <div>
               <p className="font-semibold text-slate-900 text-sm">{name}</p>
               <p className="text-xs text-slate-400">{email}</p>
@@ -165,15 +200,6 @@ function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio,
             </button>
           </div>
 
-          <div className="pt-4 border-t border-slate-100">
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full flex items-center gap-3 h-11 px-4 rounded-xl border border-red-100 text-red-500 hover:bg-red-50 transition-colors cursor-pointer text-sm font-medium"
-            >
-              <LogOut className="w-4 h-4" />
-              Çıxış et
-            </button>
-          </div>
         </div>
       </div>
     </>
@@ -506,6 +532,7 @@ export default function ProfilePage() {
         bio={userProfile?.bio}
         city={userProfile?.city}
         photoUrl={profilePhotoUrl}
+        avatarMediaId={userProfile?.avatarMediaId}
         onSaved={() => refetchProfile()}
       />
     </div>

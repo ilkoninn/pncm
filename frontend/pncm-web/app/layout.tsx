@@ -36,7 +36,7 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
       style={{ overflowX: "clip" }}
     >
-      <body className="min-h-full flex flex-col" style={{ overflowX: "clip" }}><Providers>{children}</Providers></body>
+      <body suppressHydrationWarning className="min-h-full flex flex-col" style={{ overflowX: "clip" }}><Providers>{children}</Providers></body>
     </html>
   );
 }

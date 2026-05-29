@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getPetBySlug } from "@/lib/api/pets";
+import { getMyAdoptions } from "@/lib/api/adoptions";
 import { AdoptionModal } from "@/components/shared/pets/AdoptionModal";
 import type { Pet } from "@/types/pets";
 import { SPECIES_MAP, GENDER_MAP, SIZE_MAP, STATUS_MAP } from "@/types/pets";
-import { MapPin, Calendar, CheckCircle, UserRound } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, UserRound, RefreshCw } from "lucide-react";
 
 function formatAge(months: number | null): string {
   if (!months) return "";
@@ -15,6 +17,12 @@ function formatAge(months: number | null): string {
   const years = Math.floor(months / 12);
   const rem = months % 12;
   return rem > 0 ? `${years} il ${rem} ay` : `${years} il`;
+}
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("az-AZ", {
+    day: "numeric", month: "long", year: "numeric",
+  });
 }
 
 function AdBanner({ label }: { label: string }) {
@@ -31,48 +39,60 @@ function AdBanner({ label }: { label: string }) {
 
 function PhotoGallery({ photos }: { photos: { id: string; url?: string | null; isPrimary: boolean }[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const advance = useCallback(() => {
+    if (photos.length > 1) setActiveIndex(i => (i + 1) % photos.length);
+  }, [photos.length]);
+
+  useEffect(() => {
+    if (photos.length <= 1) return;
+    const timer = setInterval(advance, 4000);
+    return () => clearInterval(timer);
+  }, [advance, photos.length]);
+
   const activeUrl = photos[activeIndex]?.url ?? null;
 
   if (photos.length === 0) {
     return (
       <div className="aspect-[4/3] rounded-2xl bg-slate-100 flex items-center justify-center">
-        <svg viewBox="0 0 80 80" fill="currentColor" className="w-16 h-16 text-slate-300">
-          <ellipse cx="27" cy="18" rx="8" ry="10" />
-          <ellipse cx="53" cy="18" rx="8" ry="10" />
-          <ellipse cx="13" cy="36" rx="7" ry="9" />
-          <ellipse cx="67" cy="36" rx="7" ry="9" />
-          <ellipse cx="40" cy="56" rx="18" ry="16" />
-        </svg>
+        <PawIcon className="w-16 h-16 text-slate-300" />
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100">
+      <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 relative">
         {activeUrl ? (
           <img src={activeUrl} alt="pet" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <svg viewBox="0 0 80 80" fill="currentColor" className="w-16 h-16 text-slate-200">
-              <ellipse cx="27" cy="18" rx="8" ry="10" />
-              <ellipse cx="53" cy="18" rx="8" ry="10" />
-              <ellipse cx="13" cy="36" rx="7" ry="9" />
-              <ellipse cx="67" cy="36" rx="7" ry="9" />
-              <ellipse cx="40" cy="56" rx="18" ry="16" />
-            </svg>
+            <PawIcon className="w-16 h-16 text-slate-200" />
+          </div>
+        )}
+        {photos.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {photos.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`rounded-full transition-all cursor-pointer ${
+                  i === activeIndex ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/60"
+                }`}
+              />
+            ))}
           </div>
         )}
       </div>
 
       {photos.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           {photos.map((p, i) => (
             <button
               key={p.id}
               onClick={() => setActiveIndex(i)}
               className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors cursor-pointer ${
-                i === activeIndex ? "border-emerald-500" : "border-transparent"
+                i === activeIndex ? "border-emerald-500" : "border-transparent opacity-70 hover:opacity-100"
               }`}
             >
               {p.url ? (
@@ -85,6 +105,18 @@ function PhotoGallery({ photos }: { photos: { id: string; url?: string | null; i
         </div>
       )}
     </div>
+  );
+}
+
+function PawIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="currentColor" className={className}>
+      <ellipse cx="27" cy="18" rx="8" ry="10" />
+      <ellipse cx="53" cy="18" rx="8" ry="10" />
+      <ellipse cx="13" cy="36" rx="7" ry="9" />
+      <ellipse cx="67" cy="36" rx="7" ry="9" />
+      <ellipse cx="40" cy="56" rx="18" ry="16" />
+    </svg>
   );
 }
 
@@ -117,11 +149,24 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
   const { slug } = React.use(params);
   const [adoptionOpen, setAdoptionOpen] = useState(false);
   const { data: session } = useSession();
+  const isLoggedIn = !!session?.userId;
 
   const { data: pet, isLoading, isError } = useQuery({
     queryKey: ["pet", slug],
     queryFn: () => getPetBySlug(slug),
   });
+
+  const { data: myAdoptions = [] } = useQuery({
+    queryKey: ["my-adoptions"],
+    queryFn: getMyAdoptions,
+    enabled: isLoggedIn,
+  });
+
+  const alreadyApplied = isLoggedIn && pet
+    ? myAdoptions.some(a => a.petId === pet.id)
+    : false;
+
+  const isOwner = isLoggedIn && pet?.ownerId === session?.userId;
 
   const sortedPhotos = pet?.photos
     ? [...pet.photos].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
@@ -169,10 +214,13 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
                         <span>{pet.city}</span>
                       </div>
                       {(pet.ownerFirstName || pet.ownerLastName) && (
-                        <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
+                        <Link
+                          href={`/profile/${pet.ownerId}`}
+                          className="flex items-center gap-1.5 text-sm text-slate-500 mt-1 hover:text-emerald-600 transition-colors w-fit"
+                        >
                           <UserRound className="w-4 h-4 flex-shrink-0" />
                           <span>{[pet.ownerFirstName, pet.ownerLastName].filter(Boolean).join(" ")}</span>
-                        </div>
+                        </Link>
                       )}
                     </div>
 
@@ -233,18 +281,33 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2 text-xs text-slate-400 pt-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{new Date(pet.createdAt).toLocaleDateString("az-AZ")}</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Elan tarixi: {formatDate(pet.createdAt)}</span>
+                      </div>
+                      {pet.updatedAt && (
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>Son yenilənmə: {formatDate(pet.updatedAt)}</span>
+                        </div>
+                      )}
                     </div>
 
-                    {pet.status === 0 && session?.userId !== pet.ownerId && (
-                      <button
-                        onClick={() => setAdoptionOpen(true)}
-                        className="w-full h-12 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors cursor-pointer"
-                      >
-                        Övladlığa al
-                      </button>
+                    {pet.status === 0 && !isOwner && (
+                      alreadyApplied ? (
+                        <div className="w-full h-12 bg-emerald-50 text-emerald-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4" />
+                          Müraciət edildi
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setAdoptionOpen(true)}
+                          className="w-full h-12 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors cursor-pointer"
+                        >
+                          Övladlığa al
+                        </button>
+                      )
                     )}
                   </div>
                 </div>

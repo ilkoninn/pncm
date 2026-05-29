@@ -52,6 +52,9 @@ export const getUserById = async (id: string): Promise<UserPublicProfile> => {
 export const updateUser = (firstName: string, lastName: string, phoneNumber?: string, bio?: string, city?: string) =>
   apiClient.patch<UserProfile>("/users/me", { firstName, lastName, phoneNumber, bio, city });
 
+export const updateAvatar = (mediaId: string) =>
+  apiClient.patch("/users/me/avatar", { mediaId });
+
 export const completeRegister = (
   registrationToken: string,
   firstName: string,
