@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
 import { uploadMedia, deleteMedia, getMediaByOwnersBatch } from "@/lib/api/media";
 import { getAdoptionsByAdopter } from "@/lib/api/adoptions";
+import { getCurrentUser, updateUser } from "@/lib/api/auth";
 import { EOwnerType } from "@/types/media";
 import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
 import { PetCard } from "@/components/shared/pets/PetCard";
@@ -58,17 +59,31 @@ function Avatar({
   );
 }
 
-function SettingsDrawer({ open, onClose, name, email, photoUrl }: {
-  open: boolean; onClose: () => void; name: string; email: string; photoUrl?: string;
+function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, photoUrl, onSaved }: {
+  open: boolean; onClose: () => void;
+  firstName: string; lastName: string; email: string; phone?: string;
+  photoUrl?: string; onSaved: () => void;
 }) {
+  const [form, setForm] = useState({ firstName, lastName, phone: phone ?? "" });
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setForm({ firstName, lastName, phone: phone ?? "" });
+  }, [firstName, lastName, phone]);
+
+  const { mutate: save, isPending } = useMutation({
+    mutationFn: () => updateUser(form.firstName, form.lastName, form.phone || undefined),
+    onSuccess: () => {
+      setSaved(true);
+      setTimeout(() => { setSaved(false); onSaved(); onClose(); }, 1000);
+    },
+  });
+
+  const name = [firstName, lastName].filter(Boolean).join(" ") || email.split("@")[0];
+
   return (
     <>
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/30 z-[1002]"
-          onClick={onClose}
-        />
-      )}
+      {open && <div className="fixed inset-0 bg-black/30 z-[1002]" onClick={onClose} />}
       <div className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white z-[1003] shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h2 className="font-bold text-slate-900">Hesab tənzimləri</h2>
@@ -92,7 +107,8 @@ function SettingsDrawer({ open, onClose, name, email, photoUrl }: {
                 <label className="text-xs font-medium text-slate-600">Ad</label>
                 <input
                   type="text"
-                  defaultValue={name}
+                  value={form.firstName}
+                  onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
                   className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-emerald-400 transition-colors"
                 />
               </div>
@@ -100,6 +116,8 @@ function SettingsDrawer({ open, onClose, name, email, photoUrl }: {
                 <label className="text-xs font-medium text-slate-600">Soyad</label>
                 <input
                   type="text"
+                  value={form.lastName}
+                  onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
                   placeholder="Soyadınız"
                   className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors"
                 />
@@ -107,23 +125,24 @@ function SettingsDrawer({ open, onClose, name, email, photoUrl }: {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-600">E-poçt</label>
-              <input
-                type="email"
-                defaultValue={email}
-                readOnly
-                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-400 bg-slate-50 cursor-not-allowed"
-              />
+              <input type="email" value={email} readOnly className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-400 bg-slate-50 cursor-not-allowed" />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-600">Telefon</label>
               <input
                 type="tel"
+                value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                 placeholder="+994 XX XXX XX XX"
                 className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors"
               />
             </div>
-            <button className="w-full h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors cursor-pointer">
-              Yadda saxla
+            <button
+              onClick={() => save()}
+              disabled={isPending || saved}
+              className="w-full h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors cursor-pointer"
+            >
+              {saved ? "Yadda saxlandı ✓" : isPending ? "Saxlanılır..." : "Yadda saxla"}
             </button>
           </div>
 
@@ -349,10 +368,19 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const name = session?.username || session?.user?.email?.split("@")[0] || "İstifadəçi";
   const email = session?.user?.email ?? "";
   const userId = session?.userId;
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const { data: userProfile, refetch: refetchProfile } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: getCurrentUser,
+    enabled: !!userId,
+  });
+
+  const firstName = userProfile?.firstName ?? session?.username ?? "";
+  const lastName  = userProfile?.lastName ?? "";
+  const name = [firstName, lastName].filter(Boolean).join(" ") || email.split("@")[0] || "İstifadəçi";
 
   const { data: photoMap } = useQuery({
     queryKey: ["profile-photo", userId],
@@ -420,7 +448,7 @@ export default function ProfilePage() {
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex-shrink-0"
             >
               <Pencil className="w-3.5 h-3.5" />
-              Düzəliş et
+              <span className="hidden md:inline">Düzəliş et</span>
             </button>
           </div>
         </div>
@@ -433,9 +461,12 @@ export default function ProfilePage() {
       <SettingsDrawer
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        name={name}
+        firstName={firstName}
+        lastName={lastName}
         email={email}
+        phone={userProfile?.phoneNumber}
         photoUrl={profilePhotoUrl}
+        onSaved={() => refetchProfile()}
       />
     </div>
   );

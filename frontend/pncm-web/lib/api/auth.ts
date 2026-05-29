@@ -18,6 +18,14 @@ export const verifyAccess = (email: string, code: string) =>
     client: 1,
   });
 
+export const getCurrentUser = async () => {
+  const { data } = await apiClient.get("/auth/me");
+  return data as { id: string; firstName: string; lastName: string; email: string; phoneNumber?: string; avatarMediaId?: string };
+};
+
+export const updateUser = (firstName: string, lastName: string, phoneNumber?: string) =>
+  apiClient.patch("/users/me", { firstName, lastName, phoneNumber });
+
 export const completeRegister = (
   registrationToken: string,
   firstName: string,
