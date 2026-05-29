@@ -13,6 +13,8 @@ public class Pet : AuditableEntity
     public EPetStatus Status { get; set; } = EPetStatus.Available;
     public Guid OwnerId { get; set; }
     public EOwnerType OwnerType { get; set; }
+    public string? OwnerFirstName { get; set; }
+    public string? OwnerLastName { get; set; }
     public required string Slug { get; set; }
     public required string City { get; set; }
     public decimal? Latitude { get; set; }

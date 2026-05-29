@@ -6,6 +6,7 @@ public static class PetSqlConstants
         color AS "Color", description AS "Description",
         is_vaccinated AS "IsVaccinated", is_neutered AS "IsNeutered",
         status AS "Status", owner_id AS "OwnerId", owner_type AS "OwnerType",
+        owner_first_name AS "OwnerFirstName", owner_last_name AS "OwnerLastName",
         city AS "City", latitude AS "Latitude", longitude AS "Longitude",
         created_at AS "CreatedAt", updated_at AS "UpdatedAt",
         is_active AS "IsActive", is_deleted AS "IsDeleted"

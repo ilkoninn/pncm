@@ -22,6 +22,8 @@ public sealed class CreatePetCommandHandler(IPetRepository petRepository)
             Status = request.Status,
             OwnerId = request.OwnerId,
             OwnerType = EOwnerType.User,
+            OwnerFirstName = request.OwnerFirstName,
+            OwnerLastName = request.OwnerLastName,
             City = request.City,
             Latitude = request.Latitude,
             Longitude = request.Longitude

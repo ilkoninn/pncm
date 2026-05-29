@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPets } from "@/lib/api/pets";
+import { getMediaByOwnersBatch } from "@/lib/api/media";
+import { EOwnerType } from "@/types/media";
 import { PetCard } from "@/components/shared/pets/PetCard";
 import { PetFiltersBar } from "@/components/shared/pets/PetFilters";
 import { CreatePetModal } from "@/components/shared/pets/CreatePetModal";
@@ -46,6 +48,14 @@ export default function PetsPage() {
   const pets = allPets && (filters.species?.length ?? 0) > 0
     ? allPets.filter(p => filters.species!.includes(p.species))
     : allPets;
+
+  const petIds = allPets?.map(p => p.id) ?? [];
+  const { data: petMediaMap } = useQuery({
+    queryKey: ["pets-media", petIds],
+    queryFn: () => getMediaByOwnersBatch(petIds, EOwnerType.Pet),
+    enabled: petIds.length > 0,
+    staleTime: 1000 * 60 * 60,
+  });
 
   return (
     <div className="md:bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-24 md:pb-28">
@@ -96,7 +106,13 @@ export default function PetsPage() {
 
             {!isLoading && !isError && pets && pets.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {pets.map(pet => <PetCard key={pet.id} pet={pet} />)}
+                {pets.map(pet => (
+                  <PetCard
+                    key={pet.id}
+                    pet={pet}
+                    photoUrl={petMediaMap?.[pet.id]?.[0]?.url}
+                  />
+                ))}
               </div>
             )}
           </div>

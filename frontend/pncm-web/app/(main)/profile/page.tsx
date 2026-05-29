@@ -201,6 +201,16 @@ function MyActivitySection({ userId }: { userId: string }) {
     queryFn: getMyPets,
   });
 
+  const sharedPets = pets.filter((p: Pet) => p.status !== 5);
+  const savedPets  = pets.filter((p: Pet) => p.status === 5);
+  const petIds = pets.map((p: Pet) => p.id);
+  const { data: petMediaMap } = useQuery({
+    queryKey: ["my-pets-media", petIds],
+    queryFn: () => getMediaByOwnersBatch(petIds, EOwnerType.Pet),
+    enabled: petIds.length > 0,
+    staleTime: 1000 * 60 * 60,
+  });
+
   const { data: adoptions = [], isLoading: adoptionsLoading } = useQuery({
     queryKey: ["my-adoptions", userId],
     queryFn: () => getAdoptionsByAdopter(userId),
@@ -255,17 +265,45 @@ function MyActivitySection({ userId }: { userId: string }) {
                 ))}
               </div>
             )}
-            {!petsLoading && pets.length === 0 && <EmptyState text="Heç bir elan yoxdur" />}
-            {!petsLoading && pets.length > 0 && (
+            {!petsLoading && sharedPets.length === 0 && <EmptyState text="Heç bir elan yoxdur" />}
+            {!petsLoading && sharedPets.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {pets.map((pet: Pet) => <PetCard key={pet.id} pet={pet} hideAdopt />)}
+                {sharedPets.map((pet: Pet) => (
+                  <PetCard
+                    key={pet.id}
+                    pet={pet}
+                    hideAdopt
+                    photoUrl={petMediaMap?.[pet.id]?.[0]?.url}
+                  />
+                ))}
               </div>
             )}
           </>
         )}
 
         {tab === "saved" && (
-          <EmptyState text="Saxlanılmış elan yoxdur" />
+          <>
+            {petsLoading && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
+                ))}
+              </div>
+            )}
+            {!petsLoading && savedPets.length === 0 && <EmptyState text="Şəxsi heyvan yoxdur" />}
+            {!petsLoading && savedPets.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {savedPets.map((pet: Pet) => (
+                  <PetCard
+                    key={pet.id}
+                    pet={pet}
+                    hideAdopt
+                    photoUrl={petMediaMap?.[pet.id]?.[0]?.url}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {tab === "adoptions" && (

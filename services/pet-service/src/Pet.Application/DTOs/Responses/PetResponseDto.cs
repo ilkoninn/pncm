@@ -14,6 +14,8 @@ public sealed record PetResponseDto(
     EPetStatus Status,
     Guid OwnerId,
     EOwnerType OwnerType,
+    string? OwnerFirstName,
+    string? OwnerLastName,
     string City,
     decimal? Latitude,
     decimal? Longitude,

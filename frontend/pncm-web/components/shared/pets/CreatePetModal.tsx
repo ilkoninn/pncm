@@ -74,6 +74,8 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
       await addPetPhoto(createdPet.id, media.id, true);
       queryClient.invalidateQueries({ queryKey: ["pets"] });
       queryClient.invalidateQueries({ queryKey: ["my-pets"] });
+      queryClient.invalidateQueries({ queryKey: ["pets-media"] });
+      queryClient.invalidateQueries({ queryKey: ["my-pets-media"] });
     } finally {
       setPhotoUploading(false);
       setStep("done");

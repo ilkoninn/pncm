@@ -20,21 +20,26 @@ const STATUS_STYLES: Record<number, { bg: string }> = {
   0: { bg: "bg-emerald-500" },
   1: { bg: "bg-slate-400" },
   2: { bg: "bg-amber-400" },
+  3: { bg: "bg-red-400" },
+  4: { bg: "bg-blue-400" },
+  5: { bg: "bg-violet-400" },
 };
 
-export function PetCard({ pet, hideAdopt }: { pet: Pet; hideAdopt?: boolean }) {
+export function PetCard({ pet, hideAdopt, photoUrl: externalPhotoUrl }: { pet: Pet; hideAdopt?: boolean; photoUrl?: string }) {
   const [adoptionOpen, setAdoptionOpen] = useState(false);
-  const primaryPhoto = pet.photos.find(p => p.isPrimary) ?? pet.photos[0];
+  const primaryPhoto = !externalPhotoUrl
+    ? (pet.photos?.find(p => p.isPrimary) ?? pet.photos?.[0])
+    : undefined;
 
   const { data: mediaFile } = useQuery({
     queryKey: ["media", primaryPhoto?.mediaId],
     queryFn: () => getMediaById(primaryPhoto!.mediaId),
-    enabled: !!primaryPhoto?.mediaId,
+    enabled: !!primaryPhoto?.mediaId && !externalPhotoUrl,
     staleTime: 1000 * 60 * 60,
   });
 
-  const photoUrl = mediaFile?.url ?? null;
-  const status = STATUS_STYLES[pet.status];
+  const photoUrl = externalPhotoUrl ?? mediaFile?.url ?? null;
+  const status = STATUS_STYLES[pet.status] ?? STATUS_STYLES[0];
   const isAvailable = pet.status === 0;
 
   return (
@@ -66,9 +71,11 @@ export function PetCard({ pet, hideAdopt }: { pet: Pet; hideAdopt?: boolean }) {
               ✓ Aşı
             </span>
           )}
-          <span className={`absolute bottom-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${status.bg}`}>
-            {STATUS_MAP[pet.status]}
-          </span>
+          {pet.status !== 5 && (
+            <span className={`absolute bottom-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${status.bg}`}>
+              {STATUS_MAP[pet.status]}
+            </span>
+          )}
         </div>
         </Link>
 

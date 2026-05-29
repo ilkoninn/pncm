@@ -52,11 +52,14 @@ public class PetModule : ICarterModule
         var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdClaim, out var userId))
             return Results.Unauthorized();
+        var firstName = user.FindFirstValue(ClaimTypes.GivenName);
+        var lastName  = user.FindFirstValue(ClaimTypes.Surname);
         var result = await mediator.Send(new CreatePetCommand(
             dto.Name, dto.Species, dto.Breed, dto.AgeMonths,
             dto.Gender, dto.Size, dto.Color, dto.Description,
             dto.IsVaccinated, dto.IsNeutered, userId,
-            dto.City, dto.Latitude, dto.Longitude, dto.Status));
+            dto.City, dto.Latitude, dto.Longitude, dto.Status,
+            firstName, lastName));
         return Results.Created($"/pets/{result.Id}", result);
     }
 

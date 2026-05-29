@@ -40,7 +40,8 @@
       "Bash(npm list *)",
       "Bash(sudo k3s kubectl get deployment adoption-service -n pncm -o jsonpath='{.spec.replicas}')",
       "Read(//mnt/d/projects/big-projects/pncm/infra/k8s/**)",
-      "Bash(dotnet ef *)"
+      "Bash(dotnet ef *)",
+      "Bash(del *)"
     ]
   }
 }

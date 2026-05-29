@@ -13,5 +13,7 @@ public sealed record CreatePetCommand(
     string City,
     decimal? Latitude,
     decimal? Longitude,
-    EPetStatus Status = EPetStatus.Available
+    EPetStatus Status = EPetStatus.Available,
+    string? OwnerFirstName = null,
+    string? OwnerLastName = null
 ) : IRequest<PetResponseDto>;

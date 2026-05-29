@@ -20,6 +20,8 @@ export interface Pet {
   status: number;
   ownerId: string;
   ownerType: number;
+  ownerFirstName: string | null;
+  ownerLastName: string | null;
   city: string;
   latitude: number | null;
   longitude: number | null;

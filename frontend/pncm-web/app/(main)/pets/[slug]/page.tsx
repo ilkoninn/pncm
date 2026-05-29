@@ -8,7 +8,7 @@ import { getMediaById } from "@/lib/api/media";
 import { AdoptionModal } from "@/components/shared/pets/AdoptionModal";
 import type { Pet } from "@/types/pets";
 import { SPECIES_MAP, GENDER_MAP, SIZE_MAP, STATUS_MAP } from "@/types/pets";
-import { MapPin, Calendar, CheckCircle } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, UserRound } from "lucide-react";
 
 function formatAge(months: number | null): string {
   if (!months) return "";
@@ -175,6 +175,12 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
                         <MapPin className="w-4 h-4" />
                         <span>{pet.city}</span>
                       </div>
+                      {(pet.ownerFirstName || pet.ownerLastName) && (
+                        <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
+                          <UserRound className="w-4 h-4 flex-shrink-0" />
+                          <span>{[pet.ownerFirstName, pet.ownerLastName].filter(Boolean).join(" ")}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
