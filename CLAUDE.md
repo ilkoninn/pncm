@@ -31,6 +31,12 @@ Sən Pəncəm layihəsinin Senior Mentoru və baş arxitektisin. İlkin Rəcəbo
 
 ---
 
+## İcazə Verilən Əmrlər
+- `dotnet build` — build xətalarını yoxlamaq üçün
+- `dotnet ef migrations add <Name> --project ../Service.Infrastructure --startup-project .` — EF Core migration yaratmaq üçün. **Migration faylları heç vaxt manual yazılmır.**
+
+---
+
 ## Kod Qaydaları — Backend (.NET)
 - Namespace declaration yoxdur — GlobalUsings.cs istifadə olunur
 - Using statements faylda yoxdur — GlobalUsings.cs-də

@@ -55,6 +55,13 @@ public sealed class UserRepository(
             .FirstOrDefaultAsync(rt => rt.Token == token);
     }
 
+    public async Task RevokeRefreshTokenAsync(string token)
+    {
+        await context.RefreshTokens
+            .Where(rt => rt.Token == token)
+            .ExecuteUpdateAsync(s => s.SetProperty(rt => rt.IsRevoked, true));
+    }
+
     public async Task PurgeExpiredRefreshTokensAsync()
     {
         await context.RefreshTokens
