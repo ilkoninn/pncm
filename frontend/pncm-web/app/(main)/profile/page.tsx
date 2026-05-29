@@ -5,12 +5,14 @@ import { useSession, signOut } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
 import { uploadMedia, deleteMedia, getMediaByOwnersBatch } from "@/lib/api/media";
+import { getAdoptionsByAdopter } from "@/lib/api/adoptions";
 import { EOwnerType } from "@/types/media";
+import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
 import { PetCard } from "@/components/shared/pets/PetCard";
 import type { Pet } from "@/types/pets";
 import {
   Pencil, X, Trophy, LogOut, Copy, Check,
-  UserRound, Link as LinkIcon, Camera,
+  UserRound, Link as LinkIcon, Camera, Heart,
 } from "lucide-react";
 
 function Avatar({
@@ -185,46 +187,109 @@ function InviteSection() {
   );
 }
 
-function MyPetsSection() {
-  const { data: pets = [], isLoading } = useQuery({
+const ADOPTION_STATUS_STYLES: Record<number, { bg: string; text: string }> = {
+  0: { bg: "bg-amber-50", text: "text-amber-700" },
+  1: { bg: "bg-emerald-50", text: "text-emerald-700" },
+  2: { bg: "bg-red-50", text: "text-red-500" },
+};
+
+function MyActivitySection({ userId }: { userId: string }) {
+  const [tab, setTab] = useState<"pets" | "adoptions">("pets");
+
+  const { data: pets = [], isLoading: petsLoading } = useQuery({
     queryKey: ["my-pets"],
     queryFn: getMyPets,
   });
 
+  const { data: adoptions = [], isLoading: adoptionsLoading } = useQuery({
+    queryKey: ["my-adoptions", userId],
+    queryFn: () => getAdoptionsByAdopter(userId),
+    enabled: tab === "adoptions",
+  });
+
+  const EmptyState = ({ text }: { text: string }) => (
+    <div className="flex flex-col items-center justify-center py-16">
+      <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+        <svg viewBox="0 0 80 80" fill="currentColor" className="w-7 h-7 text-slate-300">
+          <ellipse cx="27" cy="18" rx="8" ry="10" />
+          <ellipse cx="53" cy="18" rx="8" ry="10" />
+          <ellipse cx="13" cy="36" rx="7" ry="9" />
+          <ellipse cx="67" cy="36" rx="7" ry="9" />
+          <ellipse cx="40" cy="56" rx="18" ry="16" />
+        </svg>
+      </div>
+      <p className="text-sm text-slate-400">{text}</p>
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-      <div className="px-5 py-3 border-b border-slate-100">
-        <h3 className="font-bold text-slate-900 text-sm">Elanlarım</h3>
+      <div className="px-5 py-3 border-b border-slate-100 flex gap-5">
+        <button
+          onClick={() => setTab("pets")}
+          className={`text-sm font-bold pb-1 transition-colors cursor-pointer ${tab === "pets" ? "text-emerald-600 border-b-2 border-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
+        >
+          Paylaşdıqlarım
+        </button>
+        <button
+          onClick={() => setTab("adoptions")}
+          className={`text-sm font-bold pb-1 transition-colors cursor-pointer ${tab === "adoptions" ? "text-emerald-600 border-b-2 border-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
+        >
+          Müraciətlərim
+        </button>
       </div>
 
       <div className="p-4">
-        {isLoading && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
-            ))}
-          </div>
+        {tab === "pets" && (
+          <>
+            {petsLoading && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
+                ))}
+              </div>
+            )}
+            {!petsLoading && pets.length === 0 && <EmptyState text="Heç bir elan yoxdur" />}
+            {!petsLoading && pets.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {pets.map((pet: Pet) => <PetCard key={pet.id} pet={pet} />)}
+              </div>
+            )}
+          </>
         )}
 
-        {!isLoading && pets.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-              <svg viewBox="0 0 80 80" fill="currentColor" className="w-7 h-7 text-slate-300">
-                <ellipse cx="27" cy="18" rx="8" ry="10" />
-                <ellipse cx="53" cy="18" rx="8" ry="10" />
-                <ellipse cx="13" cy="36" rx="7" ry="9" />
-                <ellipse cx="67" cy="36" rx="7" ry="9" />
-                <ellipse cx="40" cy="56" rx="18" ry="16" />
-              </svg>
-            </div>
-            <p className="text-sm text-slate-400">Bu bölmədə heç bir heyvan yoxdur</p>
-          </div>
-        )}
-
-        {!isLoading && pets.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {pets.map((pet: Pet) => <PetCard key={pet.id} pet={pet} />)}
-          </div>
+        {tab === "adoptions" && (
+          <>
+            {adoptionsLoading && (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />
+                ))}
+              </div>
+            )}
+            {!adoptionsLoading && adoptions.length === 0 && <EmptyState text="Heç bir müraciət yoxdur" />}
+            {!adoptionsLoading && adoptions.length > 0 && (
+              <div className="space-y-3">
+                {adoptions.map(a => {
+                  const style = ADOPTION_STATUS_STYLES[a.status] ?? ADOPTION_STATUS_STYLES[0];
+                  return (
+                    <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                        <Heart className="w-4 h-4 text-emerald-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-800 truncate">{a.message}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{new Date(a.createdAt).toLocaleDateString("az-AZ")}</p>
+                      </div>
+                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${style.bg} ${style.text}`}>
+                        {ADOPTION_STATUS_MAP[a.status]}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -313,7 +378,7 @@ export default function ProfilePage() {
         </div>
 
         <InviteSection />
-        <MyPetsSection />
+        {userId && <MyActivitySection userId={userId} />}
 
       </div>
 

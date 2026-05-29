@@ -55,7 +55,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.accessTokenExpires = new Date(
           user.expiresAt as string
         ).getTime();
+        return token;
       }
+
+      if (Date.now() < (token.accessTokenExpires as number) - 60_000) {
+        return token;
+      }
+
+      try {
+        const res = await fetch("http://pncm-identity:80/auth/refresh-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+          }),
+        });
+
+        if (!res.ok) throw new Error("Refresh failed");
+
+        const data = await res.json();
+        token.accessToken = data.accessToken;
+        token.refreshToken = data.refreshToken;
+        token.accessTokenExpires = new Date(data.expiresAt).getTime();
+      } catch {
+        token.error = "RefreshTokenError";
+      }
+
       return token;
     },
     async session({ session, token }) {
