@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Store.Application\Store.Application.csproj" />
     <Protobuf Include="..\..\Protos\user.proto" GrpcServices="Client" />
+    <Protobuf Include="..\..\..\media-service\Protos\media.proto" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>

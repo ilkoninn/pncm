@@ -9,6 +9,12 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.27.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.67.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="MassTransit.Kafka" Version="8.5.7" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
@@ -18,6 +24,10 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
   </ItemGroup>
   
+  <ItemGroup>
+    <Protobuf Include="..\..\..\media-service\Protos\media.proto" GrpcServices="Client" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Identity.Application\Identity.Application.csproj" />
   </ItemGroup>

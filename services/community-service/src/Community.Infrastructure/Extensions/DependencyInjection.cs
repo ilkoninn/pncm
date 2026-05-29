@@ -19,6 +19,7 @@ public static class DependencyInjection
         }
 
         services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IMediaGrpcClient, MediaGrpcClient>();
         services.AddScoped<IContestRepository, ContestRepository>();
         services.AddScoped<IContestEntryRepository, ContestEntryRepository>();
         services.AddScoped<IInviteRepository, InviteRepository>();

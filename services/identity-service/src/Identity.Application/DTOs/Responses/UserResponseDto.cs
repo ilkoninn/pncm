@@ -4,5 +4,6 @@ public record UserResponseDto(
     string LastName,
     string Email,
     string? PhoneNumber,
-    Guid? AvatarMediaId
+    Guid? AvatarMediaId,
+    string? AvatarUrl = null
 );

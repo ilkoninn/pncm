@@ -223,13 +223,6 @@ function MyActivitySection({ userId }: { userId: string }) {
 
   const sharedPets = pets.filter((p: Pet) => p.status !== 5);
   const savedPets  = pets.filter((p: Pet) => p.status === 5);
-  const petIds = pets.map((p: Pet) => p.id);
-  const { data: petMediaMap } = useQuery({
-    queryKey: ["my-pets-media", petIds],
-    queryFn: () => getMediaByOwnersBatch(petIds, EOwnerType.Pet),
-    enabled: petIds.length > 0,
-    staleTime: 1000 * 60 * 60,
-  });
 
   const { data: adoptions = [], isLoading: adoptionsLoading } = useQuery({
     queryKey: ["my-adoptions", userId],
@@ -293,7 +286,7 @@ function MyActivitySection({ userId }: { userId: string }) {
                     key={pet.id}
                     pet={pet}
                     hideAdopt
-                    photoUrl={petMediaMap?.[pet.id]?.[0]?.url}
+                    photoUrl={pet.primaryPhotoUrl ?? undefined}
                   />
                 ))}
               </div>
@@ -318,7 +311,7 @@ function MyActivitySection({ userId }: { userId: string }) {
                     key={pet.id}
                     pet={pet}
                     hideAdopt
-                    photoUrl={petMediaMap?.[pet.id]?.[0]?.url}
+                    photoUrl={pet.primaryPhotoUrl ?? undefined}
                   />
                 ))}
               </div>

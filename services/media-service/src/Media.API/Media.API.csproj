@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="FastEndpoints" Version="8.1.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.5" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageReference Include="OpenTelemetry" Version="1.15.3" />
@@ -27,6 +28,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Media.Infrastructure\Media.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\..\Protos\media.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

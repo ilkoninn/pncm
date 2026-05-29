@@ -9,5 +9,6 @@ public sealed record StoreResponseDto(
     Guid? LogoMediaId,
     string? PhoneNumber,
     bool IsActive,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? LogoUrl = null
 );

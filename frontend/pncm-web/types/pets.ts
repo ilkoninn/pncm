@@ -2,6 +2,7 @@ export interface PetPhoto {
   id: string;
   mediaId: string;
   isPrimary: boolean;
+  url?: string | null;
 }
 
 export interface Pet {
@@ -27,6 +28,7 @@ export interface Pet {
   longitude: number | null;
   photos: PetPhoto[];
   createdAt: string;
+  primaryPhotoUrl?: string | null;
 }
 
 export const SPECIES_MAP: Record<number, string> = {

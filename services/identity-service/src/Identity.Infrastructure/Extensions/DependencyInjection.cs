@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IMagicLinkService, MagicLinkService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IEmailService, MailKitEmailService>();
+        services.AddScoped<IMediaGrpcClient, MediaGrpcClient>();
 
         var applicationAssembly = typeof(RequestAccessCommand).Assembly;
 

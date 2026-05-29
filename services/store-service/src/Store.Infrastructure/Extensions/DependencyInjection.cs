@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<IStoreRepository, StoreRepository>();
 
         services.AddScoped<IUserGrpcClient, UserGrpcClient>();
+        services.AddScoped<IMediaGrpcClient, MediaGrpcClient>();
 
         var applicationAssembly = typeof(CreateStoreCommand).Assembly;
 

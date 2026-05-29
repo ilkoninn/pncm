@@ -48,6 +48,10 @@ spec:
               value: "Host=pncm-postgres;Port=5432;Database=pncm_store;Username=postgres;Password=postgres;Encoding=UTF8"
             - name: Otlp__Endpoint
               value: "http://pncm-jaeger:4317"
+            - name: GrpcServices__IdentityService
+              value: "http://pncm-identity:80"
+            - name: GrpcServices__MediaService
+              value: "http://pncm-media:80"
 ---
 apiVersion: v1
 kind: Service

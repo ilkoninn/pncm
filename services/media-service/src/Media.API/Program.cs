@@ -32,6 +32,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddGrpc();
 
 var app = builder.Build();
 
@@ -43,6 +44,7 @@ app.UseSwaggerGen();
 app.UseFastEndpoints();
 app.MapMetrics();
 app.MapHealthChecks("/health");
+app.MapGrpcService<Media.API.GrpcServices.MediaGrpcService>();
 
 using (var scope = app.Services.CreateScope())
 {

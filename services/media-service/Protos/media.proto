@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "Media.API.Protos";
+
+package media;
+
+service MediaGrpcService {
+  rpc GetPrimaryPhotos (GetPrimaryPhotosRequest) returns (GetPrimaryPhotosResponse);
+  rpc GetPhotosByOwner (GetPhotosByOwnerRequest) returns (GetPhotosByOwnerResponse);
+}
+
+message GetPrimaryPhotosRequest {
+  repeated string owner_ids = 1;
+  int32 owner_type = 2;
+}
+
+message OwnerPhoto {
+  string owner_id = 1;
+  string photo_url = 2;
+}
+
+message GetPrimaryPhotosResponse {
+  repeated OwnerPhoto photos = 1;
+}
+
+message GetPhotosByOwnerRequest {
+  string owner_id = 1;
+  int32 owner_type = 2;
+}
+
+message PhotoItem {
+  string media_id = 1;
+  string url = 2;
+}
+
+message GetPhotosByOwnerResponse {
+  repeated PhotoItem photos = 1;
+}

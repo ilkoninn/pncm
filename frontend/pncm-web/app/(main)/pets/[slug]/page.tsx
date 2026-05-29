@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getPetBySlug } from "@/lib/api/pets";
-import { getMediaById } from "@/lib/api/media";
 import { AdoptionModal } from "@/components/shared/pets/AdoptionModal";
 import type { Pet } from "@/types/pets";
 import { SPECIES_MAP, GENDER_MAP, SIZE_MAP, STATUS_MAP } from "@/types/pets";
@@ -30,18 +29,9 @@ function AdBanner({ label }: { label: string }) {
   );
 }
 
-function PhotoGallery({ photos }: { photos: { id: string; mediaId: string; isPrimary: boolean }[] }) {
+function PhotoGallery({ photos }: { photos: { id: string; url?: string | null; isPrimary: boolean }[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  const queries = photos.map(p => ({
-    queryKey: ["media", p.mediaId],
-    queryFn: () => getMediaById(p.mediaId),
-    staleTime: 1000 * 60 * 60,
-    enabled: !!p.mediaId,
-  }));
-
-  const results = queries.map(q => useQuery(q));
-  const activeUrl = results[activeIndex]?.data?.url ?? null;
+  const activeUrl = photos[activeIndex]?.url ?? null;
 
   if (photos.length === 0) {
     return (
@@ -64,31 +54,34 @@ function PhotoGallery({ photos }: { photos: { id: string; mediaId: string; isPri
           <img src={activeUrl} alt="pet" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-slate-200 border-t-emerald-500 rounded-full animate-spin" />
+            <svg viewBox="0 0 80 80" fill="currentColor" className="w-16 h-16 text-slate-200">
+              <ellipse cx="27" cy="18" rx="8" ry="10" />
+              <ellipse cx="53" cy="18" rx="8" ry="10" />
+              <ellipse cx="13" cy="36" rx="7" ry="9" />
+              <ellipse cx="67" cy="36" rx="7" ry="9" />
+              <ellipse cx="40" cy="56" rx="18" ry="16" />
+            </svg>
           </div>
         )}
       </div>
 
       {photos.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {photos.map((_, i) => {
-            const url = results[i]?.data?.url ?? null;
-            return (
-              <button
-                key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors cursor-pointer ${
-                  i === activeIndex ? "border-emerald-500" : "border-transparent"
-                }`}
-              >
-                {url ? (
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-slate-100" />
-                )}
-              </button>
-            );
-          })}
+          {photos.map((p, i) => (
+            <button
+              key={p.id}
+              onClick={() => setActiveIndex(i)}
+              className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors cursor-pointer ${
+                i === activeIndex ? "border-emerald-500" : "border-transparent"
+              }`}
+            >
+              {p.url ? (
+                <img src={p.url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-slate-100" />
+              )}
+            </button>
+          ))}
         </div>
       )}
     </div>

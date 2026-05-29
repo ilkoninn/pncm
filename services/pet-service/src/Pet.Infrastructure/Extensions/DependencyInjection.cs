@@ -15,6 +15,7 @@ public static class DependencyInjection
             new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IPetRepository, PetRepository>();
+        services.AddScoped<IMediaGrpcClient, MediaGrpcClient>();
 
         var applicationAssembly = typeof(CreatePetCommand).Assembly;
 

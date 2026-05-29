@@ -4,5 +4,7 @@ public sealed record PostResponseDto(
     Guid? PetId,
     string Content,
     List<Guid> MediaIds,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? PrimaryPhotoUrl = null,
+    List<string>? MediaUrls = null
 );
