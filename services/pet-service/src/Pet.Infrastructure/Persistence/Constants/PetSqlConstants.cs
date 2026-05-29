@@ -21,7 +21,7 @@ public static class PetSqlConstants
 
     public const string GetPhotosByPetIdSql = $"SELECT {PhotoColumns} FROM pet_photos WHERE pet_id = @PetId";
 
-    public const string GetAllSql = $"SELECT {PetColumns} FROM pets WHERE is_active = true AND is_deleted = false";
+    public const string GetAllSql = $"SELECT {PetColumns} FROM pets WHERE is_active = true AND is_deleted = false AND status != 5";
 
     public const string GetByOwnerSql = $"SELECT {PetColumns} FROM pets WHERE owner_id = @OwnerId AND owner_type = @OwnerType AND is_active = true AND is_deleted = false";
 

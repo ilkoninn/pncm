@@ -66,10 +66,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-100 bg-white">
         <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <Link href="/pets" className="flex items-center gap-2 flex-shrink-0">
             <PawPrint className="w-6 h-6 text-emerald-700" />
             <span className="font-bold text-slate-800 tracking-tight">Pəncəm</span>
-          </div>
+          </Link>
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5 flex-shrink-0">

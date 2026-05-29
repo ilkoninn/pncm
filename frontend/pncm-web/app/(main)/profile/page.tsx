@@ -194,7 +194,7 @@ const ADOPTION_STATUS_STYLES: Record<number, { bg: string; text: string }> = {
 };
 
 function MyActivitySection({ userId }: { userId: string }) {
-  const [tab, setTab] = useState<"pets" | "adoptions">("pets");
+  const [tab, setTab] = useState<"pets" | "adoptions" | "saved">("pets");
 
   const { data: pets = [], isLoading: petsLoading } = useQuery({
     queryKey: ["my-pets"],
@@ -232,6 +232,12 @@ function MyActivitySection({ userId }: { userId: string }) {
           Paylaşdıqlarım
         </button>
         <button
+          onClick={() => setTab("saved")}
+          className={`text-sm font-bold pb-1 transition-colors cursor-pointer ${tab === "saved" ? "text-emerald-600 border-b-2 border-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
+        >
+          Saxladıqlarım
+        </button>
+        <button
           onClick={() => setTab("adoptions")}
           className={`text-sm font-bold pb-1 transition-colors cursor-pointer ${tab === "adoptions" ? "text-emerald-600 border-b-2 border-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
         >
@@ -252,10 +258,14 @@ function MyActivitySection({ userId }: { userId: string }) {
             {!petsLoading && pets.length === 0 && <EmptyState text="Heç bir elan yoxdur" />}
             {!petsLoading && pets.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {pets.map((pet: Pet) => <PetCard key={pet.id} pet={pet} />)}
+                {pets.map((pet: Pet) => <PetCard key={pet.id} pet={pet} hideAdopt />)}
               </div>
             )}
           </>
+        )}
+
+        {tab === "saved" && (
+          <EmptyState text="Saxlanılmış elan yoxdur" />
         )}
 
         {tab === "adoptions" && (

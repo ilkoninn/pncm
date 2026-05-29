@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getPetBySlug } from "@/lib/api/pets";
 import { getMediaById } from "@/lib/api/media";
@@ -122,6 +123,7 @@ function PetDetailSkeleton() {
 export default function PetDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [adoptionOpen, setAdoptionOpen] = useState(false);
+  const { data: session } = useSession();
 
   const { data: pet, isLoading, isError } = useQuery({
     queryKey: ["pet", slug],
@@ -237,7 +239,7 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
                       <span>{new Date(pet.createdAt).toLocaleDateString("az-AZ")}</span>
                     </div>
 
-                    {pet.status === 0 && (
+                    {pet.status === 0 && session?.userId !== pet.ownerId && (
                       <button
                         onClick={() => setAdoptionOpen(true)}
                         className="w-full h-12 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors cursor-pointer"

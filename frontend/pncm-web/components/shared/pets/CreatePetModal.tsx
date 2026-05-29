@@ -5,9 +5,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPet, addPetPhoto } from "@/lib/api/pets";
 import { uploadMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
-import { X, Check, Camera, ImagePlus } from "lucide-react";
+import { X, Check, Camera, ImagePlus, Heart, PawPrint } from "lucide-react";
 import { SPECIES_MAP, GENDER_MAP, SIZE_MAP } from "@/types/pets";
-import type { Pet } from "@/types/pets";
+import type { Pet, PetFormType } from "@/types/pets";
 
 const INITIAL = {
   name: "", species: 0, breed: "", ageMonths: "" as string | number,
@@ -15,15 +15,22 @@ const INITIAL = {
   isVaccinated: false, isNeutered: false, city: "",
 };
 
+const inputCls = "w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors";
+const selectCls = inputCls + " bg-white";
+const labelCls = "text-xs font-medium text-slate-600";
+
 export function CreatePetModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [petType, setPetType] = useState<PetFormType | null>(null);
   const [form, setForm] = useState(INITIAL);
-  const [step, setStep] = useState<"form" | "photo" | "done">("form");
+  const [step, setStep] = useState<"type" | "form" | "photo" | "done">("type");
   const [createdPet, setCreatedPet] = useState<Pet | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
+
+  const isAdoption = petType === "adoption";
 
   const { mutate: submitPet, isPending } = useMutation({
     mutationFn: () => createPet({
@@ -37,7 +44,8 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
       description: form.description || undefined,
       isVaccinated: form.isVaccinated,
       isNeutered: form.isNeutered,
-      city: form.city,
+      city: form.city || "Bakı",
+      status: isAdoption ? 0 : 5,
     }),
     onSuccess: (pet) => {
       queryClient.invalidateQueries({ queryKey: ["pets"] });
@@ -72,9 +80,12 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
     }
   }
 
-  const inputCls = "w-full h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors";
-  const selectCls = inputCls + " bg-white";
-  const labelCls = "text-xs font-medium text-slate-600";
+  const titles: Record<typeof step, string> = {
+    type: "Heyvan əlavə et",
+    form: isAdoption ? "Övladlığa vermək" : "Şəxsi heyvan",
+    photo: "Şəkil əlavə et",
+    done: "Tamamlandı",
+  };
 
   return (
     <div className="fixed inset-0 z-[1010] flex items-end sm:items-center justify-center">
@@ -82,59 +93,127 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
 
       <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
-          <h2 className="font-bold text-slate-900 text-sm">
-            {step === "form" ? "Elan yayımla" : step === "photo" ? "Şəkil əlavə et" : "Tamamlandı"}
-          </h2>
+          <div className="flex items-center gap-2">
+            {step === "form" && (
+              <button
+                onClick={() => setStep("type")}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-colors cursor-pointer text-sm"
+              >
+                ←
+              </button>
+            )}
+            <h2 className="font-bold text-slate-900 text-sm">{titles[step]}</h2>
+          </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition-colors cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
+        {step === "type" && (
+          <div className="p-5 space-y-3">
+            <p className="text-xs text-slate-400 mb-4">Hansı məqsədlə əlavə edirsən?</p>
+            <button
+              onClick={() => { setPetType("personal"); setStep("form"); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-emerald-400 hover:bg-emerald-50/50 transition-all cursor-pointer text-left group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-emerald-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                <PawPrint className="w-6 h-6 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Şəxsi heyvanim</p>
+                <p className="text-xs text-slate-400 mt-0.5">Öz heyvanını qeyd et, yalnız sən görəcəksən</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => { setPetType("adoption"); setStep("form"); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-emerald-400 hover:bg-emerald-50/50 transition-all cursor-pointer text-left group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-emerald-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                <Heart className="w-6 h-6 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">Övladlığa vermək</p>
+                <p className="text-xs text-slate-400 mt-0.5">Heyvanın üçün yeni sahib tap</p>
+              </div>
+            </button>
+          </div>
+        )}
+
         {step === "form" && (
           <form onSubmit={e => { e.preventDefault(); submitPet(); }} className="overflow-y-auto p-5 space-y-4">
+            {isAdoption && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 rounded-xl text-xs text-emerald-700 font-medium">
+                <Heart className="w-3.5 h-3.5 flex-shrink-0" />
+                İşarəli sahələr (*) mütləq doldurulmalıdır
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5 col-span-2">
                 <label className={labelCls}>Ad *</label>
                 <input required value={form.name} onChange={e => set("name", e.target.value)} placeholder="Heyvanın adı" className={inputCls} />
               </div>
+
               <div className="space-y-1.5">
                 <label className={labelCls}>Növ *</label>
                 <select value={form.species} onChange={e => set("species", Number(e.target.value))} className={selectCls}>
                   {Object.entries(SPECIES_MAP).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
+
               <div className="space-y-1.5">
                 <label className={labelCls}>Cins</label>
                 <input value={form.breed} onChange={e => set("breed", e.target.value)} placeholder="məs. Labrador" className={inputCls} />
               </div>
+
               <div className="space-y-1.5">
-                <label className={labelCls}>Cinsiyyət *</label>
+                <label className={labelCls}>Cinsiyyət{isAdoption ? " *" : ""}</label>
                 <select value={form.gender} onChange={e => set("gender", Number(e.target.value))} className={selectCls}>
                   {Object.entries(GENDER_MAP).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
+
               <div className="space-y-1.5">
-                <label className={labelCls}>Ölçü *</label>
+                <label className={labelCls}>Ölçü{isAdoption ? " *" : ""}</label>
                 <select value={form.size} onChange={e => set("size", Number(e.target.value))} className={selectCls}>
                   {Object.entries(SIZE_MAP).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
+
               <div className="space-y-1.5">
                 <label className={labelCls}>Yaş (ay)</label>
                 <input type="number" min={0} value={form.ageMonths} onChange={e => set("ageMonths", e.target.value)} placeholder="məs. 6" className={inputCls} />
               </div>
+
               <div className="space-y-1.5">
                 <label className={labelCls}>Rəng</label>
                 <input value={form.color} onChange={e => set("color", e.target.value)} placeholder="məs. Qara" className={inputCls} />
               </div>
+
               <div className="space-y-1.5 col-span-2">
-                <label className={labelCls}>Şəhər *</label>
-                <input required value={form.city} onChange={e => set("city", e.target.value)} placeholder="məs. Bakı" className={inputCls} />
+                <label className={labelCls}>Şəhər{isAdoption ? " *" : ""}</label>
+                <input
+                  required={isAdoption}
+                  value={form.city}
+                  onChange={e => set("city", e.target.value)}
+                  placeholder="məs. Bakı"
+                  className={inputCls}
+                />
               </div>
+
               <div className="space-y-1.5 col-span-2">
-                <label className={labelCls}>Açıqlama</label>
-                <textarea value={form.description} onChange={e => set("description", e.target.value)} placeholder="Heyvan haqqında ətraflı məlumat..." rows={3} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors resize-none" />
+                <label className={labelCls}>Açıqlama{isAdoption ? " *" : ""}</label>
+                <textarea
+                  required={isAdoption}
+                  value={form.description}
+                  onChange={e => set("description", e.target.value)}
+                  placeholder={isAdoption ? "Heyvan haqqında ətraflı məlumat verin..." : "Heyvan haqqında qeyd"}
+                  rows={3}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors resize-none"
+                />
               </div>
+
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.isVaccinated} onChange={e => set("isVaccinated", e.target.checked)} className="rounded accent-emerald-600" />
                 <span className="text-sm text-slate-700">Aşılanıb</span>
@@ -144,6 +223,7 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
                 <span className="text-sm text-slate-700">Kısırlaşdırılıb</span>
               </label>
             </div>
+
             <button type="submit" disabled={isPending} className="w-full h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors cursor-pointer">
               {isPending ? "Yaradılır..." : "Növbəti →"}
             </button>
@@ -174,17 +254,10 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="flex gap-3">
-              <button
-                onClick={() => setStep("done")}
-                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
+              <button onClick={() => setStep("done")} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer">
                 Sonra əlavə et
               </button>
-              <button
-                onClick={handlePhotoUpload}
-                disabled={!photoFile || photoUploading}
-                className="flex-1 h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors cursor-pointer"
-              >
+              <button onClick={handlePhotoUpload} disabled={!photoFile || photoUploading} className="flex-1 h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors cursor-pointer">
                 {photoUploading ? "Yüklənir..." : "Yüklə"}
               </button>
             </div>
@@ -196,8 +269,14 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
             <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
               <Check className="w-7 h-7 text-emerald-600" />
             </div>
-            <p className="font-semibold text-slate-900">Elan yayımlandı!</p>
-            <p className="text-sm text-slate-400 text-center">Heyvanınız indi siyahıda görünür.</p>
+            <p className="font-semibold text-slate-900">
+              {isAdoption ? "Elan yayımlandı!" : "Heyvan əlavə edildi!"}
+            </p>
+            <p className="text-sm text-slate-400 text-center">
+              {isAdoption
+                ? "Heyvanınız indi siyahıda görünür."
+                : "Heyvanınız profilinizə əlavə edildi."}
+            </p>
             <button onClick={onClose} className="mt-2 h-10 px-6 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer">
               Bağla
             </button>

@@ -11,5 +11,6 @@ public sealed record CreatePetRequestDto(
     bool IsNeutered,
     string City,
     decimal? Latitude,
-    decimal? Longitude
+    decimal? Longitude,
+    EPetStatus Status = EPetStatus.Available
 );

@@ -56,7 +56,7 @@ public class PetModule : ICarterModule
             dto.Name, dto.Species, dto.Breed, dto.AgeMonths,
             dto.Gender, dto.Size, dto.Color, dto.Description,
             dto.IsVaccinated, dto.IsNeutered, userId,
-            dto.City, dto.Latitude, dto.Longitude));
+            dto.City, dto.Latitude, dto.Longitude, dto.Status));
         return Results.Created($"/pets/{result.Id}", result);
     }
 

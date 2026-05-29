@@ -4,5 +4,6 @@ public enum EPetStatus
     Reserved,
     Adopted,
     Lost,
-    Found
+    Found,
+    Personal
 }

@@ -9,6 +9,18 @@ import { CreatePetModal } from "@/components/shared/pets/CreatePetModal";
 import type { PetFilters } from "@/types/pets";
 import { Plus } from "lucide-react";
 
+function AdBanner({ label }: { label: string }) {
+  return (
+    <div className="bg-white rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 h-full min-h-[200px] text-slate-300">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </svg>
+      <span className="text-xs font-medium">{label}</span>
+    </div>
+  );
+}
+
 function SkeletonCard() {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden animate-pulse">
@@ -18,18 +30,6 @@ function SkeletonCard() {
         <div className="h-3 w-20 bg-slate-100 rounded" />
         <div className="h-3 w-16 bg-slate-100 rounded" />
       </div>
-    </div>
-  );
-}
-
-function AdBanner({ label }: { label: string }) {
-  return (
-    <div className="bg-white rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 h-full min-h-[200px] text-slate-300">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
-        <rect x="2" y="3" width="20" height="14" rx="2" />
-        <path d="M8 21h8M12 17v4" />
-      </svg>
-      <span className="text-xs font-medium">{label}</span>
     </div>
   );
 }
@@ -58,7 +58,7 @@ export default function PetsPage() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            <PetFiltersBar filters={filters} onChange={setFilters} />
+            <PetFiltersBar filters={filters} onChange={setFilters} onShare={() => setCreateOpen(true)} />
 
             {isError && (
               <div className="flex items-center justify-center py-16">
@@ -108,15 +108,6 @@ export default function PetsPage() {
 
         </div>
       </div>
-
-      {/* Desktop Paylaş button */}
-      <button
-        onClick={() => setCreateOpen(true)}
-        className="hidden md:flex fixed bottom-[5rem] right-8 items-center gap-2 h-11 px-5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer shadow-lg z-[1002]"
-      >
-        <Plus className="w-4 h-4" />
-        Paylaş
-      </button>
 
       {/* Mobile FAB — half embedded in bottom nav */}
       <button

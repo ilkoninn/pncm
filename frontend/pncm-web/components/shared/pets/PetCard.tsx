@@ -22,7 +22,7 @@ const STATUS_STYLES: Record<number, { bg: string }> = {
   2: { bg: "bg-amber-400" },
 };
 
-export function PetCard({ pet }: { pet: Pet }) {
+export function PetCard({ pet, hideAdopt }: { pet: Pet; hideAdopt?: boolean }) {
   const [adoptionOpen, setAdoptionOpen] = useState(false);
   const primaryPhoto = pet.photos.find(p => p.isPrimary) ?? pet.photos[0];
 
@@ -84,7 +84,7 @@ export function PetCard({ pet }: { pet: Pet }) {
           </p>
           <p className="text-xs text-slate-400 truncate">{pet.city}</p>
 
-          {isAvailable && (
+          {isAvailable && !hideAdopt && (
             <button
               onClick={() => setAdoptionOpen(true)}
               className="w-full h-8 mt-1 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors cursor-pointer"

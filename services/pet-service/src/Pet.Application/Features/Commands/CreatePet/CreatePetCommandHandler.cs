@@ -19,6 +19,7 @@ public sealed class CreatePetCommandHandler(IPetRepository petRepository)
             Description = request.Description,
             IsVaccinated = request.IsVaccinated,
             IsNeutered = request.IsNeutered,
+            Status = request.Status,
             OwnerId = request.OwnerId,
             OwnerType = EOwnerType.User,
             City = request.City,
