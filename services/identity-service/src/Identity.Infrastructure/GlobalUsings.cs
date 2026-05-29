@@ -10,6 +10,8 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using StackExchange.Redis;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
 global using MassTransit;
 global using MediatR;
 global using Identity.Domain.Events;

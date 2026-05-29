@@ -12,15 +12,13 @@ public sealed class RefreshTokenCommandHandler(
         if (userId is null)
             return new TokenResponseDto(null, null, null, "Token etibarsızdır.");
 
-        var storedToken = await userRepository.GetRefreshTokenAsync(request.RefreshToken);
+        var storedToken = await userRepository.GetAndRevokeRefreshTokenAsync(request.RefreshToken);
 
-        if (storedToken is null || storedToken.IsRevoked || storedToken.ExpiresAt < DateTime.UtcNow)
+        if (storedToken is null)
             return new TokenResponseDto(null, null, null, "Refresh token etibarsızdır.");
 
         if (storedToken.UserId != Guid.Parse(userId))
             return new TokenResponseDto(null, null, null, "Token etibarsızdır.");
-
-        await userRepository.RevokeRefreshTokenAsync(request.RefreshToken);
 
         var newAccessToken = tokenService.GenerateAccessToken(storedToken.User);
         var newRefreshToken = tokenService.GenerateRefreshToken();

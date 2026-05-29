@@ -59,6 +59,7 @@ public static class DependencyInjection
             });
 
         services.AddAuthorization();
+        services.AddHostedService<RefreshTokenCleanupService>();
 
         services.AddMassTransit(x =>
         {

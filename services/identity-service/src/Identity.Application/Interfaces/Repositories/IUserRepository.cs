@@ -8,6 +8,6 @@ public interface IUserRepository
 
     // For refresh token management
     Task SaveRefreshTokenAsync(RefreshToken refreshToken);
-    Task<RefreshToken?> GetRefreshTokenAsync(string token);
-    Task RevokeRefreshTokenAsync(string token);
+    Task<RefreshToken?> GetAndRevokeRefreshTokenAsync(string token);
+    Task PurgeExpiredRefreshTokensAsync();
 }

@@ -42,21 +42,23 @@ public sealed class UserRepository(
         await context.SaveChangesAsync();
     }
 
-    public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+    public async Task<RefreshToken?> GetAndRevokeRefreshTokenAsync(string token)
     {
+        var affected = await context.RefreshTokens
+            .Where(rt => rt.Token == token && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
+            .ExecuteUpdateAsync(s => s.SetProperty(rt => rt.IsRevoked, true));
+
+        if (affected == 0) return null;
+
         return await context.RefreshTokens
             .Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.Token == token);
     }
 
-    public async Task RevokeRefreshTokenAsync(string token)
+    public async Task PurgeExpiredRefreshTokensAsync()
     {
-        var refreshToken = await context.RefreshTokens
-            .FirstOrDefaultAsync(rt => rt.Token == token);
-        
-        if (refreshToken is null) return;
-        
-        refreshToken.IsRevoked = true;
-        await context.SaveChangesAsync();
+        await context.RefreshTokens
+            .Where(rt => rt.IsRevoked || rt.ExpiresAt < DateTime.UtcNow)
+            .ExecuteDeleteAsync();
     }
 }
