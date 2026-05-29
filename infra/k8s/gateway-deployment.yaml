@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: ilkoninn/pncm-gateway:sha-72fb0913a1f7937436a936f57abaf7b359787de3
+          image: ilkoninn/pncm-gateway:sha-6b3ba2618b7d24728a07ade834a245b5264f36c1
           ports:
             - containerPort: 8080
           resources:
