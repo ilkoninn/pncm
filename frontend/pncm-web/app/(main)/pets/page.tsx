@@ -38,36 +38,27 @@ export default function PetsPage() {
   const [filters, setFilters] = useState<PetFilters>({});
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data: pets, isLoading, isError } = useQuery({
-    queryKey: ["pets", filters],
+  const { data: allPets, isLoading, isError } = useQuery({
+    queryKey: ["pets", { city: filters.city, status: filters.status }],
     queryFn: () => getPets(filters),
   });
+
+  const pets = allPets && (filters.species?.length ?? 0) > 0
+    ? allPets.filter(p => filters.species!.includes(p.species))
+    : allPets;
 
   return (
     <div className="md:bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-24 md:pb-28">
       <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-6">
         <div className="flex gap-4">
 
-          {/* Left ad sidebar — xl only */}
           <aside className="hidden xl:flex flex-col gap-3 w-44 flex-shrink-0">
             <AdBanner label="Reklam" />
             <AdBanner label="Banner" />
           </aside>
 
-          {/* Main content */}
           <div className="flex-1 min-w-0 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <PetFiltersBar filters={filters} onChange={setFilters} />
-              </div>
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-1.5 h-10 px-4 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer flex-shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                Paylaş
-              </button>
-            </div>
+            <PetFiltersBar filters={filters} onChange={setFilters} />
 
             {isError && (
               <div className="flex items-center justify-center py-16">
@@ -110,7 +101,6 @@ export default function PetsPage() {
             )}
           </div>
 
-          {/* Right ad sidebar — xl only */}
           <aside className="hidden xl:flex flex-col gap-3 w-44 flex-shrink-0">
             <AdBanner label="Yarışma" />
             <AdBanner label="Reklam" />
@@ -118,6 +108,24 @@ export default function PetsPage() {
 
         </div>
       </div>
+
+      {/* Desktop Paylaş button */}
+      <button
+        onClick={() => setCreateOpen(true)}
+        className="hidden md:flex fixed bottom-[5rem] right-8 items-center gap-2 h-11 px-5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer shadow-lg z-[1002]"
+      >
+        <Plus className="w-4 h-4" />
+        Paylaş
+      </button>
+
+      {/* Mobile FAB — half embedded in bottom nav */}
+      <button
+        onClick={() => setCreateOpen(true)}
+        className="md:hidden fixed bottom-9 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer z-[1002]"
+        aria-label="Elan yarat"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
 
       {createOpen && <CreatePetModal onClose={() => setCreateOpen(false)} />}
     </div>

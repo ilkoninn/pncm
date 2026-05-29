@@ -3,7 +3,6 @@ import type { Pet, PetFilters, CreatePetDto } from "@/types/pets";
 
 export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   const params: Record<string, string> = {};
-  if (filters?.species !== undefined) params.species = String(filters.species);
   if (filters?.city) params.city = filters.city;
   if (filters?.status !== undefined) params.status = String(filters.status);
 

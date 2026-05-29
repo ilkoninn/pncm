@@ -21,7 +21,7 @@ namespace PetService.Infrastructure.Migrations
             migrationBuilder.Sql("""
                 UPDATE pets
                 SET slug = LOWER(REGEXP_REPLACE(name, '[^a-zA-Z0-9]+', '-', 'g'))
-                        || '-' || SUBSTRING(REPLACE(id::text, '-', ''), 1, 8)
+                        || '-' || RIGHT(REPLACE(id::text, '-', ''), 12)
                 WHERE slug = ''
                 """);
 
