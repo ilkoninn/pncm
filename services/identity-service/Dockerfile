@@ -5,16 +5,18 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ["src/Identity.API/Identity.API.csproj", "src/Identity.API/"]
-COPY ["src/Identity.Application/Identity.Application.csproj", "src/Identity.Application/"]
-COPY ["src/Identity.Domain/Identity.Domain.csproj", "src/Identity.Domain/"]
-COPY ["src/Identity.Infrastructure/Identity.Infrastructure.csproj", "src/Identity.Infrastructure/"]
+COPY media-service/Protos/ media-service/Protos/
 
-RUN dotnet restore "src/Identity.API/Identity.API.csproj"
+COPY ["identity-service/src/Identity.API/Identity.API.csproj", "identity-service/src/Identity.API/"]
+COPY ["identity-service/src/Identity.Application/Identity.Application.csproj", "identity-service/src/Identity.Application/"]
+COPY ["identity-service/src/Identity.Domain/Identity.Domain.csproj", "identity-service/src/Identity.Domain/"]
+COPY ["identity-service/src/Identity.Infrastructure/Identity.Infrastructure.csproj", "identity-service/src/Identity.Infrastructure/"]
 
-COPY . .
+RUN dotnet restore "identity-service/src/Identity.API/Identity.API.csproj"
 
-RUN dotnet publish "src/Identity.API/Identity.API.csproj" -c Release -o /app/publish
+COPY identity-service/ identity-service/
+
+RUN dotnet publish "identity-service/src/Identity.API/Identity.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app

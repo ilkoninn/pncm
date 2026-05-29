@@ -5,16 +5,18 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ["src/Store.API/Store.API.csproj", "src/Store.API/"]
-COPY ["src/Store.Application/Store.Application.csproj", "src/Store.Application/"]
-COPY ["src/Store.Domain/Store.Domain.csproj", "src/Store.Domain/"]
-COPY ["src/Store.Infrastructure/Store.Infrastructure.csproj", "src/Store.Infrastructure/"]
+COPY media-service/Protos/ media-service/Protos/
 
-RUN dotnet restore "src/Store.API/Store.API.csproj"
+COPY ["store-service/src/Store.API/Store.API.csproj", "store-service/src/Store.API/"]
+COPY ["store-service/src/Store.Application/Store.Application.csproj", "store-service/src/Store.Application/"]
+COPY ["store-service/src/Store.Domain/Store.Domain.csproj", "store-service/src/Store.Domain/"]
+COPY ["store-service/src/Store.Infrastructure/Store.Infrastructure.csproj", "store-service/src/Store.Infrastructure/"]
 
-COPY . .
+RUN dotnet restore "store-service/src/Store.API/Store.API.csproj"
 
-RUN dotnet publish "src/Store.API/Store.API.csproj" -c Release -o /app/publish
+COPY store-service/ store-service/
+
+RUN dotnet publish "store-service/src/Store.API/Store.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app

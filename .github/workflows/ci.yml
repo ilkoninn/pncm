@@ -24,7 +24,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: services/identity-service
+          context: services
           file: services/identity-service/Dockerfile
           push: true
           tags: |
@@ -46,7 +46,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: services/store-service
+          context: services
           file: services/store-service/Dockerfile
           push: true
           tags: |
@@ -90,7 +90,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: services/pet-service
+          context: services
           file: services/pet-service/Dockerfile
           push: true
           tags: |
@@ -134,7 +134,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: services/community-service
+          context: services
           file: services/community-service/Dockerfile
           push: true
           tags: |

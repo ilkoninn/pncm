@@ -5,16 +5,18 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ["src/Community.API/Community.API.csproj", "src/Community.API/"]
-COPY ["src/Community.Application/Community.Application.csproj", "src/Community.Application/"]
-COPY ["src/Community.Domain/Community.Domain.csproj", "src/Community.Domain/"]
-COPY ["src/Community.Infrastructure/Community.Infrastructure.csproj", "src/Community.Infrastructure/"]
+COPY media-service/Protos/ media-service/Protos/
 
-RUN dotnet restore "src/Community.API/Community.API.csproj"
+COPY ["community-service/src/Community.API/Community.API.csproj", "community-service/src/Community.API/"]
+COPY ["community-service/src/Community.Application/Community.Application.csproj", "community-service/src/Community.Application/"]
+COPY ["community-service/src/Community.Domain/Community.Domain.csproj", "community-service/src/Community.Domain/"]
+COPY ["community-service/src/Community.Infrastructure/Community.Infrastructure.csproj", "community-service/src/Community.Infrastructure/"]
 
-COPY . .
+RUN dotnet restore "community-service/src/Community.API/Community.API.csproj"
 
-RUN dotnet publish "src/Community.API/Community.API.csproj" -c Release -o /app/publish
+COPY community-service/ community-service/
+
+RUN dotnet publish "community-service/src/Community.API/Community.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
