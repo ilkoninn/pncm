@@ -1,5 +1,6 @@
 public sealed record UpdateStoreCommand(
     Guid Id,
+    Guid RequesterId,
     string Name,
     string Address,
     string City,

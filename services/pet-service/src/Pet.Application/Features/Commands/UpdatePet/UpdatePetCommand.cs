@@ -1,5 +1,6 @@
 public sealed record UpdatePetCommand(
     Guid Id,
+    Guid RequesterId,
     string? Name,
     string? Breed,
     int? AgeMonths,

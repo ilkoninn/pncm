@@ -10,6 +10,9 @@ public sealed class DeleteStoreCommandHandler(
         if (store is null)
             throw new KeyNotFoundException("Mağaza tapılmadı.");
 
+        if (store.OwnerId != request.RequesterId)
+            throw new UnauthorizedAccessException("Bu əməliyyat üçün icazəniz yoxdur.");
+
         await storeRepository.DeleteAsync(request.Id, cancellationToken);
 
         return Unit.Value;

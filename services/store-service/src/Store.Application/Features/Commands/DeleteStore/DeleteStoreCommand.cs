@@ -1,1 +1,1 @@
-public sealed record DeleteStoreCommand(Guid Id) : IRequest<Unit>;
+public sealed record DeleteStoreCommand(Guid Id, Guid RequesterId) : IRequest<Unit>;

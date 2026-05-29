@@ -6,6 +6,9 @@ public sealed class UpdatePetStatusCommandHandler(IPetRepository petRepository)
         var pet = await petRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new KeyNotFoundException("Heyvan tapılmadı.");
 
+        if (pet.OwnerId != request.RequesterId)
+            throw new UnauthorizedAccessException("Bu əməliyyat üçün icazəniz yoxdur.");
+
         pet.Status = request.Status;
 
         await petRepository.UpdateAsync(pet, cancellationToken);

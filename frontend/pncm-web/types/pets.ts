@@ -88,3 +88,14 @@ export interface CreatePetDto {
 }
 
 export type PetFormType = "personal" | "adoption";
+
+export interface UpdatePetDto {
+  name?: string;
+  breed?: string;
+  ageMonths?: number;
+  color?: string;
+  description?: string;
+  isVaccinated?: boolean;
+  isNeutered?: boolean;
+  city?: string;
+}

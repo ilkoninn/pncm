@@ -6,8 +6,8 @@ public class StoreModule : ICarterModule
         app.MapGet("/stores/nearby", GetNearby);
         app.MapGet("/stores", GetAll);
         app.MapPost("/stores", Create);
-        app.MapPut("/stores/{id:guid}", Update);
-        app.MapDelete("/stores/{id:guid}", Delete);
+        app.MapPut("/stores/{id:guid}", Update).RequireAuthorization();
+        app.MapDelete("/stores/{id:guid}", Delete).RequireAuthorization();
         app.MapPatch("/stores/{id:guid}/logo", UpdateLogo);
     }
 
@@ -38,15 +38,21 @@ public class StoreModule : ICarterModule
     }
 
     private static async Task<IResult> Update(
-        Guid id, UpdateStoreCommand command, IMediator mediator)
+        Guid id, ClaimsPrincipal user, UpdateStoreCommand command, IMediator mediator)
     {
-        var result = await mediator.Send(command with { Id = id });
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var requesterId))
+            return Results.Unauthorized();
+        var result = await mediator.Send(command with { Id = id, RequesterId = requesterId });
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> Delete(Guid id, IMediator mediator)
+    private static async Task<IResult> Delete(Guid id, ClaimsPrincipal user, IMediator mediator)
     {
-        await mediator.Send(new DeleteStoreCommand(id));
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var requesterId))
+            return Results.Unauthorized();
+        await mediator.Send(new DeleteStoreCommand(id, requesterId));
         return Results.NoContent();
     }
 

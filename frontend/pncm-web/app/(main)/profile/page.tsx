@@ -9,6 +9,7 @@ import { getMyAdoptions } from "@/lib/api/adoptions";
 import { getCurrentUser, updateUser } from "@/lib/api/auth";
 import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
 import { PetCard } from "@/components/shared/pets/PetCard";
+import { EditPetModal } from "@/components/shared/pets/EditPetModal";
 import type { Pet } from "@/types/pets";
 import {
   Pencil, X, Trophy, LogOut, Copy, Check,
@@ -213,6 +214,7 @@ const ADOPTION_STATUS_STYLES: Record<number, { bg: string; text: string }> = {
 
 function MyActivitySection() {
   const [tab, setTab] = useState<"pets" | "adoptions" | "saved">("pets");
+  const [editingPet, setEditingPet] = useState<Pet | null>(null);
 
   const { data: sharedPets = [], isLoading: sharedLoading } = useQuery({
     queryKey: ["my-pets", "adoption"],
@@ -288,6 +290,7 @@ function MyActivitySection() {
                     pet={pet}
                     hideAdopt
                     photoUrl={pet.primaryPhotoUrl ?? undefined}
+                    onEdit={() => setEditingPet(pet)}
                   />
                 ))}
               </div>
@@ -313,6 +316,7 @@ function MyActivitySection() {
                     pet={pet}
                     hideAdopt
                     photoUrl={pet.primaryPhotoUrl ?? undefined}
+                    onEdit={() => setEditingPet(pet)}
                   />
                 ))}
               </div>
@@ -354,6 +358,14 @@ function MyActivitySection() {
           </>
         )}
       </div>
+
+      {editingPet && (
+        <EditPetModal
+          pet={editingPet}
+          open={!!editingPet}
+          onClose={() => setEditingPet(null)}
+        />
+      )}
     </div>
   );
 }

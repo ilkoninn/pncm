@@ -6,6 +6,9 @@ public sealed class DeletePetCommandHandler(IPetRepository petRepository)
         var pet = await petRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new KeyNotFoundException("Heyvan tapılmadı.");
 
+        if (pet.OwnerId != request.RequesterId)
+            throw new UnauthorizedAccessException("Bu əməliyyat üçün icazəniz yoxdur.");
+
         await petRepository.DeleteAsync(pet.Id, cancellationToken);
     }
 }

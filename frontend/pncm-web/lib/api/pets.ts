@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import type { Pet, PetFilters, CreatePetDto } from "@/types/pets";
+import type { Pet, PetFilters, CreatePetDto, UpdatePetDto } from "@/types/pets";
 
 export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   const params: Record<string, string> = {};
@@ -31,4 +31,13 @@ export const addPetPhoto = async (petId: string, mediaId: string, isPrimary: boo
 export const getPetBySlug = async (slug: string): Promise<Pet> => {
   const { data } = await apiClient.get<Pet>(`/pets/slug/${slug}`);
   return data;
+};
+
+export const updatePet = async (id: string, dto: UpdatePetDto): Promise<Pet> => {
+  const { data } = await apiClient.put<Pet>(`/pets/${id}`, dto);
+  return data;
+};
+
+export const deletePet = async (id: string): Promise<void> => {
+  await apiClient.delete(`/pets/${id}`);
 };

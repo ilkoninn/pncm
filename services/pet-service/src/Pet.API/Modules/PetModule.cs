@@ -8,9 +8,9 @@ public class PetModule : ICarterModule
         app.MapGet("/pets/nearby", GetNearby);
         app.MapGet("/pets/owner", GetByOwner);
         app.MapPost("/pets", Create);
-        app.MapPut("/pets/{id:guid}", Update);
-        app.MapDelete("/pets/{id:guid}", Delete);
-        app.MapPatch("/pets/{id:guid}/status", UpdateStatus);
+        app.MapPut("/pets/{id:guid}", Update).RequireAuthorization();
+        app.MapDelete("/pets/{id:guid}", Delete).RequireAuthorization();
+        app.MapPatch("/pets/{id:guid}/status", UpdateStatus).RequireAuthorization();
         app.MapPost("/pets/{id:guid}/photos", AddPhoto);
     }
 
@@ -83,23 +83,32 @@ public class PetModule : ICarterModule
         return Results.Created($"/pets/{result.Id}", result);
     }
 
-    private static async Task<IResult> Update(Guid id, UpdatePetRequestDto dto, IMediator mediator)
+    private static async Task<IResult> Update(Guid id, ClaimsPrincipal user, UpdatePetRequestDto dto, IMediator mediator)
     {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var requesterId))
+            return Results.Unauthorized();
         var result = await mediator.Send(new UpdatePetCommand(
-            id, dto.Name, dto.Breed, dto.AgeMonths, dto.Color, dto.Description,
+            id, requesterId, dto.Name, dto.Breed, dto.AgeMonths, dto.Color, dto.Description,
             dto.IsVaccinated, dto.IsNeutered, dto.City, dto.Latitude, dto.Longitude));
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> Delete(Guid id, IMediator mediator)
+    private static async Task<IResult> Delete(Guid id, ClaimsPrincipal user, IMediator mediator)
     {
-        await mediator.Send(new DeletePetCommand(id));
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var requesterId))
+            return Results.Unauthorized();
+        await mediator.Send(new DeletePetCommand(id, requesterId));
         return Results.NoContent();
     }
 
-    private static async Task<IResult> UpdateStatus(Guid id, UpdatePetStatusRequestDto dto, IMediator mediator)
+    private static async Task<IResult> UpdateStatus(Guid id, ClaimsPrincipal user, UpdatePetStatusRequestDto dto, IMediator mediator)
     {
-        var result = await mediator.Send(new UpdatePetStatusCommand(id, dto.Status));
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var requesterId))
+            return Results.Unauthorized();
+        var result = await mediator.Send(new UpdatePetStatusCommand(id, requesterId, dto.Status));
         return Results.Ok(result);
     }
 

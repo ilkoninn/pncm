@@ -10,6 +10,9 @@ public sealed class UpdateStoreCommandHandler(
         if (store is null)
             throw new KeyNotFoundException("Mağaza tapılmadı.");
 
+        if (store.OwnerId != request.RequesterId)
+            throw new UnauthorizedAccessException("Bu əməliyyat üçün icazəniz yoxdur.");
+
         store.Name = request.Name;
         store.Address = request.Address;
         store.City = request.City;

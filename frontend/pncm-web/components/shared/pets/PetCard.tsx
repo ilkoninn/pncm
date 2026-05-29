@@ -7,6 +7,7 @@ import type { Pet } from "@/types/pets";
 import { SPECIES_MAP, STATUS_MAP } from "@/types/pets";
 import { getMediaById } from "@/lib/api/media";
 import { AdoptionModal } from "./AdoptionModal";
+import { Pencil } from "lucide-react";
 
 function formatAge(months: number | null): string {
   if (!months) return "";
@@ -25,7 +26,7 @@ const STATUS_STYLES: Record<number, { bg: string }> = {
   5: { bg: "bg-violet-400" },
 };
 
-export function PetCard({ pet, hideAdopt, photoUrl: externalPhotoUrl }: { pet: Pet; hideAdopt?: boolean; photoUrl?: string }) {
+export function PetCard({ pet, hideAdopt, photoUrl: externalPhotoUrl, onEdit }: { pet: Pet; hideAdopt?: boolean; photoUrl?: string; onEdit?: () => void }) {
   const [adoptionOpen, setAdoptionOpen] = useState(false);
   const primaryPhoto = !externalPhotoUrl
     ? (pet.photos?.find(p => p.isPrimary) ?? pet.photos?.[0])
@@ -66,7 +67,15 @@ export function PetCard({ pet, hideAdopt, photoUrl: externalPhotoUrl }: { pet: P
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
-          {pet.isVaccinated && (
+          {onEdit && (
+            <button
+              onClick={e => { e.preventDefault(); onEdit(); }}
+              className="absolute top-2 right-2 w-7 h-7 rounded-xl bg-white/90 flex items-center justify-center text-slate-600 hover:bg-white shadow-sm transition-colors cursor-pointer z-10"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {pet.isVaccinated && !onEdit && (
             <span className="absolute top-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/95 text-emerald-600 shadow-sm">
               ✓ Aşı
             </span>
