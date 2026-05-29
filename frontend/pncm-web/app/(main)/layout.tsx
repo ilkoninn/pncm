@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Bell, Store, Users, UserCircle2, LogOut } from "lucide-react";
+import { NotificationsDrawer } from "@/components/shared/notifications/NotificationsDrawer";
 
 function PawPrint({ className }: { className?: string }) {
   return (
@@ -60,6 +62,7 @@ function NavItem({ href, label, Icon, active }: {
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white flex flex-col w-screen">
@@ -73,8 +76,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Mobile: link to page */}
+            <Link
+              href="/notifications"
+              className="md:hidden relative w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+              aria-label="Bildirişlər"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+            </Link>
+            {/* Web: opens drawer */}
             <button
-              className="relative w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              onClick={() => setNotifOpen(true)}
+              className="hidden md:flex relative w-9 h-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
               aria-label="Bildirişlər"
             >
               <Bell className="w-5 h-5" />
@@ -118,6 +132,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           })}
         </div>
       </nav>
+
+      <NotificationsDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
 
       {/* Desktop floating center nav */}
       <nav className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-[1001]">

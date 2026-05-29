@@ -289,8 +289,10 @@ function MyActivitySection() {
   const { data: adoptions = [], isLoading: adoptionsLoading } = useQuery({
     queryKey: ["my-adoptions"],
     queryFn: getMyAdoptions,
-    enabled: tab === "adoptions",
+    enabled: tab === "adoptions" || tab === "saved",
   });
+
+  const completedAdoptions = adoptions.filter(a => a.status === 3);
 
   const { mutate: cancel, variables: cancellingId } = useMutation({
     mutationFn: (id: string) => cancelAdoption(id),
@@ -362,7 +364,7 @@ function MyActivitySection() {
                     pet={pet}
                     hideAdopt
                     photoUrl={pet.primaryPhotoUrl ?? undefined}
-                    onEdit={() => openEdit(pet)}
+                    onEdit={pet.status !== 2 ? () => openEdit(pet) : undefined}
                   />
                 ))}
               </div>
@@ -372,15 +374,17 @@ function MyActivitySection() {
 
         {tab === "saved" && (
           <>
-            {savedLoading && (
+            {(savedLoading || adoptionsLoading) && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
                 ))}
               </div>
             )}
-            {!savedLoading && savedPets.length === 0 && <EmptyState text="Şəxsi heyvan yoxdur" />}
-            {!savedLoading && savedPets.length > 0 && (
+            {!savedLoading && !adoptionsLoading && savedPets.length === 0 && completedAdoptions.length === 0 && (
+              <EmptyState text="Şəxsi heyvan yoxdur" />
+            )}
+            {!savedLoading && !adoptionsLoading && (savedPets.length > 0 || completedAdoptions.length > 0) && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {savedPets.map((pet: Pet) => (
                   <PetCard
@@ -390,6 +394,33 @@ function MyActivitySection() {
                     photoUrl={pet.primaryPhotoUrl ?? undefined}
                     onEdit={() => openEdit(pet)}
                   />
+                ))}
+                {completedAdoptions.map(a => (
+                  <a key={a.id} href={`/pets/${a.petSlug}`} className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                    <div className="relative aspect-square overflow-hidden bg-slate-100">
+                      {a.petPrimaryPhotoUrl ? (
+                        <img src={a.petPrimaryPhotoUrl} alt={a.petName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                          <svg viewBox="0 0 80 80" fill="currentColor" className="w-12 h-12">
+                            <ellipse cx="27" cy="18" rx="8" ry="10" />
+                            <ellipse cx="53" cy="18" rx="8" ry="10" />
+                            <ellipse cx="13" cy="36" rx="7" ry="9" />
+                            <ellipse cx="67" cy="36" rx="7" ry="9" />
+                            <ellipse cx="40" cy="56" rx="18" ry="16" />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                      <span className="absolute bottom-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white bg-blue-500">
+                        Mənimdə
+                      </span>
+                    </div>
+                    <div className="p-3">
+                      <p className="font-bold text-slate-900 text-sm truncate">{a.petName}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Platform üzərindən</p>
+                    </div>
+                  </a>
                 ))}
               </div>
             )}

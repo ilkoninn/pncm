@@ -56,7 +56,7 @@ export const SIZE_MAP: Record<number, string> = {
 export const STATUS_MAP: Record<number, string> = {
   0: "Mövcud",
   1: "Rezerv",
-  2: "Övladlığa götürüldü",
+  2: "Verildi",
   3: "İtirilmiş",
   4: "Tapılmış",
   5: "Şəxsi",

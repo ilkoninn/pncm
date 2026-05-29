@@ -32,7 +32,10 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         Guid? ownerId = null,
         CancellationToken cancellationToken = default)
     {
-        var sql = new StringBuilder(PetSqlConstants.GetAllBaseSql);
+        var baseSql = ownerId.HasValue
+            ? PetSqlConstants.GetAllByOwnerIdBaseSql
+            : PetSqlConstants.GetAllBaseSql;
+        var sql = new StringBuilder(baseSql);
         var p = new DynamicParameters();
 
         if (!string.IsNullOrWhiteSpace(city))
@@ -118,8 +121,7 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         await context.Pets
             .Where(p => p.Id == petId)
             .ExecuteUpdateAsync(s => s
-                .SetProperty(p => p.OwnerId, newOwnerId)
-                .SetProperty(p => p.Status, EPetStatus.Personal),
+                .SetProperty(p => p.Status, EPetStatus.Adopted),
             cancellationToken);
     }
 }
