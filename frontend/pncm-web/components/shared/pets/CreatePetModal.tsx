@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPet, addPetPhoto } from "@/lib/api/pets";
 import { uploadMedia } from "@/lib/api/media";
@@ -19,7 +19,7 @@ const inputCls = "w-full h-10 px-3 rounded-xl border border-slate-200 text-sm te
 const selectCls = inputCls + " bg-white";
 const labelCls = "text-xs font-medium text-slate-600";
 
-export function CreatePetModal({ onClose }: { onClose: () => void }) {
+export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [petType, setPetType] = useState<PetFormType | null>(null);
@@ -28,6 +28,19 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
   const [createdPet, setCreatedPet] = useState<Pet | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setPetType(null);
+        setForm(INITIAL);
+        setStep("type");
+        setCreatedPet(null);
+        setPhotoPreview(null);
+        setPhotoFile(null);
+      }, 300);
+    }
+  }, [open]);
   const [photoUploading, setPhotoUploading] = useState(false);
 
   const isAdoption = petType === "adoption";
@@ -90,10 +103,10 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[1010] flex items-end sm:items-center justify-center">
+    <div className={`fixed inset-0 z-[1010] flex items-end sm:items-center justify-center transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 max-h-[90vh] flex flex-col">
+      <div className={`relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl z-10 max-h-[90vh] flex flex-col transition-transform duration-300 ease-out ${open ? "translate-y-0" : "translate-y-full sm:translate-y-0"}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center gap-2">
             {step === "form" && (
@@ -216,14 +229,30 @@ export function CreatePetModal({ onClose }: { onClose: () => void }) {
                 />
               </div>
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.isVaccinated} onChange={e => set("isVaccinated", e.target.checked)} className="rounded accent-emerald-600" />
-                <span className="text-sm text-slate-700">Aşılanıb</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.isNeutered} onChange={e => set("isNeutered", e.target.checked)} className="rounded accent-emerald-600" />
-                <span className="text-sm text-slate-700">Kısırlaşdırılıb</span>
-              </label>
+              <div className="col-span-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => set("isVaccinated", !form.isVaccinated)}
+                  className={`flex-1 h-10 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
+                    form.isVaccinated
+                      ? "bg-emerald-600 text-white border-emerald-600"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
+                  }`}
+                >
+                  Aşılanıb
+                </button>
+                <button
+                  type="button"
+                  onClick={() => set("isNeutered", !form.isNeutered)}
+                  className={`flex-1 h-10 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
+                    form.isNeutered
+                      ? "bg-emerald-600 text-white border-emerald-600"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
+                  }`}
+                >
+                  Kısırlaşdırılıb
+                </button>
+              </div>
             </div>
 
             <button type="submit" disabled={isPending} className="w-full h-11 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors cursor-pointer">

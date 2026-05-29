@@ -6,7 +6,7 @@ public sealed class GetAllPetsQueryHandler(IPetRepository petRepository)
         var pets = await petRepository.GetAllAsync(
             request.City, request.Species, request.Gender,
             request.Size, request.IsVaccinated, request.IsNeutered,
-            cancellationToken);
+            request.ExcludeOwnerId, cancellationToken);
 
         return pets.Adapt<IEnumerable<PetResponseDto>>();
     }

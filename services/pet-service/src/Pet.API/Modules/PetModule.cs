@@ -15,6 +15,7 @@ public class PetModule : ICarterModule
     }
 
     private static async Task<IResult> GetAll(
+        ClaimsPrincipal user,
         IMediator mediator,
         string? city = null,
         int? species = null,
@@ -23,13 +24,19 @@ public class PetModule : ICarterModule
         bool? isVaccinated = null,
         bool? isNeutered = null)
     {
+        Guid? excludeOwnerId = null;
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (Guid.TryParse(userIdClaim, out var userId))
+            excludeOwnerId = userId;
+
         var result = await mediator.Send(new GetAllPetsQuery(
             city,
             species.HasValue ? (ESpecies)species.Value : null,
             gender.HasValue  ? (EGender)gender.Value   : null,
             size.HasValue    ? (EPetSize)size.Value     : null,
             isVaccinated,
-            isNeutered));
+            isNeutered,
+            excludeOwnerId));
         return Results.Ok(result);
     }
 

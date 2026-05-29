@@ -9,6 +9,7 @@ public interface IPetRepository
         EPetSize? size = null,
         bool? isVaccinated = null,
         bool? isNeutered = null,
+        Guid? excludeOwnerId = null,
         CancellationToken cancellationToken = default);
     Task<IEnumerable<Pet>> GetByOwnerAsync(Guid ownerId, EOwnerType ownerType, CancellationToken cancellationToken = default);
     Task<IEnumerable<Pet>> GetNearbyAsync(decimal latitude, decimal longitude, double radiusKm, CancellationToken cancellationToken = default);

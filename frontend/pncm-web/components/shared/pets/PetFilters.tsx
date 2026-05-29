@@ -16,8 +16,109 @@ const SPECIES_TABS = [
 ];
 
 function activeFilterCount(f: PetFilters) {
-  return [f.gender, f.size, f.isVaccinated, f.isNeutered]
-    .filter(v => v !== undefined).length;
+  return [f.gender, f.size, f.isVaccinated, f.isNeutered].filter(v => v !== undefined).length;
+}
+
+function ToggleGroup<T extends number>({
+  options, value, onChange,
+}: {
+  options: [string, string][];
+  value: T | undefined;
+  onChange: (v: T | undefined) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map(([k, v]) => {
+        const n = Number(k) as T;
+        const active = value === n;
+        return (
+          <button
+            key={k}
+            onClick={() => onChange(active ? undefined : n)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
+              active
+                ? "bg-emerald-600 text-white border-emerald-600"
+                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
+            }`}
+          >
+            {v}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function FilterPanel({
+  draft, setDraft, onApply, onReset, onClose,
+}: {
+  draft: PetFilters;
+  setDraft: (f: PetFilters) => void;
+  onApply: () => void;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-slate-900 text-sm">Filtrlər</h3>
+        <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 cursor-pointer">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Cinsiyyət</p>
+          <ToggleGroup
+            options={Object.entries(GENDER_MAP)}
+            value={draft.gender}
+            onChange={v => setDraft({ ...draft, gender: v })}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Ölçü</p>
+          <ToggleGroup
+            options={Object.entries(SIZE_MAP)}
+            value={draft.size}
+            onChange={v => setDraft({ ...draft, size: v })}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Xüsusiyyətlər</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setDraft({ ...draft, isVaccinated: draft.isVaccinated ? undefined : true })}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
+                draft.isVaccinated ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
+              }`}
+            >
+              Aşılanıb
+            </button>
+            <button
+              onClick={() => setDraft({ ...draft, isNeutered: draft.isNeutered ? undefined : true })}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
+                draft.isNeutered ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
+              }`}
+            >
+              Kısırlaşdırılıb
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-2 pt-1">
+        <button onClick={onReset} className="flex-1 h-10 rounded-xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer">
+          Sıfırla
+        </button>
+        <button onClick={onApply} className="flex-1 h-10 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer">
+          Tətbiq et
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function PetFiltersBar({ filters, onChange, onShare }: PetFiltersProps) {
@@ -25,16 +126,19 @@ export function PetFiltersBar({ filters, onChange, onShare }: PetFiltersProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [draft, setDraft] = useState<PetFilters>(filters);
 
+  function openDrawer() { setDraft(filters); setDrawerOpen(true); }
+  function closeDrawer() { setDrawerOpen(false); }
+
   function applyDraft() {
     onChange({ ...filters, ...draft });
-    setDrawerOpen(false);
+    closeDrawer();
   }
 
   function resetDraft() {
-    const reset = { city: filters.city, species: filters.species };
+    const reset: PetFilters = { city: filters.city, species: filters.species };
     setDraft(reset);
     onChange(reset);
-    setDrawerOpen(false);
+    closeDrawer();
   }
 
   const extraCount = activeFilterCount(filters);
@@ -56,9 +160,8 @@ export function PetFiltersBar({ filters, onChange, onShare }: PetFiltersProps) {
           />
         </div>
 
-        {/* Filter button */}
         <button
-          onClick={() => { setDraft(filters); setDrawerOpen(true); }}
+          onClick={openDrawer}
           className={`relative flex items-center gap-1.5 h-11 px-3.5 rounded-2xl border text-sm font-medium transition-colors cursor-pointer flex-shrink-0 ${
             extraCount > 0
               ? "bg-emerald-600 text-white border-emerald-600"
@@ -86,10 +189,7 @@ export function PetFiltersBar({ filters, onChange, onShare }: PetFiltersProps) {
       </div>
 
       {/* Species chips */}
-      <div
-        className="flex flex-wrap gap-2 md:flex-nowrap md:overflow-x-auto"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
+      <div className="flex flex-wrap gap-2 md:flex-nowrap md:overflow-x-auto" style={{ scrollbarWidth: "none" }}>
         {SPECIES_TABS.map(tab => (
           <button
             key={String(tab.value)}
@@ -105,97 +205,29 @@ export function PetFiltersBar({ filters, onChange, onShare }: PetFiltersProps) {
         ))}
       </div>
 
-      {/* Filter drawer */}
-      {drawerOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/30 z-[1010]" onClick={() => setDrawerOpen(false)} />
-          <div className="fixed bottom-0 left-0 right-0 z-[1011] bg-white rounded-t-3xl shadow-2xl p-5 space-y-5 md:static md:rounded-2xl md:border md:border-slate-100 md:shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-sm">Əlavə filtrlər</h3>
-              <button onClick={() => setDrawerOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      {/* Single wrapper — exact same pattern as CreatePetModal */}
+      <div
+        className={`fixed inset-0 z-[1010] flex flex-col justify-end md:items-center md:justify-center transition-opacity duration-300 ${
+          drawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="absolute inset-0 bg-black/40" onClick={closeDrawer} />
 
-            {/* Gender */}
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Cinsiyyət</p>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(GENDER_MAP).map(([k, v]) => (
-                  <button
-                    key={k}
-                    onClick={() => setDraft(d => ({ ...d, gender: d.gender === Number(k) ? undefined : Number(k) }))}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
-                      draft.gender === Number(k)
-                        ? "bg-emerald-600 text-white border-emerald-600"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Size */}
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Ölçü</p>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(SIZE_MAP).map(([k, v]) => (
-                  <button
-                    key={k}
-                    onClick={() => setDraft(d => ({ ...d, size: d.size === Number(k) ? undefined : Number(k) }))}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
-                      draft.size === Number(k)
-                        ? "bg-emerald-600 text-white border-emerald-600"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Checkboxes */}
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={draft.isVaccinated === true}
-                  onChange={e => setDraft(d => ({ ...d, isVaccinated: e.target.checked ? true : undefined }))}
-                  className="rounded accent-emerald-600"
-                />
-                <span className="text-sm text-slate-700">Aşılanıb</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={draft.isNeutered === true}
-                  onChange={e => setDraft(d => ({ ...d, isNeutered: e.target.checked ? true : undefined }))}
-                  className="rounded accent-emerald-600"
-                />
-                <span className="text-sm text-slate-700">Kısırlaşdırılıb</span>
-              </label>
-            </div>
-
-            <div className="flex gap-3 pt-1">
-              <button
-                onClick={resetDraft}
-                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                Sıfırla
-              </button>
-              <button
-                onClick={applyDraft}
-                className="flex-1 h-11 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer"
-              >
-                Tətbiq et
-              </button>
-            </div>
+        {/* Mobile: bottom sheet */}
+        <div
+          className={`md:hidden relative bg-white rounded-t-3xl transition-transform duration-300 ease-out ${drawerOpen ? "translate-y-0" : "translate-y-full"}`}
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        >
+          <div className="p-5">
+            <FilterPanel draft={draft} setDraft={setDraft} onApply={applyDraft} onReset={resetDraft} onClose={closeDrawer} />
           </div>
-        </>
-      )}
+        </div>
+
+        {/* Desktop: centered popup */}
+        <div className="hidden md:relative md:block bg-white rounded-2xl p-5 w-80">
+          <FilterPanel draft={draft} setDraft={setDraft} onApply={applyDraft} onReset={resetDraft} onClose={closeDrawer} />
+        </div>
+      </div>
     </div>
   );
 }

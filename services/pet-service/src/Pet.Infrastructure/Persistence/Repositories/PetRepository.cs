@@ -28,6 +28,7 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         EPetSize? size = null,
         bool? isVaccinated = null,
         bool? isNeutered = null,
+        Guid? excludeOwnerId = null,
         CancellationToken cancellationToken = default)
     {
         var sql = new StringBuilder(PetSqlConstants.GetAllBaseSql);
@@ -42,7 +43,8 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         if (gender.HasValue)  { sql.Append(" AND gender = @Gender");   p.Add("Gender",  (int)gender.Value);  }
         if (size.HasValue)    { sql.Append(" AND size = @Size");       p.Add("Size",    (int)size.Value);    }
         if (isVaccinated.HasValue) { sql.Append(" AND is_vaccinated = @IsVaccinated"); p.Add("IsVaccinated", isVaccinated.Value); }
-        if (isNeutered.HasValue)   { sql.Append(" AND is_neutered = @IsNeutered");     p.Add("IsNeutered",   isNeutered.Value);   }
+        if (isNeutered.HasValue)    { sql.Append(" AND is_neutered = @IsNeutered");     p.Add("IsNeutered",   isNeutered.Value);   }
+        if (excludeOwnerId.HasValue) { sql.Append(" AND owner_id != @ExcludeOwnerId"); p.Add("ExcludeOwnerId", excludeOwnerId.Value); }
 
         sql.Append(" ORDER BY created_at DESC");
 

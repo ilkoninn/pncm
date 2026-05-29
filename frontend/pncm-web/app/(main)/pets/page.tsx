@@ -130,7 +130,7 @@ export default function PetsPage() {
         <Plus className="w-6 h-6" />
       </button>
 
-      {createOpen && <CreatePetModal onClose={() => setCreateOpen(false)} />}
+      <CreatePetModal open={createOpen} onClose={() => setCreateOpen(false)} />
     </div>
   );
 }

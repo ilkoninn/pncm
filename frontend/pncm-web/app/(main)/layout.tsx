@@ -62,7 +62,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col overflow-x-hidden w-screen">
+    <div className="min-h-screen bg-white flex flex-col w-screen">
       <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-100 bg-white">
         <div className="h-full px-4 md:px-6 flex items-center justify-between gap-4">
           {/* Logo */}
