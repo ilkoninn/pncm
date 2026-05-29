@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: ilkoninn/pncm-notification:sha-f015ee5d0d52bb4fea206634e863323f520be720
+          image: ilkoninn/pncm-notification:sha-7a640f81faffc3b453e254e892f9b75b151f0764
           ports:
             - containerPort: 8080
           resources:
