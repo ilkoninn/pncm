@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: store-service
-          image: ilkoninn/pncm-store:sha-f71f6718d98af9ce1eb0537747ae486ceda569fa
+          image: ilkoninn/pncm-store:sha-86ad5232c6817a0da6a795978b42a50e12b52dab
           ports:
             - containerPort: 8080
           resources:
