@@ -42,7 +42,9 @@
       "Read(//mnt/d/projects/big-projects/pncm/infra/k8s/**)",
       "Bash(dotnet ef *)",
       "Bash(del *)",
-      "Bash(xargs grep -l \"grpc\\\\|Grpc\\\\|MediaService\\\\|IMediaClient\")"
+      "Bash(xargs grep -l \"grpc\\\\|Grpc\\\\|MediaService\\\\|IMediaClient\")",
+      "Bash(gh run *)",
+      "PowerShell(gh run *)"
     ]
   }
 }

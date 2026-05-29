@@ -112,7 +112,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: services/adoption-service
+          context: services
           file: services/adoption-service/Dockerfile
           push: true
           tags: |
