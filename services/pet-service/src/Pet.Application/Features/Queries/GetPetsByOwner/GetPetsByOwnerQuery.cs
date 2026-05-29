@@ -1,4 +1,3 @@
 public sealed record GetPetsByOwnerQuery(
-    Guid OwnerId,
-    EOwnerType OwnerType
+    Guid OwnerId
 ) : IRequest<IEnumerable<PetResponseDto>>;

@@ -4,6 +4,7 @@ public class PetModule : ICarterModule
     {
         app.MapGet("/pets", GetAll);
         app.MapGet("/pets/{id:guid}", GetById);
+        app.MapGet("/pets/slug/{slug}", GetBySlug);
         app.MapGet("/pets/nearby", GetNearby);
         app.MapGet("/pets/owner", GetByOwner);
         app.MapPost("/pets", Create);
@@ -25,6 +26,12 @@ public class PetModule : ICarterModule
         return Results.Ok(result);
     }
 
+    private static async Task<IResult> GetBySlug(string slug, IMediator mediator)
+    {
+        var result = await mediator.Send(new GetPetBySlugQuery(slug));
+        return Results.Ok(result);
+    }
+
     private static async Task<IResult> GetNearby(decimal lat, decimal lng, double radiusKm, IMediator mediator)
     {
         var result = await mediator.Send(new GetNearbyPetsQuery(lat, lng, radiusKm));
@@ -36,7 +43,7 @@ public class PetModule : ICarterModule
         var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdClaim, out var userId))
             return Results.Unauthorized();
-        var result = await mediator.Send(new GetPetsByOwnerQuery(userId, EOwnerType.User));
+        var result = await mediator.Send(new GetPetsByOwnerQuery(userId));
         return Results.Ok(result);
     }
 
@@ -49,7 +56,7 @@ public class PetModule : ICarterModule
             dto.Name, dto.Species, dto.Breed, dto.AgeMonths,
             dto.Gender, dto.Size, dto.Color, dto.Description,
             dto.IsVaccinated, dto.IsNeutered, userId,
-            EOwnerType.User, dto.City, dto.Latitude, dto.Longitude));
+            dto.City, dto.Latitude, dto.Longitude));
         return Results.Created($"/pets/{result.Id}", result);
     }
 
@@ -73,9 +80,12 @@ public class PetModule : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> AddPhoto(Guid id, AddPetPhotoRequestDto dto, IMediator mediator)
+    private static async Task<IResult> AddPhoto(Guid id, ClaimsPrincipal user, AddPetPhotoRequestDto dto, IMediator mediator)
     {
-        var result = await mediator.Send(new AddPetPhotoCommand(id, dto.MediaId, dto.IsPrimary));
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+        var result = await mediator.Send(new AddPetPhotoCommand(id, userId, dto.MediaId, dto.IsPrimary));
         return Results.Created($"/pets/{id}/photos/{result.Id}", result);
     }
 }

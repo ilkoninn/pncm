@@ -52,6 +52,10 @@ RefreshToken
 | GET | `/auth/me` | Bearer | Cari istifadəçi məlumatları |
 | PATCH | `/users/me/avatar` | Bearer | Avatar MediaId yenilə |
 
+### RefreshToken — Atomic Get+Revoke
+`GetAndRevokeRefreshTokenAsync` — tək `ExecuteUpdateAsync` ilə WHERE filter, race condition yoxdur.
+`RefreshTokenCleanupService` — BackgroundService, hər gün expired+revoked token-ləri `ExecuteDeleteAsync` ilə silir.
+
 ### Kafka Events (Publisher)
 
 | Topic | Event | Payload | Trigger |
@@ -85,17 +89,17 @@ PetPhoto
 
 ### Endpoints
 
-| Method | Path | İzah |
-|---|---|---|
-| POST | `/pets` | Yeni heyvan elanı yarat |
-| GET | `/pets` | Bütün heyvanlar (filtrasiya ilə) |
-| GET | `/pets/{id}` | ID-yə görə heyvan |
-| GET | `/pets/nearby?lat=&lng=&radius=` | Yaxınlıqdakı heyvanlar (coğrafi) |
-| GET | `/pets/owner?ownerId=&ownerType=` | Sahibə görə heyvanlar |
-| PUT | `/pets/{id}` | Məlumatları yenilə |
-| DELETE | `/pets/{id}` | Soft delete |
-| PATCH | `/pets/{id}/status` | Status dəyiş |
-| POST | `/pets/{id}/photos` | Şəkil əlavə et (MediaId qəbul edir) |
+| Method | Path | Auth | İzah |
+|---|---|---|---|
+| POST | `/pets` | Bearer | Yeni elan — `OwnerId` JWT-dən, `OwnerType=User` hardcode |
+| GET | `/pets` | — | Bütün heyvanlar (filtrasiya ilə) |
+| GET | `/pets/{id}` | — | ID-yə görə heyvan |
+| GET | `/pets/nearby?lat=&lng=&radius=` | — | Yaxınlıqdakı heyvanlar |
+| GET | `/pets/owner` | Bearer | Cari istifadəçinin heyvanları (JWT-dən userId) |
+| PUT | `/pets/{id}` | — | Məlumatları yenilə |
+| DELETE | `/pets/{id}` | — | Soft delete |
+| PATCH | `/pets/{id}/status` | — | Status dəyiş |
+| POST | `/pets/{id}/photos` | — | Şəkil əlavə et (MediaId qəbul edir) |
 
 **Şəkil əlavə etmə axışı:**
 ```
@@ -153,11 +157,16 @@ MediaFile
 
 ### Endpoints
 
-| Method | Path | İzah |
-|---|---|---|
-| POST | `/media/upload` | Fayl yüklə (`multipart/form-data`) → MediaId qaytar |
-| GET | `/media/{id}` | Fayl metadatasını gətir |
-| DELETE | `/media/{id}` | MinIO-dan + DB-dən sil |
+| Method | Path | Auth | İzah |
+|---|---|---|---|
+| POST | `/media/upload` | Bearer | Fayl yüklə (`multipart/form-data`) — `OwnerId` JWT-dən |
+| GET | `/media/{id}` | — | Fayl metadatası + presigned URL |
+| DELETE | `/media/{id}` | — | MinIO-dan + DB-dən sil |
+| POST | `/media/batch` | — | `{ ownerIds, ownerType }` → `{ [ownerId]: MediaFileDto[] }` |
+
+**Presigned URL:** 7 gün, `Cache-Control: immutable`. Hər oxumada fresh URL generasiya olunur (DB-də `Url=""` saxlanılır, işlənmir).
+
+**Batch endpoint:** N+1 problemi həlli. `WHERE ownerId IN (...)` — 1 DB query.
 
 ---
 
@@ -177,13 +186,13 @@ AdoptionRequest
 
 ### Endpoints
 
-| Method | Path | İzah |
-|---|---|---|
-| POST | `/adoptions` | Yeni müraciət yarat |
-| GET | `/adoptions/{id}` | Müraciəti gətir |
-| GET | `/adoptions/pet/{petId}` | Heyvana gələn müraciətlər |
-| GET | `/adoptions/adopter/{adopterId}` | İstifadəçinin müraciətləri |
-| PATCH | `/adoptions/{id}/status` | Status dəyiş (Approved/Rejected) |
+| Method | Path | Auth | İzah |
+|---|---|---|---|
+| POST | `/adoptions` | Bearer | Yeni müraciət — `AdopterId` JWT-dən, request body-dən silinib |
+| GET | `/adoptions/{id}` | — | Müraciəti gətir |
+| GET | `/adoptions/pet/{petId}` | — | Heyvana gələn müraciətlər |
+| GET | `/adoptions/adopter/{adopterId}` | — | İstifadəçinin müraciətləri |
+| PATCH | `/adoptions/{id}/status` | — | Status dəyiş (Approved/Rejected) |
 
 ### Kafka Events (Publisher)
 

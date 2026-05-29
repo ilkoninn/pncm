@@ -12,6 +12,15 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         return pet;
     }
 
+    public async Task<Pet?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    {
+        var pet = await connection.QueryFirstOrDefaultAsync<Pet>(PetSqlConstants.GetBySlugSql, new { Slug = slug });
+        if (pet is null) return null;
+        var photos = await connection.QueryAsync<PetPhoto>(PetSqlConstants.GetPhotosByPetIdSql, new { PetId = pet.Id });
+        pet.Photos = photos.ToList();
+        return pet;
+    }
+
     public async Task<IEnumerable<Pet>> GetAllAsync(CancellationToken cancellationToken = default)
         => await connection.QueryAsync<Pet>(PetSqlConstants.GetAllSql);
 

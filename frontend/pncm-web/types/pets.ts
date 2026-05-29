@@ -7,6 +7,7 @@ export interface PetPhoto {
 export interface Pet {
   id: string;
   name: string;
+  slug: string;
   species: number;
   breed: string | null;
   ageMonths: number | null;

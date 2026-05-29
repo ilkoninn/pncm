@@ -1,6 +1,7 @@
 public sealed record PetResponseDto(
     Guid Id,
     string Name,
+    string Slug,
     ESpecies Species,
     string? Breed,
     int? AgeMonths,

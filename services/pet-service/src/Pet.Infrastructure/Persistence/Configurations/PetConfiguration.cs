@@ -17,6 +17,10 @@ public sealed class PetConfiguration : IEntityTypeConfiguration<Pet>
         builder.Property(x => x.Description)
             .HasMaxLength(1000);
 
+        builder.Property(x => x.Slug)
+            .IsRequired()
+            .HasMaxLength(200);
+
         builder.Property(x => x.City)
             .IsRequired()
             .HasMaxLength(100);
@@ -36,6 +40,7 @@ public sealed class PetConfiguration : IEntityTypeConfiguration<Pet>
         builder.HasIndex(x => x.Species);
         builder.HasIndex(x => x.City);
         builder.HasIndex(x => x.OwnerId);
+        builder.HasIndex(x => x.Slug).IsUnique();
         builder.HasIndex(x => new { x.Latitude, x.Longitude });
 
         builder.ToTable("pets");

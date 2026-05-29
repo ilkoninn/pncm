@@ -365,9 +365,9 @@ Hər servis `Otlp__Endpoint=http://pncm-jaeger:4317` env dəyişəni ilə trace-
 | `ConnectionStrings__DefaultConnection` | Hamısı | PostgreSQL connection string |
 | `ConnectionStrings__Redis` | Identity, Community | Redis connection string |
 | `Kafka__BootstrapServers` | Identity, Adoption, Community, Notification | `kafka:29092` |
-| `Jwt__SecretKey` | Identity | Min 32 char — JWT imzalama açarı |
-| `Jwt__Issuer` | Identity | `pncm-identity` |
-| `Jwt__Audience` | Identity | `pncm-api` |
+| `Jwt__SecretKey` | Identity, Media, Pet, Adoption | Min 32 char — JWT imzalama açarı |
+| `Jwt__Issuer` | Identity, Media, Pet, Adoption | `pncm-identity` |
+| `Jwt__Audience` | Identity, Media, Pet, Adoption | `pncm-api` |
 | `MinIO__Endpoint` | Media | `minio:9000` |
 | `MinIO__PublicEndpoint` | Media | `localhost:9000` |
 | `MinIO__AccessKey` | Media | `minioadmin` |

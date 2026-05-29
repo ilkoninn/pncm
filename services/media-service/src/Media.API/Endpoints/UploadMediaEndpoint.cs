@@ -26,12 +26,16 @@ public sealed class UploadMediaEndpoint(IMediator mediator) : Endpoint<UploadMed
             return;
         }
 
+        var ownerId = req.OwnerType == EOwnerType.User
+            ? userId
+            : req.OwnerId ?? userId;
+
         var result = await mediator.Send(new UploadMediaCommand(
             file.OpenReadStream(),
             file.FileName,
             file.ContentType,
             file.Length,
-            userId,
+            ownerId,
             req.OwnerType
         ), ct);
 

@@ -1,7 +1,7 @@
 public static class PetSqlConstants
 {
     public const string PetColumns = """
-        id AS "Id", name AS "Name", species AS "Species", breed AS "Breed",
+        id AS "Id", name AS "Name", slug AS "Slug", species AS "Species", breed AS "Breed",
         age_months AS "AgeMonths", gender AS "Gender", size AS "Size",
         color AS "Color", description AS "Description",
         is_vaccinated AS "IsVaccinated", is_neutered AS "IsNeutered",
@@ -16,6 +16,8 @@ public static class PetSqlConstants
         """;
 
     public const string GetByIdSql = $"SELECT {PetColumns} FROM pets WHERE id = @Id";
+
+    public const string GetBySlugSql = $"SELECT {PetColumns} FROM pets WHERE slug = @Slug AND is_active = true AND is_deleted = false";
 
     public const string GetPhotosByPetIdSql = $"SELECT {PhotoColumns} FROM pet_photos WHERE pet_id = @PetId";
 

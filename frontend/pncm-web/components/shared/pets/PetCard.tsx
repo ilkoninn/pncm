@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import type { Pet } from "@/types/pets";
 import { SPECIES_MAP, STATUS_MAP } from "@/types/pets";
+import { getMediaById } from "@/lib/api/media";
 import { AdoptionModal } from "./AdoptionModal";
 
 function formatAge(months: number | null): string {
@@ -22,26 +25,40 @@ const STATUS_STYLES: Record<number, { bg: string }> = {
 export function PetCard({ pet }: { pet: Pet }) {
   const [adoptionOpen, setAdoptionOpen] = useState(false);
   const primaryPhoto = pet.photos.find(p => p.isPrimary) ?? pet.photos[0];
-  const photoUrl = primaryPhoto
-    ? `${process.env.NEXT_PUBLIC_API_URL}/media/${primaryPhoto.mediaId}`
-    : "/images/test1.jpg";
 
+  const { data: mediaFile } = useQuery({
+    queryKey: ["media", primaryPhoto?.mediaId],
+    queryFn: () => getMediaById(primaryPhoto!.mediaId),
+    enabled: !!primaryPhoto?.mediaId,
+    staleTime: 1000 * 60 * 60,
+  });
+
+  const photoUrl = mediaFile?.url ?? null;
   const status = STATUS_STYLES[pet.status];
   const isAvailable = pet.status === 0;
 
   return (
     <>
       <article className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        <div className="relative aspect-square overflow-hidden bg-slate-50 cursor-pointer">
-          <img
-            src={photoUrl}
-            alt={pet.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={e => {
-              (e.target as HTMLImageElement).src = "";
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
-          />
+        <Link href={`/pets/${pet.slug}`} className="block">
+        <div className="relative aspect-square overflow-hidden bg-slate-100 cursor-pointer">
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={pet.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-300">
+              <svg viewBox="0 0 80 80" fill="currentColor" className="w-12 h-12">
+                <ellipse cx="27" cy="18" rx="8" ry="10" />
+                <ellipse cx="53" cy="18" rx="8" ry="10" />
+                <ellipse cx="13" cy="36" rx="7" ry="9" />
+                <ellipse cx="67" cy="36" rx="7" ry="9" />
+                <ellipse cx="40" cy="56" rx="18" ry="16" />
+              </svg>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
           {pet.isVaccinated && (
@@ -53,6 +70,7 @@ export function PetCard({ pet }: { pet: Pet }) {
             {STATUS_MAP[pet.status]}
           </span>
         </div>
+        </Link>
 
         <div className="p-3 space-y-1.5">
           <div className="flex items-start justify-between gap-1">

@@ -10,7 +10,6 @@ public sealed record CreatePetCommand(
     bool IsVaccinated,
     bool IsNeutered,
     Guid OwnerId,
-    EOwnerType OwnerType,
     string City,
     decimal? Latitude,
     decimal? Longitude

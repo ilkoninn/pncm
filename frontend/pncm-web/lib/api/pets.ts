@@ -20,3 +20,12 @@ export const createPet = async (dto: CreatePetDto): Promise<Pet> => {
   const { data } = await apiClient.post<Pet>("/pets", dto);
   return data;
 };
+
+export const addPetPhoto = async (petId: string, mediaId: string, isPrimary: boolean): Promise<void> => {
+  await apiClient.post(`/pets/${petId}/photos`, { mediaId, isPrimary });
+};
+
+export const getPetBySlug = async (slug: string): Promise<Pet> => {
+  const { data } = await apiClient.get<Pet>(`/pets/slug/${slug}`);
+  return data;
+};

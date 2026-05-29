@@ -1,6 +1,7 @@
 public interface IPetRepository
 {
     Task<Pet?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Pet?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
     Task<IEnumerable<Pet>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<IEnumerable<Pet>> GetByOwnerAsync(Guid ownerId, EOwnerType ownerType, CancellationToken cancellationToken = default);
     Task<IEnumerable<Pet>> GetNearbyAsync(decimal latitude, decimal longitude, double radiusKm, CancellationToken cancellationToken = default);
