@@ -1,3 +1,5 @@
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -47,9 +49,14 @@ app.MapPost("/adoptions", async (ClaimsPrincipal user, CreateAdoptionRequestDto 
     var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
     if (!Guid.TryParse(userIdClaim, out var adopterId))
         return Results.Unauthorized();
+    var firstName = user.FindFirstValue(ClaimTypes.GivenName) ?? "";
+    var lastName  = user.FindFirstValue(ClaimTypes.Surname)   ?? "";
+    var adopterName = $"{firstName} {lastName}".Trim();
     var result = await mediator.Send(new CreateAdoptionCommand(
-        dto.PetId, adopterId, dto.Message, dto.ContactPhone,
-        dto.PetName, dto.PetSlug, dto.PetPrimaryPhotoUrl));
+        dto.PetId, adopterId,
+        dto.Message, dto.ContactPhone,
+        dto.PetName, dto.PetSlug, dto.PetPrimaryPhotoUrl,
+        adopterName));
     return Results.Created($"/adoptions/{result.Id}", result);
 }).RequireAuthorization();
 
@@ -59,11 +66,14 @@ app.MapGet("/adoptions/{id:guid}", async (Guid id, IMediator mediator) =>
     return Results.Ok(result);
 });
 
-app.MapGet("/adoptions/pet/{petId:guid}", async (Guid petId, IMediator mediator) =>
+app.MapGet("/adoptions/pet/{petId:guid}", async (Guid petId, ClaimsPrincipal user, IMediator mediator) =>
 {
-    var result = await mediator.Send(new GetAdoptionsByPetQuery(petId));
+    var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!Guid.TryParse(userIdClaim, out var requesterId))
+        return Results.Unauthorized();
+    var result = await mediator.Send(new GetAdoptionsByPetQuery(petId, requesterId));
     return Results.Ok(result);
-});
+}).RequireAuthorization();
 
 app.MapGet("/adoptions/me", async (ClaimsPrincipal user, IMediator mediator) =>
 {
@@ -91,11 +101,19 @@ app.MapDelete("/adoptions/{id:guid}", async (Guid id, ClaimsPrincipal user, Adop
     return Results.NoContent();
 }).RequireAuthorization();
 
-app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatusRequestDto dto, IMediator mediator) =>
+app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatusRequestDto dto, ClaimsPrincipal user, AdoptionDbContext db, IMediator mediator) =>
 {
+    var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!Guid.TryParse(userIdClaim, out var requesterId))
+        return Results.Unauthorized();
+
+    var exists = await db.AdoptionRequests
+        .AnyAsync(x => x.Id == id && x.PetOwnerId == requesterId && !x.IsDeleted);
+    if (!exists) return Results.Forbid();
+
     var result = await mediator.Send(new UpdateAdoptionStatusCommand(id, dto.Status));
     return Results.Ok(result);
-});
+}).RequireAuthorization();
 
 app.MapMetrics();
 app.MapHealthChecks("/health");

@@ -5,5 +5,6 @@ public sealed record CreateAdoptionCommand(
     string ContactPhone,
     string PetName,
     string PetSlug,
-    string? PetPrimaryPhotoUrl
+    string? PetPrimaryPhotoUrl,
+    string AdopterName
 ) : IRequest<AdoptionResponseDto>;

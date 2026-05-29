@@ -3,8 +3,7 @@ public sealed class GetAdoptionsByPetQueryHandler(IAdoptionRepository repository
 {
     public async Task<IEnumerable<AdoptionResponseDto>> Handle(GetAdoptionsByPetQuery request, CancellationToken cancellationToken)
     {
-        var adoptions = await repository.GetByPetIdAsync(request.PetId, cancellationToken);
-
+        var adoptions = await repository.GetByPetIdAsync(request.PetId, request.RequesterId, cancellationToken);
         return adoptions.Adapt<IEnumerable<AdoptionResponseDto>>();
     }
 }

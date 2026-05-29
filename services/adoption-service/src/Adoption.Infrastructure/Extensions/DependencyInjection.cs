@@ -12,6 +12,7 @@ public static class DependencyInjection
                 .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddScoped<IAdoptionRepository, AdoptionRepository>();
+        services.AddSingleton<IPetGrpcClient, PetGrpcClient>();
 
         var applicationAssembly = typeof(CreateAdoptionCommand).Assembly;
 

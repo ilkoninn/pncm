@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pet.API.Protos";
+
+package pet;
+
+service PetGrpcService {
+  rpc GetPetOwner (GetPetOwnerRequest) returns (GetPetOwnerResponse);
+}
+
+message GetPetOwnerRequest {
+  string pet_id = 1;
+}
+
+message GetPetOwnerResponse {
+  string owner_id = 1;
+}

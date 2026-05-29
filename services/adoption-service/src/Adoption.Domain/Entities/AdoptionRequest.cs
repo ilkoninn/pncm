@@ -8,4 +8,6 @@ public class AdoptionRequest : AuditableEntity
     public required string PetName { get; set; }
     public required string PetSlug { get; set; }
     public string? PetPrimaryPhotoUrl { get; set; }
+    public required string AdopterName { get; set; }
+    public Guid PetOwnerId { get; set; }
 }

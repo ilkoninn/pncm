@@ -19,6 +19,7 @@ spec:
           image: ilkoninn/pncm-pet:sha-7a640f81faffc3b453e254e892f9b75b151f0764
           ports:
             - containerPort: 8080
+            - containerPort: 8081
           resources:
             requests:
               memory: "128Mi"
@@ -69,5 +70,9 @@ spec:
   selector:
     app: pet-service
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8080
+    - name: grpc
+      port: 8081
+      targetPort: 8081

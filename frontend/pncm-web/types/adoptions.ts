@@ -11,12 +11,14 @@ export interface AdoptionResponseDto {
   id: string;
   petId: string;
   adopterId: string;
+  petOwnerId: string;
   status: number;
   message: string;
   contactPhone: string;
   petName: string;
   petSlug: string;
   petPrimaryPhotoUrl?: string | null;
+  adopterName: string;
   createdAt: string;
 }
 

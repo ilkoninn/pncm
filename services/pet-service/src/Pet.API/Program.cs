@@ -7,6 +7,7 @@ builder.Services.AddOpenTelemetry(builder.Configuration, "pet-service");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCarter();
+builder.Services.AddGrpc();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -39,6 +40,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapCarter();
+app.MapGrpcService<Pet.API.GrpcServices.PetGrpcService>();
 app.MapMetrics();
 app.MapHealthChecks("/health");
 app.UseMiddleware<ExceptionHandlingMiddleware>();

@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getPetBySlug } from "@/lib/api/pets";
-import { getMyAdoptions } from "@/lib/api/adoptions";
+import { getMyAdoptions, getAdoptionsByPet } from "@/lib/api/adoptions";
 import { AdoptionModal } from "@/components/shared/pets/AdoptionModal";
+import { AdoptionRequestsModal } from "@/components/shared/pets/AdoptionRequestsModal";
 import type { Pet } from "@/types/pets";
 import { SPECIES_MAP, GENDER_MAP, SIZE_MAP, STATUS_MAP } from "@/types/pets";
-import { MapPin, Calendar, CheckCircle, UserRound, RefreshCw } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, UserRound, RefreshCw, Users } from "lucide-react";
 
 function formatAge(months: number | null): string {
   if (!months) return "";
@@ -148,6 +149,7 @@ function PetDetailSkeleton() {
 export default function PetDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [adoptionOpen, setAdoptionOpen] = useState(false);
+  const [requestsOpen, setRequestsOpen] = useState(false);
   const { data: session } = useSession();
   const isLoggedIn = !!session?.userId;
 
@@ -162,11 +164,17 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
     enabled: isLoggedIn,
   });
 
-  const alreadyApplied = isLoggedIn && pet
+  const isOwner = isLoggedIn && !!pet && pet.ownerId === session?.userId;
+
+  const { data: petAdoptions = [] } = useQuery({
+    queryKey: ["adoptions-by-pet", pet?.id],
+    queryFn: () => getAdoptionsByPet(pet!.id),
+    enabled: isOwner && !!pet,
+  });
+
+  const alreadyApplied = isLoggedIn && !isOwner && pet
     ? myAdoptions.some(a => a.petId === pet.id)
     : false;
-
-  const isOwner = isLoggedIn && pet?.ownerId === session?.userId;
 
   const sortedPhotos = pet?.photos
     ? [...pet.photos].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
@@ -205,9 +213,29 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
                     <div>
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <h1 className="text-2xl font-bold text-slate-900">{pet.name}</h1>
-                        <span className={`text-xs font-semibold px-3 py-1.5 rounded-full flex-shrink-0 ${STATUS_STYLES[pet.status]?.bg} ${STATUS_STYLES[pet.status]?.text}`}>
-                          {STATUS_MAP[pet.status]}
-                        </span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isOwner && (
+                            <>
+                              <Link
+                                href={`/pets/${slug}/adoptions`}
+                                className="sm:hidden flex items-center gap-1.5 h-8 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                                {petAdoptions.length > 0 ? `${petAdoptions.length} müraciət` : "Müraciətlər"}
+                              </Link>
+                              <button
+                                onClick={() => setRequestsOpen(true)}
+                                className="hidden sm:flex items-center gap-1.5 h-8 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                                {petAdoptions.length > 0 ? `${petAdoptions.length} müraciət` : "Müraciətlər"}
+                              </button>
+                            </>
+                          )}
+                          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${STATUS_STYLES[pet.status]?.bg} ${STATUS_STYLES[pet.status]?.text}`}>
+                            {STATUS_MAP[pet.status]}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-1.5 text-sm text-slate-400">
                         <MapPin className="w-4 h-4" />
@@ -324,6 +352,14 @@ export default function PetDetailPage({ params }: { params: Promise<{ slug: stri
 
       {pet && adoptionOpen && (
         <AdoptionModal pet={pet} onClose={() => setAdoptionOpen(false)} />
+      )}
+      {pet && (
+        <AdoptionRequestsModal
+          petId={pet.id}
+          petName={pet.name}
+          open={requestsOpen}
+          onClose={() => setRequestsOpen(false)}
+        />
       )}
     </div>
   );

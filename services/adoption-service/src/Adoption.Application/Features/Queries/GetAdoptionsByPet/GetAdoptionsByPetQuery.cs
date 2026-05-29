@@ -1,1 +1,1 @@
-public sealed record GetAdoptionsByPetQuery(Guid PetId) : IRequest<IEnumerable<AdoptionResponseDto>>;
+public sealed record GetAdoptionsByPetQuery(Guid PetId, Guid RequesterId) : IRequest<IEnumerable<AdoptionResponseDto>>;
