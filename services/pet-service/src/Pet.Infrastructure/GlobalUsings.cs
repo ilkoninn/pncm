@@ -1,4 +1,5 @@
 global using System.Data;
+global using System.Text;
 global using Dapper;
 global using FluentValidation;
 global using Mapster;

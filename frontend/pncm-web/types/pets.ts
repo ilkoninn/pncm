@@ -60,9 +60,12 @@ export const STATUS_MAP: Record<number, string> = {
 };
 
 export interface PetFilters {
-  species?: number[];
+  species?: number;
   city?: string;
-  status?: number;
+  gender?: number;
+  size?: number;
+  isVaccinated?: boolean;
+  isNeutered?: boolean;
 }
 
 export interface CreatePetDto {

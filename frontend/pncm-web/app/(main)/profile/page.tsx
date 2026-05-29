@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
-import { uploadMedia, deleteMedia, getMediaByOwnersBatch } from "@/lib/api/media";
+import { getMediaByOwnersBatch } from "@/lib/api/media";
 import { getAdoptionsByAdopter } from "@/lib/api/adoptions";
 import { getCurrentUser, updateUser } from "@/lib/api/auth";
 import { EOwnerType } from "@/types/media";
@@ -365,11 +366,10 @@ function MyActivitySection({ userId }: { userId: string }) {
 
 export default function ProfilePage() {
   const { data: session } = useSession();
-  const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const email = session?.user?.email ?? "";
   const userId = session?.userId;
+  const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { data: userProfile, refetch: refetchProfile } = useQuery({
@@ -390,25 +390,6 @@ export default function ProfilePage() {
 
   const profilePhotoUrl = userId ? photoMap?.[userId]?.[0]?.url : undefined;
 
-  const { mutate: uploadPhoto, isPending: uploading } = useMutation({
-    mutationFn: async (file: File) => {
-      const existing = userId ? photoMap?.[userId] : undefined;
-      if (existing?.length) {
-        await Promise.all(existing.map((p) => deleteMedia(p.id)));
-      }
-      return uploadMedia(file, EOwnerType.User);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile-photo", userId] });
-    },
-  });
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) uploadPhoto(file);
-    e.target.value = "";
-  }
-
   return (
     <div className="bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-28">
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
@@ -416,19 +397,10 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl border border-slate-100 p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-              />
               <Avatar
                 name={name}
                 photoUrl={profilePhotoUrl}
                 size="lg"
-                uploading={uploading}
-                onClick={() => fileInputRef.current?.click()}
               />
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -443,12 +415,20 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Mobile: navigate to settings page */}
             <button
-              onClick={() => setSettingsOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex-shrink-0"
+              onClick={() => router.push("/profile/settings")}
+              className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex-shrink-0"
             >
               <Pencil className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Düzəliş et</span>
+            </button>
+            {/* Desktop: open drawer */}
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex-shrink-0"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Düzəliş et
             </button>
           </div>
         </div>

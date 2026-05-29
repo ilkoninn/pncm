@@ -40,21 +40,17 @@ export default function PetsPage() {
   const [filters, setFilters] = useState<PetFilters>({});
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data: allPets, isLoading, isError } = useQuery({
-    queryKey: ["pets", { city: filters.city, status: filters.status }],
+  const { data: pets, isLoading, isError } = useQuery({
+    queryKey: ["pets", filters],
     queryFn: () => getPets(filters),
   });
 
-  const pets = allPets && (filters.species?.length ?? 0) > 0
-    ? allPets.filter(p => filters.species!.includes(p.species))
-    : allPets;
-
-  const petIds = allPets?.map(p => p.id) ?? [];
+  const petIds = pets?.map(p => p.id) ?? [];
   const { data: petMediaMap } = useQuery({
     queryKey: ["pets-media", petIds],
     queryFn: () => getMediaByOwnersBatch(petIds, EOwnerType.Pet),
     enabled: petIds.length > 0,
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 30,
   });
 
   return (

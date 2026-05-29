@@ -14,9 +14,22 @@ public class PetModule : ICarterModule
         app.MapPost("/pets/{id:guid}/photos", AddPhoto);
     }
 
-    private static async Task<IResult> GetAll(IMediator mediator)
+    private static async Task<IResult> GetAll(
+        IMediator mediator,
+        string? city = null,
+        int? species = null,
+        int? gender = null,
+        int? size = null,
+        bool? isVaccinated = null,
+        bool? isNeutered = null)
     {
-        var result = await mediator.Send(new GetAllPetsQuery());
+        var result = await mediator.Send(new GetAllPetsQuery(
+            city,
+            species.HasValue ? (ESpecies)species.Value : null,
+            gender.HasValue  ? (EGender)gender.Value   : null,
+            size.HasValue    ? (EPetSize)size.Value     : null,
+            isVaccinated,
+            isNeutered));
         return Results.Ok(result);
     }
 

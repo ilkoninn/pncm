@@ -3,8 +3,12 @@ import type { Pet, PetFilters, CreatePetDto } from "@/types/pets";
 
 export const getPets = async (filters?: PetFilters): Promise<Pet[]> => {
   const params: Record<string, string> = {};
-  if (filters?.city) params.city = filters.city;
-  if (filters?.status !== undefined) params.status = String(filters.status);
+  if (filters?.city)                         params.city        = filters.city;
+  if (filters?.species !== undefined)        params.species     = String(filters.species);
+  if (filters?.gender !== undefined)         params.gender      = String(filters.gender);
+  if (filters?.size !== undefined)           params.size        = String(filters.size);
+  if (filters?.isVaccinated !== undefined)   params.isVaccinated = String(filters.isVaccinated);
+  if (filters?.isNeutered !== undefined)     params.isNeutered   = String(filters.isNeutered);
 
   const { data } = await apiClient.get<Pet[]>("/pets", { params });
   return data;

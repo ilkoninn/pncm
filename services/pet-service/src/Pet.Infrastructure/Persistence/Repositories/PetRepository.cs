@@ -21,8 +21,33 @@ public sealed class PetRepository(PetDbContext context, IDbConnection connection
         return pet;
     }
 
-    public async Task<IEnumerable<Pet>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await connection.QueryAsync<Pet>(PetSqlConstants.GetAllSql);
+    public async Task<IEnumerable<Pet>> GetAllAsync(
+        string? city = null,
+        ESpecies? species = null,
+        EGender? gender = null,
+        EPetSize? size = null,
+        bool? isVaccinated = null,
+        bool? isNeutered = null,
+        CancellationToken cancellationToken = default)
+    {
+        var sql = new StringBuilder(PetSqlConstants.GetAllBaseSql);
+        var p = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(city))
+        {
+            sql.Append(" AND LOWER(city) LIKE LOWER(@City)");
+            p.Add("City", $"%{city}%");
+        }
+        if (species.HasValue) { sql.Append(" AND species = @Species"); p.Add("Species", (int)species.Value); }
+        if (gender.HasValue)  { sql.Append(" AND gender = @Gender");   p.Add("Gender",  (int)gender.Value);  }
+        if (size.HasValue)    { sql.Append(" AND size = @Size");       p.Add("Size",    (int)size.Value);    }
+        if (isVaccinated.HasValue) { sql.Append(" AND is_vaccinated = @IsVaccinated"); p.Add("IsVaccinated", isVaccinated.Value); }
+        if (isNeutered.HasValue)   { sql.Append(" AND is_neutered = @IsNeutered");     p.Add("IsNeutered",   isNeutered.Value);   }
+
+        sql.Append(" ORDER BY created_at DESC");
+
+        return await connection.QueryAsync<Pet>(sql.ToString(), p);
+    }
 
     public async Task<IEnumerable<Pet>> GetByOwnerAsync(
         Guid ownerId, EOwnerType ownerType, CancellationToken cancellationToken = default)
