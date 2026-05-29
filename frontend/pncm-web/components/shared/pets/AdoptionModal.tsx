@@ -13,7 +13,11 @@ export function AdoptionModal({ pet, onClose }: { pet: Pet; onClose: () => void 
   const [done, setDone] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: () => createAdoption({ petId: pet.id, message, contactPhone: phone }),
+    mutationFn: () => createAdoption({
+      petId: pet.id, message, contactPhone: phone,
+      petName: pet.name, petSlug: pet.slug,
+      petPrimaryPhotoUrl: pet.primaryPhotoUrl,
+    }),
     onSuccess: () => setDone(true),
   });
 

@@ -47,7 +47,9 @@ app.MapPost("/adoptions", async (ClaimsPrincipal user, CreateAdoptionRequestDto 
     var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
     if (!Guid.TryParse(userIdClaim, out var adopterId))
         return Results.Unauthorized();
-    var result = await mediator.Send(new CreateAdoptionCommand(dto.PetId, adopterId, dto.Message, dto.ContactPhone));
+    var result = await mediator.Send(new CreateAdoptionCommand(
+        dto.PetId, adopterId, dto.Message, dto.ContactPhone,
+        dto.PetName, dto.PetSlug, dto.PetPrimaryPhotoUrl));
     return Results.Created($"/adoptions/{result.Id}", result);
 }).RequireAuthorization();
 
@@ -70,6 +72,23 @@ app.MapGet("/adoptions/me", async (ClaimsPrincipal user, IMediator mediator) =>
         return Results.Unauthorized();
     var result = await mediator.Send(new GetAdoptionsByAdopterQuery(adopterId));
     return Results.Ok(result);
+}).RequireAuthorization();
+
+app.MapDelete("/adoptions/{id:guid}", async (Guid id, ClaimsPrincipal user, AdoptionDbContext db) =>
+{
+    var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!Guid.TryParse(userIdClaim, out var adopterId))
+        return Results.Unauthorized();
+
+    var adoption = await db.AdoptionRequests.FindAsync(id);
+    if (adoption is null) return Results.NotFound();
+    if (adoption.AdopterId != adopterId) return Results.Forbid();
+    if (adoption.Status != EAdoptionStatus.Pending)
+        return Results.BadRequest(new { title = "Yalnız gözləmədəki müraciətlər ləğv edilə bilər." });
+
+    db.AdoptionRequests.Remove(adoption);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
 }).RequireAuthorization();
 
 app.MapPatch("/adoptions/{id:guid}/status", async (Guid id, UpdateAdoptionStatusRequestDto dto, IMediator mediator) =>

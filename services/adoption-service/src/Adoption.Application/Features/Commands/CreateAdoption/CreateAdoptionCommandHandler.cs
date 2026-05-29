@@ -10,7 +10,10 @@ public sealed class CreateAdoptionCommandHandler(
             PetId = request.PetId,
             AdopterId = request.AdopterId,
             Message = request.Message,
-            ContactPhone = request.ContactPhone
+            ContactPhone = request.ContactPhone,
+            PetName = request.PetName,
+            PetSlug = request.PetSlug,
+            PetPrimaryPhotoUrl = request.PetPrimaryPhotoUrl
         };
 
         await repository.CreateAsync(adoption, cancellationToken);

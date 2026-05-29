@@ -5,4 +5,7 @@ public class AdoptionRequest : AuditableEntity
     public EAdoptionStatus Status { get; set; } = EAdoptionStatus.Pending;
     public required string Message { get; set; }
     public required string ContactPhone { get; set; }
+    public required string PetName { get; set; }
+    public required string PetSlug { get; set; }
+    public string? PetPrimaryPhotoUrl { get; set; }
 }

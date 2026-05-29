@@ -15,3 +15,7 @@ export const getMyAdoptions = async (): Promise<AdoptionResponseDto[]> => {
   const { data } = await apiClient.get<AdoptionResponseDto[]>("/adoptions/me");
   return data;
 };
+
+export const cancelAdoption = async (id: string): Promise<void> => {
+  await apiClient.delete(`/adoptions/${id}`);
+};

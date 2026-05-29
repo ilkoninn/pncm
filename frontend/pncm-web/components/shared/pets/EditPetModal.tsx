@@ -143,10 +143,10 @@ export function EditPetModal({ pet, open, onClose }: { pet: Pet; open: boolean; 
   }
 
   return (
-    <div className={`fixed inset-0 z-[1010] flex items-start sm:items-center justify-center transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+    <div className={`fixed inset-0 z-[1010] flex items-end sm:items-center justify-center transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className={`relative w-full sm:max-w-lg bg-white rounded-b-3xl sm:rounded-2xl z-10 max-h-[90vh] flex flex-col transition-transform duration-300 ease-out ${open ? "translate-y-0" : "-translate-y-full sm:translate-y-0"}`}>
+      <div className={`relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl z-10 max-h-[90vh] flex flex-col transition-transform duration-300 ease-out ${open ? "translate-y-0" : "translate-y-full sm:translate-y-0"}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <h2 className="font-bold text-slate-900 text-sm">
             {step === "confirm-delete" ? "Silməyi təsdiqlə" : step === "done" ? "Tamamlandı" : "Elana düzəliş et"}

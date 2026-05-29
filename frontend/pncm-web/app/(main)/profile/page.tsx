@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
-import { getMyAdoptions } from "@/lib/api/adoptions";
+import { getMyAdoptions, cancelAdoption } from "@/lib/api/adoptions";
 import { getCurrentUser, updateUser } from "@/lib/api/auth";
 import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
 import { PetCard } from "@/components/shared/pets/PetCard";
@@ -13,7 +13,7 @@ import { EditPetModal } from "@/components/shared/pets/EditPetModal";
 import type { Pet } from "@/types/pets";
 import {
   Pencil, X, Trophy, LogOut, Copy, Check,
-  UserRound, Link as LinkIcon, Camera, Heart,
+  UserRound, Link as LinkIcon, Camera, Heart, ExternalLink,
 } from "lucide-react";
 
 function Avatar({
@@ -215,6 +215,17 @@ const ADOPTION_STATUS_STYLES: Record<number, { bg: string; text: string }> = {
 function MyActivitySection() {
   const [tab, setTab] = useState<"pets" | "adoptions" | "saved">("pets");
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+
+  function openEdit(pet: Pet) {
+    setEditingPet(pet);
+    requestAnimationFrame(() => setEditOpen(true));
+  }
+
+  function closeEdit() {
+    setEditOpen(false);
+    setTimeout(() => setEditingPet(null), 300);
+  }
 
   const { data: sharedPets = [], isLoading: sharedLoading } = useQuery({
     queryKey: ["my-pets", "adoption"],
@@ -227,10 +238,17 @@ function MyActivitySection() {
     enabled: tab === "saved",
   });
 
+  const queryClient = useQueryClient();
+
   const { data: adoptions = [], isLoading: adoptionsLoading } = useQuery({
     queryKey: ["my-adoptions"],
     queryFn: getMyAdoptions,
     enabled: tab === "adoptions",
+  });
+
+  const { mutate: cancel, variables: cancellingId } = useMutation({
+    mutationFn: (id: string) => cancelAdoption(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-adoptions"] }),
   });
 
   const EmptyState = ({ text }: { text: string }) => (
@@ -290,7 +308,7 @@ function MyActivitySection() {
                     pet={pet}
                     hideAdopt
                     photoUrl={pet.primaryPhotoUrl ?? undefined}
-                    onEdit={() => setEditingPet(pet)}
+                    onEdit={() => openEdit(pet)}
                   />
                 ))}
               </div>
@@ -316,7 +334,7 @@ function MyActivitySection() {
                     pet={pet}
                     hideAdopt
                     photoUrl={pet.primaryPhotoUrl ?? undefined}
-                    onEdit={() => setEditingPet(pet)}
+                    onEdit={() => openEdit(pet)}
                   />
                 ))}
               </div>
@@ -338,18 +356,39 @@ function MyActivitySection() {
               <div className="space-y-3">
                 {adoptions.map(a => {
                   const style = ADOPTION_STATUS_STYLES[a.status] ?? ADOPTION_STATUS_STYLES[0];
+                  const isCancelling = cancellingId === a.id;
                   return (
-                    <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                        <Heart className="w-4 h-4 text-emerald-500" />
-                      </div>
+                    <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100">
+                      <a href={`/pets/${a.petSlug}`} className="flex-shrink-0">
+                        {a.petPrimaryPhotoUrl ? (
+                          <img src={a.petPrimaryPhotoUrl} alt={a.petName} className="w-11 h-11 rounded-xl object-cover" />
+                        ) : (
+                          <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center">
+                            <Heart className="w-5 h-5 text-emerald-400" />
+                          </div>
+                        )}
+                      </a>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-800 truncate">{a.message}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{new Date(a.createdAt).toLocaleDateString("az-AZ")}</p>
+                        <a href={`/pets/${a.petSlug}`} className="flex items-center gap-1 group">
+                          <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-emerald-600 transition-colors">{a.petName}</p>
+                          <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-emerald-500 flex-shrink-0 transition-colors" />
+                        </a>
+                        <p className="text-xs text-slate-400 mt-0.5 truncate">{a.message}</p>
                       </div>
-                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${style.bg} ${style.text}`}>
-                        {ADOPTION_STATUS_MAP[a.status]}
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${style.bg} ${style.text}`}>
+                          {ADOPTION_STATUS_MAP[a.status]}
+                        </span>
+                        {a.status === 0 && (
+                          <button
+                            onClick={() => cancel(a.id)}
+                            disabled={isCancelling}
+                            className="text-[11px] font-medium text-red-400 hover:text-red-600 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            {isCancelling ? "..." : "Ləğv"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -362,8 +401,8 @@ function MyActivitySection() {
       {editingPet && (
         <EditPetModal
           pet={editingPet}
-          open={!!editingPet}
-          onClose={() => setEditingPet(null)}
+          open={editOpen}
+          onClose={closeEdit}
         />
       )}
     </div>

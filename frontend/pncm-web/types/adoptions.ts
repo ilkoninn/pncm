@@ -2,6 +2,9 @@ export interface CreateAdoptionDto {
   petId: string;
   message: string;
   contactPhone: string;
+  petName: string;
+  petSlug: string;
+  petPrimaryPhotoUrl?: string | null;
 }
 
 export interface AdoptionResponseDto {
@@ -11,6 +14,9 @@ export interface AdoptionResponseDto {
   status: number;
   message: string;
   contactPhone: string;
+  petName: string;
+  petSlug: string;
+  petPrimaryPhotoUrl?: string | null;
   createdAt: string;
 }
 

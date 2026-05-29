@@ -12,6 +12,17 @@ public sealed class AdoptionRequestConfiguration : IEntityTypeConfiguration<Adop
             .IsRequired()
             .HasMaxLength(20);
 
+        builder.Property(x => x.PetName)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(x => x.PetSlug)
+            .IsRequired()
+            .HasMaxLength(300);
+
+        builder.Property(x => x.PetPrimaryPhotoUrl)
+            .HasMaxLength(2000);
+
         builder.Property(x => x.Status).HasConversion<int>();
 
         builder.HasIndex(x => x.PetId);

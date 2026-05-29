@@ -5,5 +5,8 @@ public sealed record AdoptionResponseDto(
     EAdoptionStatus Status,
     string Message,
     string ContactPhone,
+    string PetName,
+    string PetSlug,
+    string? PetPrimaryPhotoUrl,
     DateTime CreatedAt
 );
