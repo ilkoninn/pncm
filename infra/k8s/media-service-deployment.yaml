@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: media-service
-          image: ilkoninn/pncm-media:sha-f015ee5d0d52bb4fea206634e863323f520be720
+          image: ilkoninn/pncm-media:sha-7a640f81faffc3b453e254e892f9b75b151f0764
           ports:
             - containerPort: 8080
             - containerPort: 8081
