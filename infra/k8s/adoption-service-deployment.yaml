@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: adoption-service
-          image: ilkoninn/pncm-adoption:sha-c636325808de733204f96f7d739b7aeefe7a0f16
+          image: ilkoninn/pncm-adoption:sha-7190cffe2ddcfb3d8d1f679c81217477e53a7fa9
           ports:
             - containerPort: 8080
           resources:
