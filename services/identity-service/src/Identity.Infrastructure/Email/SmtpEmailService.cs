@@ -1,11 +1,11 @@
-public sealed class MailKitEmailService(IConfiguration configuration) : IEmailService
+public sealed class SmtpEmailService(IConfiguration configuration) : IEmailService
 {
-    private readonly string _host = configuration["Email:Host"]!;
-    private readonly int _port = int.Parse(configuration["Email:Port"]!);
-    private readonly string _username = configuration["Email:Username"]!;
-    private readonly string _password = configuration["Email:Password"]!;
-    private readonly string _fromAddress = configuration["Email:FromAddress"]!;
-    private readonly string _fromName = configuration["Email:FromName"]!;
+    private readonly string _host = configuration["Email:Smtp:Host"]!;
+    private readonly int _port = int.Parse(configuration["Email:Smtp:Port"]!);
+    private readonly string _username = configuration["Email:Smtp:Username"]!;
+    private readonly string _password = configuration["Email:Smtp:Password"]!;
+    private readonly string _fromAddress = configuration["Email:Smtp:FromAddress"]!;
+    private readonly string _fromName = configuration["Email:Smtp:FromName"]!;
 
     public async Task SendOtpAsync(string toEmail, string otpCode, CancellationToken ct)
     {

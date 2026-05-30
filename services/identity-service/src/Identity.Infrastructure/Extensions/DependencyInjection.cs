@@ -25,7 +25,14 @@ public static class DependencyInjection
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IMagicLinkService, MagicLinkService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IEmailService, MailKitEmailService>();
+        services.AddKeyedScoped<IEmailService, SmtpEmailService>(EEmailProvider.Smtp);
+        services.AddScoped<IEmailServiceFactory, EmailServiceFactory>();
+        services.AddScoped<IEmailService>(sp =>
+        {
+            var provider = sp.GetRequiredService<IConfiguration>()
+                .GetValue<EEmailProvider>("Email:Provider");
+            return sp.GetRequiredService<IEmailServiceFactory>().Create(provider);
+        });
         services.AddScoped<IMediaGrpcClient, MediaGrpcClient>();
 
         var applicationAssembly = typeof(RequestAccessCommand).Assembly;

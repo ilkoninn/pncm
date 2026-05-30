@@ -65,6 +65,26 @@ spec:
               value: "http://pncm-jaeger:4317"
             - name: GrpcServices__MediaService
               value: "http://pncm-media:8081"
+            - name: Email__Provider
+              value: "Smtp"
+            - name: Email__Smtp__Host
+              value: "smtp.gmail.com"
+            - name: Email__Smtp__Port
+              value: "587"
+            - name: Email__Smtp__FromAddress
+              value: "sendm554@gmail.com"
+            - name: Email__Smtp__FromName
+              value: "Pəncəm"
+            - name: Email__Smtp__Username
+              valueFrom:
+                secretKeyRef:
+                  name: pncm-email-secrets
+                  key: EMAIL_USERNAME
+            - name: Email__Smtp__Password
+              valueFrom:
+                secretKeyRef:
+                  name: pncm-email-secrets
+                  key: EMAIL_PASSWORD
 ---
 apiVersion: v1
 kind: Service
