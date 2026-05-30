@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: community-service
-          image: ilkoninn/pncm-community:sha-d94d890f615b555138eb0bca3df7a15a0d767ffd
+          image: ilkoninn/pncm-community:sha-52b283bb7a49f83677197eaa4277876b4d218c98
           ports:
             - containerPort: 8080
           resources:
