@@ -13,6 +13,11 @@ public sealed class GetCurrentUserQueryHandler(
         try { avatarUrl = await mediaGrpcClient.GetAvatarUrlAsync(user.Id, cancellationToken); }
         catch { }
 
+        string? bannerUrl = null;
+        if (user.BannerMediaId.HasValue)
+            try { bannerUrl = await mediaGrpcClient.GetBannerUrlAsync(user.Id, user.BannerMediaId.Value, cancellationToken); }
+            catch { }
+
         return new UserResponseDto(
             user.Id,
             user.FirstName,
@@ -22,7 +27,9 @@ public sealed class GetCurrentUserQueryHandler(
             user.AvatarMediaId,
             avatarUrl,
             user.Bio,
-            user.City
+            user.City,
+            user.BannerMediaId,
+            bannerUrl
         );
     }
 }

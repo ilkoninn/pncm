@@ -5,6 +5,8 @@ export interface Post {
   authorName: string;
   authorEmail: string;
   mediaIds: string[];
+  primaryPhotoUrl?: string | null;
+  mediaUrls?: string[] | null;
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;

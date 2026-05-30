@@ -26,6 +26,8 @@ export interface UserProfile {
   phoneNumber?: string;
   avatarMediaId?: string;
   avatarUrl?: string;
+  bannerMediaId?: string;
+  bannerUrl?: string;
   bio?: string;
   city?: string;
 }
@@ -54,6 +56,9 @@ export const updateUser = (firstName: string, lastName: string, phoneNumber?: st
 
 export const updateAvatar = (mediaId: string) =>
   apiClient.patch("/users/me/avatar", { mediaId });
+
+export const updateBanner = (mediaId: string) =>
+  apiClient.patch("/users/me/banner", { mediaId });
 
 export const completeRegister = (
   registrationToken: string,

@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPets } from "@/lib/api/pets";
 import { getMyAdoptions, cancelAdoption, confirmAdoption } from "@/lib/api/adoptions";
-import { getCurrentUser, updateUser, updateAvatar } from "@/lib/api/auth";
+import { getCurrentUser, updateUser, updateAvatar, updateBanner } from "@/lib/api/auth";
 import { uploadMedia, deleteMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
 import { ADOPTION_STATUS_MAP } from "@/types/adoptions";
@@ -61,13 +61,15 @@ function Avatar({
   );
 }
 
-function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio, city, photoUrl, avatarMediaId, onSaved }: {
+function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio, city, photoUrl, avatarMediaId, bannerUrl, bannerMediaId, onSaved }: {
   open: boolean; onClose: () => void;
   firstName: string; lastName: string; email: string; phone?: string;
-  bio?: string; city?: string; photoUrl?: string; avatarMediaId?: string; onSaved: () => void;
+  bio?: string; city?: string; photoUrl?: string; avatarMediaId?: string;
+  bannerUrl?: string; bannerMediaId?: string; onSaved: () => void;
 }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ firstName, lastName, phone: phone ?? "", bio: bio ?? "", city: city ?? "" });
   const [saved, setSaved] = useState(false);
 
@@ -80,6 +82,16 @@ function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio,
       if (avatarMediaId) await deleteMedia(avatarMediaId);
       const media = await uploadMedia(file, EOwnerType.User);
       await updateAvatar(media.id);
+      return media;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+  });
+
+  const { mutate: uploadBannerPhoto, isPending: bannerUploading } = useMutation({
+    mutationFn: async (file: File) => {
+      if (bannerMediaId) await deleteMedia(bannerMediaId);
+      const media = await uploadMedia(file, EOwnerType.User);
+      await updateBanner(media.id);
       return media;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
@@ -118,20 +130,63 @@ function SettingsDrawer({ open, onClose, firstName, lastName, email, phone, bio,
               e.target.value = "";
             }}
           />
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="relative flex-shrink-0 cursor-pointer group"
-            >
-              <Avatar name={name} photoUrl={photoUrl} size="sm" uploading={uploading} />
-              {!uploading && (
-                <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
-                  <Camera className="w-2 h-2 text-white" />
-                </div>
+
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) uploadBannerPhoto(file);
+              e.target.value = "";
+            }}
+          />
+
+          {/* Banner + avatar section */}
+          <div className="rounded-2xl overflow-hidden border border-slate-100">
+            {/* Banner */}
+            <div className="h-20 relative flex items-center justify-center overflow-hidden">
+              {bannerUrl ? (
+                <img src={bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700" />
               )}
-            </button>
-            <div>
-              <p className="font-semibold text-slate-900 text-sm">{name}</p>
+              <button
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={bannerUploading}
+                className="relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 text-white text-xs font-medium hover:bg-black/30 transition-colors cursor-pointer disabled:opacity-60"
+              >
+                <Camera className="w-3 h-3" />
+                {bannerUploading ? "Yüklənir..." : "Banner dəyiş"}
+              </button>
+            </div>
+            {/* Avatar */}
+            <div className="px-4 -mt-8 pb-4">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="relative flex-shrink-0 cursor-pointer group inline-block"
+              >
+                <div className="w-16 h-16 rounded-full ring-4 ring-white overflow-hidden flex-shrink-0">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-xl">
+                      {uploading ? (
+                        <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        name?.[0]?.toUpperCase() ?? "?"
+                      )}
+                    </div>
+                  )}
+                </div>
+                {!uploading && (
+                  <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
+                    <Camera className="w-2.5 h-2.5 text-white" />
+                  </div>
+                )}
+              </button>
+              <p className="font-semibold text-slate-900 text-sm mt-2">{name}</p>
               <p className="text-xs text-slate-400">{email}</p>
             </div>
           </div>
@@ -527,52 +582,57 @@ export default function ProfilePage() {
     <div className="bg-slate-100 min-h-[calc(100vh-3.5rem)] pb-28">
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
 
-        <div className="bg-white rounded-2xl border border-slate-100 p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <Avatar
-                name={name}
-                photoUrl={profilePhotoUrl}
-                size="lg"
-              />
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="font-bold text-slate-900 text-lg leading-tight">{name}</h1>
-                  <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                    <Trophy className="w-3 h-3" />
-                    0 xal
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5">
-                  <p className="text-sm text-slate-400">Pəncəm üzvü</p>
-                  {userProfile?.city && (
-                    <>
-                      <span className="text-slate-300 text-sm">·</span>
-                      <p className="text-sm text-slate-400">{userProfile.city}</p>
-                    </>
-                  )}
-                </div>
-                {userProfile?.bio && (
-                  <p className="text-sm text-slate-500 mt-2 leading-relaxed max-w-xs">{userProfile.bio}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Mobile: navigate to settings page */}
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          {/* Banner */}
+          <div className="h-28 relative overflow-hidden">
+            {userProfile?.bannerUrl ? (
+              <img src={userProfile.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700" />
+            )}
             <button
               onClick={() => router.push("/profile/settings")}
-              className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex-shrink-0"
+              className="md:hidden absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-xl bg-black/20 text-white hover:bg-black/30 transition-colors cursor-pointer"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
-            {/* Desktop: open drawer */}
             <button
               onClick={() => setSettingsOpen(true)}
-              className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex-shrink-0"
+              className="hidden md:flex absolute top-3 right-3 items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 text-white text-xs font-medium hover:bg-black/30 transition-colors cursor-pointer"
             >
-              <Pencil className="w-3.5 h-3.5" />
+              <Pencil className="w-3 h-3" />
               Düzəliş et
             </button>
+          </div>
+
+          {/* Avatar row */}
+          <div className="px-5 -mt-9">
+            <div className="ring-4 ring-white rounded-full inline-block">
+              <Avatar name={name} photoUrl={profilePhotoUrl} size="lg" />
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="px-5 pt-2 pb-5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-bold text-slate-900 text-lg leading-tight">{name}</h1>
+              <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">
+                <Trophy className="w-3 h-3" />
+                0 xal
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5">
+              <p className="text-sm text-slate-400">Pəncəm üzvü</p>
+              {userProfile?.city && (
+                <>
+                  <span className="text-slate-300 text-sm">·</span>
+                  <p className="text-sm text-slate-400">{userProfile.city}</p>
+                </>
+              )}
+            </div>
+            {userProfile?.bio && (
+              <p className="text-sm text-slate-500 mt-2 leading-relaxed">{userProfile.bio}</p>
+            )}
           </div>
         </div>
 
@@ -592,6 +652,8 @@ export default function ProfilePage() {
         city={userProfile?.city}
         photoUrl={profilePhotoUrl}
         avatarMediaId={userProfile?.avatarMediaId}
+        bannerUrl={userProfile?.bannerUrl}
+        bannerMediaId={userProfile?.bannerMediaId}
         onSaved={() => refetchProfile()}
       />
     </div>

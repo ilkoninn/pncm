@@ -69,10 +69,10 @@ export function PostCard({ post }: PostCardProps) {
           </button>
         )}
 
-        {post.mediaIds.length > 0 && (
-          <div className="mt-3 rounded-xl overflow-hidden bg-slate-100 aspect-video flex items-center justify-center">
+        {post.primaryPhotoUrl && (
+          <div className="mt-3 rounded-xl overflow-hidden bg-slate-100 aspect-video">
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}/media/${post.mediaIds[0]}`}
+              src={post.primaryPhotoUrl}
               alt=""
               className="w-full h-full object-cover"
             />

@@ -18,4 +18,21 @@ public sealed class MediaGrpcClient(IConfiguration configuration) : IMediaGrpcCl
 
         return response.Photos.FirstOrDefault()?.PhotoUrl;
     }
+
+    public async Task<string?> GetBannerUrlAsync(
+        Guid userId,
+        Guid bannerMediaId,
+        CancellationToken cancellationToken = default)
+    {
+        var address = configuration["GrpcServices:MediaService"]!;
+        var channel = GrpcChannel.ForAddress(address);
+        var client = new MediaGrpcService.MediaGrpcServiceClient(channel);
+
+        var response = await client.GetPhotosByOwnerAsync(
+            new GetPhotosByOwnerRequest { OwnerId = userId.ToString(), OwnerType = 0 },
+            cancellationToken: cancellationToken);
+
+        return response.Photos
+            .FirstOrDefault(p => p.MediaId == bannerMediaId.ToString())?.Url;
+    }
 }

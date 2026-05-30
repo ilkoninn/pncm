@@ -8,6 +8,7 @@ public class AppUser : IdentityUser<Guid>, IAuditable
     public bool IsDeleted { get; set; } = false;
     
     public Guid? AvatarMediaId { get; set; }
+    public Guid? BannerMediaId { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
