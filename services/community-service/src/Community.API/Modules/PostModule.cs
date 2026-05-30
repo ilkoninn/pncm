@@ -5,6 +5,7 @@ public class PostModule : ICarterModule
         app.MapPost("/posts", Create).RequireAuthorization();
         app.MapGet("/posts/{id:guid}", GetById);
         app.MapGet("/posts", GetAll);
+        app.MapPost("/posts/{id:guid}/like", ToggleLike).RequireAuthorization();
     }
 
     private static async Task<IResult> Create(CreatePostRequestDto dto, ISender sender, HttpContext httpContext)
@@ -25,9 +26,20 @@ public class PostModule : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetAll(ISender sender)
+    private static async Task<IResult> GetAll(ISender sender, HttpContext httpContext)
     {
-        var result = await sender.Send(new GetAllPostsQuery());
+        Guid? userId = null;
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+            userId = Guid.Parse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var result = await sender.Send(new GetAllPostsQuery(userId));
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> ToggleLike(Guid id, ISender sender, HttpContext httpContext)
+    {
+        var userId = Guid.Parse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await sender.Send(new ToggleLikeCommand(id, userId));
         return Results.Ok(result);
     }
 }

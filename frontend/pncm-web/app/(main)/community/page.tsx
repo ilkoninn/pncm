@@ -106,6 +106,7 @@ export default function CommunityPage() {
   const { data: posts = [], isLoading: postsLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: getPosts,
+    staleTime: 60_000,
   });
 
   const { data: contests = [] } = useQuery({

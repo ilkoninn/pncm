@@ -8,9 +8,13 @@ export interface Post {
   primaryPhotoUrl?: string | null;
   mediaUrls?: string[] | null;
   likesCount: number;
-  commentsCount: number;
   isLiked: boolean;
   createdAt: string;
+}
+
+export interface ToggleLikeResponse {
+  likesCount: number;
+  isLiked: boolean;
 }
 
 export interface Contest {

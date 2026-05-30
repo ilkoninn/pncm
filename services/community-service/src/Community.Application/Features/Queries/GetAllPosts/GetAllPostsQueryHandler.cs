@@ -29,6 +29,15 @@ public sealed class GetAllPostsQueryHandler(IPostRepository repository, IMediaGr
             }
         }
 
+        HashSet<Guid> likedPostIds = [];
+        if (request.UserId.HasValue)
+        {
+            likedPostIds = await repository.GetLikedPostIdsAsync(
+                request.UserId.Value,
+                postList.Select(p => p.Id),
+                cancellationToken);
+        }
+
         return postList.Select(p =>
         {
             var urls = p.MediaIds
@@ -46,7 +55,9 @@ public sealed class GetAllPostsQueryHandler(IPostRepository repository, IMediaGr
                 p.AuthorName,
                 p.AuthorAvatarUrl,
                 PrimaryPhotoUrl: urls.FirstOrDefault(),
-                MediaUrls: urls.Count > 0 ? urls : null
+                MediaUrls: urls.Count > 0 ? urls : null,
+                LikesCount: p.LikesCount,
+                IsLiked: likedPostIds.Contains(p.Id)
             );
         });
     }

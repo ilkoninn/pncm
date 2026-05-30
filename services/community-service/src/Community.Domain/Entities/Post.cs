@@ -6,4 +6,5 @@ public class Post : AuditableEntity
     public List<Guid> MediaIds { get; set; } = [];
     public string AuthorName { get; set; } = string.Empty;
     public string? AuthorAvatarUrl { get; set; }
+    public int LikesCount { get; set; }
 }

@@ -8,5 +8,7 @@ public sealed record PostResponseDto(
     string AuthorName,
     string? AuthorAvatarUrl = null,
     string? PrimaryPhotoUrl = null,
-    List<string>? MediaUrls = null
+    List<string>? MediaUrls = null,
+    int LikesCount = 0,
+    bool IsLiked = false
 );

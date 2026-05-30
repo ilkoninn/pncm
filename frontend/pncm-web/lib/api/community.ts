@@ -1,5 +1,5 @@
 import client from "./client";
-import type { Post, Contest, LeaderboardEntry, CreatePostRequest } from "@/types/community";
+import type { Post, Contest, LeaderboardEntry, CreatePostRequest, ToggleLikeResponse } from "@/types/community";
 
 export async function getPosts(): Promise<Post[]> {
   const { data } = await client.get<Post[]>("/posts");
@@ -8,6 +8,11 @@ export async function getPosts(): Promise<Post[]> {
 
 export async function createPost(req: CreatePostRequest): Promise<Post> {
   const { data } = await client.post<Post>("/posts", req);
+  return data;
+}
+
+export async function toggleLike(postId: string): Promise<ToggleLikeResponse> {
+  const { data } = await client.post<ToggleLikeResponse>(`/posts/${postId}/like`);
   return data;
 }
 
