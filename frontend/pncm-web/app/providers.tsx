@@ -14,6 +14,13 @@ function TokenSync() {
     }
     setAccessToken(session?.accessToken ?? null);
   }, [session?.accessToken, (session as any)?.error]);
+
+  useEffect(() => {
+    const handler = () => signOut({ callbackUrl: "/login" });
+    window.addEventListener("auth:unauthorized", handler);
+    return () => window.removeEventListener("auth:unauthorized", handler);
+  }, []);
+
   return null;
 }
 
@@ -28,7 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }));
 
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={4 * 60}>
       <TokenSync />
       <QueryClientProvider client={queryClient}>
         {children}

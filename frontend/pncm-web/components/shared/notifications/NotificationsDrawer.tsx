@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyNotifications, markNotificationRead } from "@/lib/api/notifications";
 import { X, Bell, Heart, Check, Trophy, UserPlus, Star, Info } from "lucide-react";
@@ -60,9 +61,9 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <>
-      {open && <div className="fixed inset-0 bg-black/30 z-[1002]" onClick={onClose} />}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white z-[1003] shadow-2xl transition-transform duration-300 flex flex-col ${open ? "translate-x-0" : "translate-x-full"}`}>
+    <React.Fragment>
+      {open && <div key="backdrop" className="fixed inset-0 bg-black/30 z-[1002]" onClick={onClose} />}
+      <div key="drawer" className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white z-[1003] shadow-2xl transition-transform duration-300 flex flex-col ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center gap-2">
             <h2 className="font-bold text-slate-900">Bildirişlər</h2>
@@ -109,6 +110,6 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
           ))}
         </div>
       </div>
-    </>
+    </React.Fragment>
   );
 }

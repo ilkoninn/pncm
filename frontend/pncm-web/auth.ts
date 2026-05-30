@@ -63,7 +63,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       try {
-        const res = await fetch("http://pncm-identity:80/auth/refresh-token", {
+        const identityUrl = process.env.IDENTITY_INTERNAL_URL ?? "http://pncm.local";
+        const res = await fetch(`${identityUrl}/auth/refresh-token`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

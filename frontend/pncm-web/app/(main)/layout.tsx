@@ -7,6 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { Bell, Store, Users, UserCircle2, LogOut } from "lucide-react";
 import { NotificationsDrawer } from "@/components/shared/notifications/NotificationsDrawer";
+import { GlobalFab } from "@/components/shared/GlobalFab";
 import { getMyNotifications } from "@/lib/api/notifications";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
 
@@ -36,9 +37,9 @@ function PawIcon({ className }: { className?: string }) {
 
 
 const NAV_ITEMS = [
+  { href: "/community", label: "İcma",      Icon: Users      },
   { href: "/pets",      label: "Heyvanlar", Icon: PawIcon    },
   { href: "/stores",    label: "Mağazalar", Icon: Store      },
-  { href: "/community", label: "İcma",      Icon: Users      },
   { href: "/profile",   label: "Profil",    Icon: UserCircle2 },
 ];
 
@@ -155,6 +156,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </nav>
 
+      <GlobalFab />
       <NotificationsDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
 
       {/* Desktop floating center nav */}

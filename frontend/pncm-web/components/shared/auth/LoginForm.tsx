@@ -50,7 +50,7 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/pets");
+    router.push("/community");
   }
 
   return (

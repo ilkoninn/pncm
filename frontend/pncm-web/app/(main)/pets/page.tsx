@@ -7,7 +7,6 @@ import { PetCard } from "@/components/shared/pets/PetCard";
 import { PetFiltersBar } from "@/components/shared/pets/PetFilters";
 import { CreatePetModal } from "@/components/shared/pets/CreatePetModal";
 import type { PetFilters } from "@/types/pets";
-import { Plus } from "lucide-react";
 
 function AdBanner({ label }: { label: string }) {
   return (
@@ -111,15 +110,6 @@ export default function PetsPage() {
 
         </div>
       </div>
-
-      {/* Mobile FAB — half embedded in bottom nav */}
-      <button
-        onClick={() => setCreateOpen(true)}
-        className="md:hidden fixed bottom-9 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer z-[1002]"
-        aria-label="Elan yarat"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
 
       <CreatePetModal open={createOpen} onClose={() => setCreateOpen(false)} />
     </div>

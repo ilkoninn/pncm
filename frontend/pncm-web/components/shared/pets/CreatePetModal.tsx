@@ -19,21 +19,21 @@ const inputCls = "w-full h-10 px-3 rounded-xl border border-slate-200 text-sm te
 const selectCls = inputCls + " bg-white";
 const labelCls = "text-xs font-medium text-slate-600";
 
-export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreatePetModal({ open, onClose, initialType }: { open: boolean; onClose: () => void; initialType?: PetFormType }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [petType, setPetType] = useState<PetFormType | null>(null);
+  const [petType, setPetType] = useState<PetFormType | null>(initialType ?? null);
   const [form, setForm] = useState(INITIAL);
-  const [step, setStep] = useState<"type" | "form" | "photo" | "done">("type");
+  const [step, setStep] = useState<"type" | "form" | "photo" | "done">(initialType ? "form" : "type");
   const [createdPet, setCreatedPet] = useState<Pet | null>(null);
   const [uploadedPhotos, setUploadedPhotos] = useState<{ preview: string; uploaded: boolean }[]>([]);
 
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
-        setPetType(null);
+        setPetType(initialType ?? null);
         setForm(INITIAL);
-        setStep("type");
+        setStep(initialType ? "form" : "type");
         setCreatedPet(null);
         setUploadedPhotos([]);
       }, 300);
@@ -104,7 +104,7 @@ export function CreatePetModal({ open, onClose }: { open: boolean; onClose: () =
       <div className={`relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl z-10 max-h-[90vh] flex flex-col transition-transform duration-300 ease-out ${open ? "translate-y-0" : "translate-y-full sm:translate-y-0"}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center gap-2">
-            {step === "form" && (
+            {step === "form" && !initialType && (
               <button
                 onClick={() => setStep("type")}
                 className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-colors cursor-pointer text-sm"

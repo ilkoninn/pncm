@@ -41,4 +41,23 @@ public sealed class MediaGrpcClient(IConfiguration configuration) : IMediaGrpcCl
 
         return response.Photos.Select(p => p.Url).ToList();
     }
+
+    public async Task<List<(Guid MediaId, string Url)>> GetPhotoItemsByOwnerAsync(
+        Guid ownerId,
+        int ownerType,
+        CancellationToken cancellationToken = default)
+    {
+        var address = configuration["GrpcServices:MediaService"]!;
+        var channel = GrpcChannel.ForAddress(address);
+        var client = new MediaGrpcService.MediaGrpcServiceClient(channel);
+
+        var request = new GetPhotosByOwnerRequest
+        {
+            OwnerId = ownerId.ToString(),
+            OwnerType = ownerType,
+        };
+
+        var response = await client.GetPhotosByOwnerAsync(request, cancellationToken: cancellationToken);
+        return [.. response.Photos.Select(p => (Guid.Parse(p.MediaId), p.Url))];
+    }
 }

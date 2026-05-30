@@ -9,23 +9,32 @@ public sealed class GetAllPostsQueryHandler(IPostRepository repository, IMediaGr
         if (postList.Count == 0)
             return [];
 
-        var postIdsWithMedia = postList
-            .Where(p => p.MediaIds.Count > 0)
-            .Select(p => p.Id)
-            .ToList();
+        var postsWithMedia = postList.Where(p => p.MediaIds.Count > 0).ToList();
+        var mediaUrlMap = new Dictionary<Guid, string>();
 
-        Dictionary<Guid, string> photoMap = [];
-        if (postIdsWithMedia.Count > 0)
+        if (postsWithMedia.Count > 0)
         {
-            try { photoMap = await mediaGrpcClient.GetPrimaryPhotosAsync(postIdsWithMedia, ownerType: 3, cancellationToken); }
-            catch { }
+            var userIds = postsWithMedia.Select(p => p.UserId).Distinct().ToList();
+            var allNeededMediaIds = postsWithMedia.SelectMany(p => p.MediaIds).ToHashSet();
+
+            foreach (var userId in userIds)
+            {
+                try
+                {
+                    var photos = await mediaGrpcClient.GetPhotoItemsByOwnerAsync(userId, 0, cancellationToken);
+                    foreach (var (mediaId, url) in photos.Where(p => allNeededMediaIds.Contains(p.MediaId)))
+                        mediaUrlMap[mediaId] = url;
+                }
+                catch { }
+            }
         }
 
         return postList.Select(p =>
         {
             var dto = p.Adapt<PostResponseDto>();
-            photoMap.TryGetValue(p.Id, out var url);
-            return dto with { PrimaryPhotoUrl = url };
+            var primaryMediaId = p.MediaIds.FirstOrDefault();
+            var primaryUrl = primaryMediaId != Guid.Empty && mediaUrlMap.TryGetValue(primaryMediaId, out var u) ? u : null;
+            return dto with { PrimaryPhotoUrl = primaryUrl };
         });
     }
 }

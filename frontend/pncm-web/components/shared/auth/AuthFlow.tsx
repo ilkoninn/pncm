@@ -130,7 +130,7 @@ function OtpStep({
           setError("Giriş zamanı xəta baş verdi.");
           return;
         }
-        router.push("/pets");
+        router.push("/community");
         onSignedIn();
         return;
       }
@@ -199,7 +199,7 @@ function ProfileStep({ registrationToken }: { registrationToken: string }) {
         setError("Giriş zamanı xəta baş verdi.");
         return;
       }
-      router.push("/pets");
+      router.push("/community");
     } catch {
       setError("Xəta baş verdi. Yenidən cəhd edin.");
     }

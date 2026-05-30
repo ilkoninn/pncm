@@ -9,4 +9,9 @@ public interface IMediaGrpcClient
         Guid ownerId,
         int ownerType,
         CancellationToken cancellationToken = default);
+
+    Task<List<(Guid MediaId, string Url)>> GetPhotoItemsByOwnerAsync(
+        Guid ownerId,
+        int ownerType,
+        CancellationToken cancellationToken = default);
 }
