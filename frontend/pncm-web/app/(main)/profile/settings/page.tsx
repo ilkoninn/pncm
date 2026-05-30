@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { getCurrentUser, updateUser, updateAvatar } from "@/lib/api/auth";
+import { getCurrentUser, updateUser, updateAvatar, updateBanner } from "@/lib/api/auth";
 import { uploadMedia, deleteMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
 import { ChevronLeft, Camera } from "lucide-react";
@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ firstName: "", lastName: "", phone: "", bio: "", city: "" });
   const [saved, setSaved] = useState(false);
 
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   });
 
   const photoUrl = userProfile?.avatarUrl ?? undefined;
+  const bannerUrl = userProfile?.bannerUrl ?? undefined;
 
   useEffect(() => {
     if (userProfile) {
@@ -43,16 +45,22 @@ export default function SettingsPage() {
 
   const { mutate: uploadPhoto, isPending: uploading } = useMutation({
     mutationFn: async (file: File) => {
-      if (userProfile?.avatarMediaId) {
-        await deleteMedia(userProfile.avatarMediaId.toString());
-      }
+      if (userProfile?.avatarMediaId) await deleteMedia(userProfile.avatarMediaId.toString());
       const media = await uploadMedia(file, EOwnerType.User);
       await updateAvatar(media.id);
       return media;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+  });
+
+  const { mutate: uploadBannerPhoto, isPending: bannerUploading } = useMutation({
+    mutationFn: async (file: File) => {
+      if (userProfile?.bannerMediaId) await deleteMedia(userProfile.bannerMediaId.toString());
+      const media = await uploadMedia(file, EOwnerType.User);
+      await updateBanner(media.id);
+      return media;
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
   });
 
   const { mutate: save, isPending } = useMutation({
@@ -79,45 +87,51 @@ export default function SettingsPage() {
         <h1 className="font-bold text-slate-900">Hesab tənzimləri</h1>
       </header>
 
-      <div className="flex-1 px-4 py-6 space-y-6">
-        {/* Avatar */}
-        <div className="flex items-center gap-4">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={e => {
-              const file = e.target.files?.[0];
-              if (file) uploadPhoto(file);
-              e.target.value = "";
-            }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="relative w-16 h-16 rounded-full flex-shrink-0 cursor-pointer group"
-          >
-            {photoUrl ? (
-              <img src={photoUrl} alt={name} className="w-full h-full rounded-full object-cover" />
-            ) : (
-              <div className="w-full h-full rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-2xl">
-                {uploading
-                  ? <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  : (name?.[0]?.toUpperCase() ?? "?")}
+      <div className="flex-1 space-y-6">
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); e.target.value = ""; }} />
+        <input ref={bannerInputRef} type="file" accept="image/*" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) uploadBannerPhoto(f); e.target.value = ""; }} />
+
+        {/* Banner + avatar */}
+        <div className="overflow-hidden">
+          <div className="h-28 relative flex items-center justify-center">
+            {bannerUrl
+              ? <img src={bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              : <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700" />}
+            <button
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={bannerUploading}
+              className="relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 text-white text-xs font-medium hover:bg-black/30 transition-colors cursor-pointer disabled:opacity-60"
+            >
+              <Camera className="w-3 h-3" />
+              {bannerUploading ? "Yüklənir..." : "Banner dəyiş"}
+            </button>
+          </div>
+          <div className="px-4 -mt-8 pb-4 bg-white">
+            <button onClick={() => fileInputRef.current?.click()}
+              className="relative inline-block cursor-pointer">
+              <div className="w-16 h-16 rounded-full ring-4 ring-white overflow-hidden">
+                {photoUrl
+                  ? <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-2xl">
+                      {uploading
+                        ? <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        : (name?.[0]?.toUpperCase() ?? "?")}
+                    </div>}
               </div>
-            )}
-            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-            <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
-              <Camera className="w-2.5 h-2.5 text-white" />
-            </div>
-          </button>
-          <div>
-            <p className="font-semibold text-slate-900 text-sm">{name}</p>
+              {!uploading && (
+                <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
+                  <Camera className="w-2.5 h-2.5 text-white" />
+                </div>
+              )}
+            </button>
+            <p className="font-semibold text-slate-900 text-sm mt-2">{name}</p>
             <p className="text-xs text-slate-400">{email}</p>
           </div>
         </div>
+
+        <div className="px-4 space-y-4 pb-8">
 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -191,6 +205,7 @@ export default function SettingsPage() {
           >
             {saved ? "Yadda saxlandı ✓" : isPending ? "Saxlanılır..." : "Yadda saxla"}
           </button>
+        </div>
         </div>
       </div>
     </div>

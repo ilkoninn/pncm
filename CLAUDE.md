@@ -98,6 +98,13 @@ Servislər arası real-time call əvəzinə, entity yaradılarkən lazımi məlu
 - API funksiyalar həmişə lib/api/-dən
 - `photo.url`, `primaryPhotoUrl`, `avatarUrl` — birbaşa DTO-dan, media call etmə
 
+### Responsive UI qaydası
+**Hər yeni UI feature həm mobile, həm web üçün eyni anda implement edilməlidir.**
+- Mobile (`md:hidden`): ayrıca səhifə (`/profile/settings`) və ya bottom sheet
+- Web (`hidden md:flex`): drawer, modal və ya inline panel
+- Hər iki view eyni funksionallığı dəstəkləməlidir — biri digərindən geri qalmamalıdır
+- Nümunə: settings drawer (web) ↔ `/profile/settings` page (mobile), notifications drawer (web) ↔ `/notifications` page (mobile)
+
 ## Layihə — Pəncəm
 Azərbaycanda pet adoption + heyvansevərlər icması platforması.
 
