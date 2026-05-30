@@ -9,10 +9,12 @@ import { CreatePost } from "@/components/shared/community/CreatePost";
 import { Trophy, ChevronRight, Users } from "lucide-react";
 
 function ProfileSidebar({
-  name, email, avatarUrl, bannerUrl,
+  name, email, avatarUrl, bannerUrl, firstName, lastName,
 }: {
   name: string; email: string; avatarUrl?: string | null; bannerUrl?: string | null;
+  firstName?: string; lastName?: string;
 }) {
+  const displayName = [firstName, lastName].filter(Boolean).join(" ") || name;
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
       <div className="h-14 relative">
@@ -20,13 +22,13 @@ function ProfileSidebar({
           ? <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
           : <div className="w-full h-full bg-gradient-to-r from-emerald-600 to-teal-700" />}
       </div>
-      <div className="px-4 pb-4 -mt-6">
-        <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-lg">
+      <div className="px-4 pb-4 -mt-6 relative z-10">
+        <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden flex-shrink-0">
           {avatarUrl
-            ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
-            : name?.[0]?.toUpperCase() ?? "?"}
+            ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover block" />
+            : <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-lg">{name?.[0]?.toUpperCase() ?? "?"}</div>}
         </div>
-        <p className="font-bold text-slate-900 text-sm mt-2 leading-tight">{name}</p>
+        <p className="font-bold text-slate-900 text-sm mt-2 leading-tight">{displayName}</p>
         <p className="text-xs text-slate-400 truncate">{email}</p>
       </div>
     </div>
@@ -122,12 +124,14 @@ export default function CommunityPage() {
               email={email}
               avatarUrl={profile?.avatarUrl}
               bannerUrl={profile?.bannerUrl}
+              firstName={profile?.firstName}
+              lastName={profile?.lastName}
             />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-3">
             <div className="hidden md:block">
-              <CreatePost userName={name} />
+              <CreatePost userName={name} avatarUrl={profile?.avatarUrl} />
             </div>
             {postsLoading && Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
 

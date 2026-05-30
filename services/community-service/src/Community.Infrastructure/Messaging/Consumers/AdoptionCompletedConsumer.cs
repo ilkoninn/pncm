@@ -15,7 +15,9 @@ public sealed class AdoptionCompletedConsumer(ISender sender) : IConsumer<Adopti
             message.NewOwnerId,
             message.PetId,
             content,
-            mediaIds
+            mediaIds,
+            message.NewOwnerName,
+            null
         ));
     }
 }

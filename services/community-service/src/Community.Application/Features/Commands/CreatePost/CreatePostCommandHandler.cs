@@ -8,7 +8,9 @@ public sealed class CreatePostCommandHandler(IPostRepository repository)
             UserId = request.UserId,
             PetId = request.PetId,
             Content = request.Content,
-            MediaIds = request.MediaIds
+            MediaIds = request.MediaIds,
+            AuthorName = request.AuthorName,
+            AuthorAvatarUrl = request.AuthorAvatarUrl
         };
 
         await repository.CreateAsync(post, cancellationToken);

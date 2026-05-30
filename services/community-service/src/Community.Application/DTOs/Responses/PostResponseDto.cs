@@ -5,6 +5,8 @@ public sealed record PostResponseDto(
     string Content,
     List<Guid> MediaIds,
     DateTime CreatedAt,
+    string AuthorName,
+    string? AuthorAvatarUrl = null,
     string? PrimaryPhotoUrl = null,
     List<string>? MediaUrls = null
 );

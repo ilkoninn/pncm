@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { Plus, X, FileText, PawPrint, Heart } from "lucide-react";
 import { CreatePetModal } from "./pets/CreatePetModal";
 import { CreatePostSheet } from "./community/CreatePostSheet";
+import { getCurrentUser } from "@/lib/api/auth";
 import type { PetFormType } from "@/types/pets";
 
 type ActionType = "post" | "personal" | "adoption" | null;
@@ -11,6 +14,12 @@ type ActionType = "post" | "personal" | "adoption" | null;
 export function GlobalFab() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [action, setAction] = useState<ActionType>(null);
+  const { status } = useSession();
+  const { data: profile } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: getCurrentUser,
+    enabled: status === "authenticated",
+  });
 
   function handleSelect(type: ActionType) {
     setSheetOpen(false);
@@ -95,7 +104,7 @@ export function GlobalFab() {
         onClose={handleClose}
         initialType={petType}
       />
-      <CreatePostSheet open={action === "post"} onClose={handleClose} />
+      <CreatePostSheet open={action === "post"} onClose={handleClose} avatarUrl={profile?.avatarUrl} />
     </>
   );
 }

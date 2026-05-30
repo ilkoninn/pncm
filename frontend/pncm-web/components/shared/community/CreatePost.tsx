@@ -7,7 +7,7 @@ import { uploadMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
 import { ImagePlus, Send, X } from "lucide-react";
 
-export function CreatePost({ userName }: { userName: string }) {
+export function CreatePost({ userName, avatarUrl }: { userName: string; avatarUrl?: string | null }) {
   const [content, setContent] = useState("");
   const [focused, setFocused] = useState(false);
   const [photos, setPhotos] = useState<{ preview: string; mediaId: string | null }[]>([]);
@@ -20,6 +20,7 @@ export function CreatePost({ userName }: { userName: string }) {
       createPost({
         content: content.trim(),
         mediaIds: photos.filter(p => p.mediaId).map(p => p.mediaId!),
+        authorAvatarUrl: avatarUrl,
       }),
     onSuccess: () => {
       setContent("");
@@ -61,8 +62,10 @@ export function CreatePost({ userName }: { userName: string }) {
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
       <div className="flex gap-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
-          {userName?.[0]?.toUpperCase() ?? "?"}
+        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+          {avatarUrl
+            ? <img src={avatarUrl} alt={userName} className="w-full h-full object-cover block" />
+            : <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-sm">{userName?.[0]?.toUpperCase() ?? "?"}</div>}
         </div>
         <div className="flex-1">
           <textarea

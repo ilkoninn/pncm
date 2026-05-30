@@ -54,6 +54,15 @@ spec:
               value: "http://pncm-jaeger:4317"
             - name: GrpcServices__MediaService
               value: "http://pncm-media:8081"
+            - name: Jwt__Issuer
+              value: "pncm-identity"
+            - name: Jwt__Audience
+              value: "pncm-api"
+            - name: Jwt__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: pncm-secrets
+                  key: JWT_SECRET
 ---
 apiVersion: v1
 kind: Service

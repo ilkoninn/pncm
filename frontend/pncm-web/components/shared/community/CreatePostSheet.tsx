@@ -7,7 +7,7 @@ import { uploadMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
 import { X, ImagePlus, Plus, Check } from "lucide-react";
 
-export function CreatePostSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreatePostSheet({ open, onClose, avatarUrl }: { open: boolean; onClose: () => void; avatarUrl?: string | null }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [content, setContent] = useState("");
@@ -31,6 +31,7 @@ export function CreatePostSheet({ open, onClose }: { open: boolean; onClose: () 
       createPost({
         content,
         mediaIds: photos.filter(p => p.mediaId).map(p => p.mediaId!),
+        authorAvatarUrl: avatarUrl,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });

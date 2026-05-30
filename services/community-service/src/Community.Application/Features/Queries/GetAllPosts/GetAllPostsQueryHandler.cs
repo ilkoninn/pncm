@@ -31,10 +31,23 @@ public sealed class GetAllPostsQueryHandler(IPostRepository repository, IMediaGr
 
         return postList.Select(p =>
         {
-            var dto = p.Adapt<PostResponseDto>();
-            var primaryMediaId = p.MediaIds.FirstOrDefault();
-            var primaryUrl = primaryMediaId != Guid.Empty && mediaUrlMap.TryGetValue(primaryMediaId, out var u) ? u : null;
-            return dto with { PrimaryPhotoUrl = primaryUrl };
+            var urls = p.MediaIds
+                .Where(id => id != Guid.Empty && mediaUrlMap.ContainsKey(id))
+                .Select(id => mediaUrlMap[id])
+                .ToList();
+
+            return new PostResponseDto(
+                p.Id,
+                p.UserId,
+                p.PetId,
+                p.Content,
+                p.MediaIds,
+                p.CreatedAt,
+                p.AuthorName,
+                p.AuthorAvatarUrl,
+                PrimaryPhotoUrl: urls.FirstOrDefault(),
+                MediaUrls: urls.Count > 0 ? urls : null
+            );
         });
     }
 }

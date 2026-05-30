@@ -1,9 +1,9 @@
 export interface Post {
   id: string;
+  userId: string;
   content: string;
-  authorId: string;
   authorName: string;
-  authorEmail: string;
+  authorAvatarUrl?: string | null;
   mediaIds: string[];
   primaryPhotoUrl?: string | null;
   mediaUrls?: string[] | null;
@@ -11,7 +11,6 @@ export interface Post {
   commentsCount: number;
   isLiked: boolean;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface Contest {
@@ -35,4 +34,5 @@ export interface LeaderboardEntry {
 export interface CreatePostRequest {
   content: string;
   mediaIds?: string[];
+  authorAvatarUrl?: string | null;
 }
