@@ -61,11 +61,26 @@ app.MapGet("/notifications/stream", async (
     var channel = hub.Subscribe(userId);
     try
     {
-        await foreach (var notification in channel.Reader.ReadAllAsync(ct))
+        using var heartbeat = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        while (!ct.IsCancellationRequested)
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(notification);
-            await response.WriteAsync($"data: {json}\n\n", ct);
-            await response.Body.FlushAsync(ct);
+            var waitRead = channel.Reader.WaitToReadAsync(ct).AsTask();
+            var waitTick = heartbeat.WaitForNextTickAsync(ct).AsTask();
+            var completed = await Task.WhenAny(waitRead, waitTick);
+            if (completed == waitRead && await waitRead)
+            {
+                while (channel.Reader.TryRead(out var notification))
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(notification);
+                    await response.WriteAsync($"data: {json}\n\n", ct);
+                    await response.Body.FlushAsync(ct);
+                }
+            }
+            else
+            {
+                await response.WriteAsync(": ping\n\n", ct);
+                await response.Body.FlushAsync(ct);
+            }
         }
     }
     catch (OperationCanceledException) { }
