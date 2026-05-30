@@ -112,19 +112,14 @@ export function PostCard({ post }: { post: Post }) {
         )}
       </div>
 
-      {likeCount > 0 && (
-        <div className="px-4 py-1.5 text-xs text-slate-400 border-t border-slate-50">
-          {likeCount} bəyənmə
-        </div>
-      )}
-
       <div className="flex border-t border-slate-100">
         <button
           onClick={() => like()}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-50 ${liked ? "text-emerald-600" : "text-slate-500"}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-50 ${liked ? "text-emerald-600" : "text-slate-500"}`}
         >
           <ThumbsUp className={`w-4 h-4 ${liked ? "fill-emerald-600" : ""}`} />
-          Bəyən
+          <span>Bəyən</span>
+          {likeCount > 0 && <span className="font-semibold tabular-nums">{likeCount}</span>}
         </button>
         <button
           onClick={handleShare}

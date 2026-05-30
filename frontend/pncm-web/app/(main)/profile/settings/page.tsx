@@ -4,10 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { getCurrentUser, updateUser, updateAvatar, updateBanner } from "@/lib/api/auth";
+import { getCurrentUser, updateUser, updateAvatar, deleteAvatar, updateBanner, deleteBanner } from "@/lib/api/auth";
 import { uploadMedia, deleteMedia } from "@/lib/api/media";
 import { EOwnerType } from "@/types/media";
-import { ChevronLeft, Camera } from "lucide-react";
+import { ChevronLeft, Camera, Trash2 } from "lucide-react";
 
 const inputCls = "w-full h-11 px-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 transition-colors";
 
@@ -43,9 +43,11 @@ export default function SettingsPage() {
     }
   }, [userProfile]);
 
+  const safeDeleteMedia = async (id: string) => { try { await deleteMedia(id); } catch {} };
+
   const { mutate: uploadPhoto, isPending: uploading } = useMutation({
     mutationFn: async (file: File) => {
-      if (userProfile?.avatarMediaId) await deleteMedia(userProfile.avatarMediaId.toString());
+      if (userProfile?.avatarMediaId) await safeDeleteMedia(userProfile.avatarMediaId.toString());
       const media = await uploadMedia(file, EOwnerType.User);
       await updateAvatar(media.id);
       return media;
@@ -55,10 +57,26 @@ export default function SettingsPage() {
 
   const { mutate: uploadBannerPhoto, isPending: bannerUploading } = useMutation({
     mutationFn: async (file: File) => {
-      if (userProfile?.bannerMediaId) await deleteMedia(userProfile.bannerMediaId.toString());
+      if (userProfile?.bannerMediaId) await safeDeleteMedia(userProfile.bannerMediaId.toString());
       const media = await uploadMedia(file, EOwnerType.User);
       await updateBanner(media.id);
       return media;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+  });
+
+  const { mutate: removeAvatar, isPending: removingAvatar } = useMutation({
+    mutationFn: async () => {
+      if (userProfile?.avatarMediaId) await safeDeleteMedia(userProfile.avatarMediaId.toString());
+      await deleteAvatar();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+  });
+
+  const { mutate: removeBanner, isPending: removingBanner } = useMutation({
+    mutationFn: async () => {
+      if (userProfile?.bannerMediaId) await safeDeleteMedia(userProfile.bannerMediaId.toString());
+      await deleteBanner();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
   });
@@ -99,33 +117,57 @@ export default function SettingsPage() {
             {bannerUrl
               ? <img src={bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
               : <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700" />}
-            <button
-              onClick={() => bannerInputRef.current?.click()}
-              disabled={bannerUploading}
-              className="relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 text-white text-xs font-medium hover:bg-black/30 transition-colors cursor-pointer disabled:opacity-60"
-            >
-              <Camera className="w-3 h-3" />
-              {bannerUploading ? "Yüklənir..." : "Banner dəyiş"}
-            </button>
+            <div className="relative z-10 flex items-center gap-2">
+              <button
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={bannerUploading || removingBanner}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 text-white text-xs font-medium hover:bg-black/30 transition-colors cursor-pointer disabled:opacity-60"
+              >
+                <Camera className="w-3 h-3" />
+                {bannerUploading ? "Yüklənir..." : "Dəyiş"}
+              </button>
+              {bannerUrl && (
+                <button
+                  onClick={() => removeBanner()}
+                  disabled={removingBanner || bannerUploading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 text-white text-xs font-medium hover:bg-red-500/70 transition-colors cursor-pointer disabled:opacity-60"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  {removingBanner ? "Silinir..." : "Sil"}
+                </button>
+              )}
+            </div>
           </div>
           <div className="px-4 -mt-8 pb-4 bg-white">
-            <button onClick={() => fileInputRef.current?.click()}
-              className="relative inline-block cursor-pointer">
-              <div className="w-16 h-16 rounded-full ring-4 ring-white overflow-hidden">
-                {photoUrl
-                  ? <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-2xl">
-                      {uploading
-                        ? <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                        : (name?.[0]?.toUpperCase() ?? "?")}
-                    </div>}
-              </div>
-              {!uploading && (
-                <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
-                  <Camera className="w-2.5 h-2.5 text-white" />
+            <div className="flex items-end gap-3">
+              <button onClick={() => fileInputRef.current?.click()}
+                className="relative inline-block cursor-pointer flex-shrink-0">
+                <div className="w-16 h-16 rounded-full ring-4 ring-white overflow-hidden">
+                  {photoUrl
+                    ? <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center font-bold text-white text-2xl">
+                        {uploading
+                          ? <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          : (name?.[0]?.toUpperCase() ?? "?")}
+                      </div>}
                 </div>
+                {!uploading && (
+                  <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center">
+                    <Camera className="w-2.5 h-2.5 text-white" />
+                  </div>
+                )}
+              </button>
+              {photoUrl && (
+                <button
+                  onClick={() => removeAvatar()}
+                  disabled={removingAvatar || uploading}
+                  className="mb-1 flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-red-500 text-xs font-medium hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  {removingAvatar ? "Silinir..." : "Profil şəklini sil"}
+                </button>
               )}
-            </button>
+            </div>
             <p className="font-semibold text-slate-900 text-sm mt-2">{name}</p>
             <p className="text-xs text-slate-400">{email}</p>
           </div>

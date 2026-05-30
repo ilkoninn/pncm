@@ -57,8 +57,14 @@ export const updateUser = (firstName: string, lastName: string, phoneNumber?: st
 export const updateAvatar = (mediaId: string) =>
   apiClient.patch("/users/me/avatar", { mediaId });
 
+export const deleteAvatar = () =>
+  apiClient.delete("/users/me/avatar");
+
 export const updateBanner = (mediaId: string) =>
   apiClient.patch("/users/me/banner", { mediaId });
+
+export const deleteBanner = () =>
+  apiClient.delete("/users/me/banner");
 
 export const completeRegister = (
   registrationToken: string,

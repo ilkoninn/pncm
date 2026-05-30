@@ -1,1 +1,1 @@
-public sealed record UpdateAvatarCommand(Guid UserId, Guid MediaId) : IRequest;
+public sealed record UpdateAvatarCommand(Guid UserId, Guid? MediaId) : IRequest;
