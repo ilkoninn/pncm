@@ -44,7 +44,8 @@
       "Bash(del *)",
       "Bash(xargs grep -l \"grpc\\\\|Grpc\\\\|MediaService\\\\|IMediaClient\")",
       "Bash(gh run *)",
-      "PowerShell(gh run *)"
+      "PowerShell(gh run *)",
+      "PowerShell(Get-ChildItem -Recurse \"D:\\\\projects\\\\big-projects\\\\pncm\\\\frontend\\\\pncm-web\\\\components\\\\shared\\\\community\" | ForEach-Object { $_.FullName })"
     ]
   }
 }
