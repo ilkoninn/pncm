@@ -4,5 +4,6 @@ public sealed record CreateAdoptionRequestDto(
     string ContactPhone,
     string PetName,
     string PetSlug,
-    string? PetPrimaryPhotoUrl
+    string? PetPrimaryPhotoUrl,
+    Guid? PetPrimaryPhotoMediaId
 );

@@ -6,6 +6,7 @@ public record AdoptionCompletedContract(
     string PetName,
     string PetSlug,
     string? PetPrimaryPhotoUrl,
+    Guid? PetPrimaryPhotoMediaId,
     Guid NewOwnerId,
     string NewOwnerName,
     Guid OriginalOwnerId);

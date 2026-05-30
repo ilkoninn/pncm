@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { Bell, Store, Users, UserCircle2, LogOut } from "lucide-react";
 import { NotificationsDrawer } from "@/components/shared/notifications/NotificationsDrawer";
@@ -66,6 +66,7 @@ function NavItem({ href, label, Icon, active }: {
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
+  const { status } = useSession();
 
   useNotificationStream();
 
@@ -73,6 +74,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     queryKey: ["notifications"],
     queryFn: getMyNotifications,
     staleTime: 1000 * 60 * 5,
+    enabled: status === "authenticated",
   });
   const unreadCount = notifications.filter(n => !n.isRead).length;
 

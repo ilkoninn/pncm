@@ -18,6 +18,7 @@ public sealed class CreateAdoptionCommandHandler(
             PetName = request.PetName,
             PetSlug = request.PetSlug,
             PetPrimaryPhotoUrl = request.PetPrimaryPhotoUrl,
+            PetPrimaryPhotoMediaId = request.PetPrimaryPhotoMediaId,
             AdopterName = request.AdopterName
         };
 

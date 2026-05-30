@@ -5,6 +5,7 @@ export interface CreateAdoptionDto {
   petName: string;
   petSlug: string;
   petPrimaryPhotoUrl?: string | null;
+  petPrimaryPhotoMediaId?: string | null;
 }
 
 export interface AdoptionResponseDto {

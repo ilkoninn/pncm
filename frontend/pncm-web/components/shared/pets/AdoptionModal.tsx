@@ -30,6 +30,7 @@ export function AdoptionModal({ pet, onClose }: { pet: Pet; onClose: () => void 
       message, contactPhone: phone,
       petName: pet.name, petSlug: pet.slug,
       petPrimaryPhotoUrl: pet.primaryPhotoUrl,
+      petPrimaryPhotoMediaId: pet.photos.find(p => p.isPrimary)?.mediaId ?? pet.photos[0]?.mediaId,
     }),
     onSuccess: () => setDone(true),
   });

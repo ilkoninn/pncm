@@ -55,7 +55,7 @@ app.MapPost("/adoptions", async (ClaimsPrincipal user, CreateAdoptionRequestDto 
     var result = await mediator.Send(new CreateAdoptionCommand(
         dto.PetId, adopterId,
         dto.Message, dto.ContactPhone,
-        dto.PetName, dto.PetSlug, dto.PetPrimaryPhotoUrl,
+        dto.PetName, dto.PetSlug, dto.PetPrimaryPhotoUrl, dto.PetPrimaryPhotoMediaId,
         adopterName));
     return Results.Created($"/adoptions/{result.Id}", result);
 }).RequireAuthorization();

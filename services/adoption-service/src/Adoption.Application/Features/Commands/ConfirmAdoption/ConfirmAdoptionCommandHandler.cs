@@ -29,6 +29,7 @@ public sealed class ConfirmAdoptionCommandHandler(
             PetName     = adoption.PetName,
             PetSlug     = adoption.PetSlug,
             PetPrimaryPhotoUrl = adoption.PetPrimaryPhotoUrl,
+            PetPrimaryPhotoMediaId = adoption.PetPrimaryPhotoMediaId,
             NewOwnerId  = adoption.AdopterId,
             NewOwnerName = adoption.AdopterName,
             OriginalOwnerId = adoption.PetOwnerId

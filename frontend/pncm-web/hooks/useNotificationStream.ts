@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getAccessToken } from "@/lib/api/token-store";
 import type { NotificationDto } from "@/types/notifications";
 
 export function useNotificationStream() {
   const queryClient = useQueryClient();
+  const { status } = useSession();
 
   useEffect(() => {
+    if (status !== "authenticated") return;
+
     const token = getAccessToken();
     if (!token) return;
 
@@ -29,5 +33,5 @@ export function useNotificationStream() {
     es.onerror = () => es.close();
 
     return () => es.close();
-  }, [queryClient]);
+  }, [queryClient, status]);
 }
